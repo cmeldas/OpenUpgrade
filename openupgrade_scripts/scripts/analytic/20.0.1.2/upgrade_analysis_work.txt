@@ -1,0 +1,35 @@
+---Models in module 'analytic'---
+---Fields in module 'analytic'---
+analytic     / account.analytic.distribution.model / analytic_distribution (json)  : now required
+# NOTHING TO DO: 0 distribution models in production. Elsewhere Odoo only sets NOT NULL
+# when no row is empty (it logs otherwise)
+analytic     / account.analytic.line    / product_uom_id (many2one)     : now a function
+# NOTHING TO DO: stored compute with readonly=False (empty compute), existing values kept
+analytic     / account.analytic.line    / x_plan1_id (many2one)         : NEW relation: account.analytic.account
+# NOTHING TO DO: artefact of the analysis database (plan 1 created before
+# analytic.project_plan was set). In a migrated database the project plan keeps the
+# column account_id (analytic.project_plan = 1 in production)
+---XML records in module 'analytic'---
+NEW ir.access: analytic.access_account_analytic_account
+NEW ir.access: analytic.access_account_analytic_applicability
+NEW ir.access: analytic.access_account_analytic_distribution_model
+NEW ir.access: analytic.access_account_analytic_plan
+NEW ir.access: analytic.analytic_applicability_comp_rule
+NEW ir.access: analytic.analytic_comp_rule
+NEW ir.access: analytic.analytic_distribution_model_comp_rule
+NEW ir.access: analytic.analytic_line_analytic
+NEW ir.access: analytic.analytic_line_comp_rule
+DEL ir.model.access: analytic.access_account_analytic_account
+DEL ir.model.access: analytic.access_account_analytic_applicability
+DEL ir.model.access: analytic.access_account_analytic_distribution_model
+DEL ir.model.access: analytic.access_account_analytic_line
+DEL ir.model.access: analytic.access_account_analytic_plan
+DEL ir.rule: analytic.analytic_applicability_comp_rule (noupdate)
+DEL ir.rule: analytic.analytic_comp_rule (noupdate)
+DEL ir.rule: analytic.analytic_distribution_model_comp_rule (noupdate)
+DEL ir.rule: analytic.analytic_line_comp_rule (noupdate)
+# NOTHING TO DO here: ir.model.access + ir.rule -> ir.access handled by base
+# Changes of noupdate data (analytic_data.xml): plan name 'Project' -> 'Project Plan',
+# set_param -> set_int of analytic.project_plan (same value)
+# NOTHING TO DO: the name is user visible and may have been changed (production:
+# Projekty / Project). Core script analytic/migrations/1.2 does not run (1.2 -> 1.2)

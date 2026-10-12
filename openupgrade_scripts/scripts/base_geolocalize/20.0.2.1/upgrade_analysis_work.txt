@@ -1,0 +1,11 @@
+---Models in module 'base_geolocalize'---
+---Fields in module 'base_geolocalize'---
+base_geolocalize / res.partner              / should_be_geolocalized (boolean): NEW hasdefault: default, isfunction: function, stored
+# NOTHING TO DO: the compute keeps the current value and sets it when the partner already has coordinates, so computing it on existing partners would flag every geolocalized partner (5 in production) and the new cron would geocode them again through the external provider. But the field has default=False, and Odoo 20 Field._init_column_data() does not schedule the computation of a new column whose field has a non-None default (it only writes the default, and skips that write for a non required boolean): the column stays NULL (= False) on existing partners. Checked in a full trial migration: no "Prepare computation of res.partner.should_be_geolocalized" in the log, 0 partners flagged afterwards
+---XML records in module 'base_geolocalize'---
+NEW ir.access: base_geolocalize.access_base_geo_provider
+DEL ir.model.access: base_geolocalize.access_base_geo_provider
+# NOTHING TO DO: ir.model.access is replaced by ir.access; the old XML-ID is saved and released in base pre-migration. The ACL is active and unmodified in production
+NEW ir.actions.server: base_geolocalize.ir_cron_geolocalize_required_partners_ir_actions_server
+NEW ir.cron: base_geolocalize.ir_cron_geolocalize_required_partners
+# NOTHING TO DO: new cron (updatable data). Its first run finds no flagged partner. From now on, changing the address of a partner that already has coordinates flags it and triggers this cron, which geocodes it through the configured provider (production: base_geolocalize.geo_provider = 1, OpenStreetMap); the res.partner.write override of v19 that reset the coordinates to 0 is gone (upstream behaviour change, accepted)

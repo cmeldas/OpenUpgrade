@@ -1,0 +1,43 @@
+---Models in module 'iap'---
+new model iap.service.pack
+# NOTHING TO DO: new model
+
+---Fields in module 'iap'---
+iap          / iap.account              / balance (char)                : not stored anymore
+iap          / iap.account              / balance (char)                : now a function
+iap          / iap.account              / balance_amount (float)        : NEW
+# DONE: post-migration: balance_amount (refreshed from the IAP server when an account is displayed) seeded from the number of the old stored balance text ('0 Enrichments', '0.0 Kredity' -> 0.0); the old column stays
+
+iap          / iap.service              / name (char)                   : translate is now 'True' ('False')
+# NOTHING TO DO: the ORM converts the column to jsonb ({'en_US': value}); the 4 services are updatable data reloaded by their modules, cs_CZ comes from the .po at the translation update
+
+iap          / iap.service              / pack_ids (one2many)           : NEW relation: iap.service.pack
+iap          / iap.service              / price_description (char)      : NEW translate
+iap          / iap.service.pack         / credit (float)                : NEW required
+iap          / iap.service.pack         / iap_service_pack_identifier (integer): NEW required
+iap          / iap.service.pack         / name (char)                   : NEW required
+iap          / iap.service.pack         / price (float)                 : NEW required
+iap          / iap.service.pack         / service_id (many2one)         : NEW relation: iap.service, required
+# NOTHING TO DO: new field / new model
+
+---XML records in module 'iap'---
+NEW ir.access: iap.access_iap_service_manager
+NEW ir.access: iap.access_iap_service_pack
+NEW ir.access: iap.access_iap_service_user
+NEW ir.access: iap.user_iap_account
+NEW ir.access: iap.user_iap_account_1
+DEL ir.model.access: iap.access_client_iap_account_manager
+DEL ir.model.access: iap.access_client_iap_account_user
+DEL ir.model.access: iap.access_iap_service_manager
+DEL ir.model.access: iap.access_iap_service_user
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.model.constraint: iap.constraint_iap_service_pack_unique_iap_service_pack_identifier
+# NOTHING TO DO: constraints created by the ORM; production data checked against them where relevant
+
+DEL ir.rule: iap.user_iap_account (noupdate)
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.ui.view: iap.iap_service_pack_view_tree
+NEW ir.ui.view: iap.view_iap_users_tree
+# NOTHING TO DO: handled by the module update (new records loaded, obsolete ones removed by _process_end)

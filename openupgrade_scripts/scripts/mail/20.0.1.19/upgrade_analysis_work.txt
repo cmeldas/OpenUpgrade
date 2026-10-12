@@ -1,0 +1,576 @@
+---Models in module 'mail'---
+obsolete model mail.thread.cc [abstract]
+# NOTHING TO DO: abstract model, the email_cc columns stay as orphans (see below)
+
+model mail.tracking.value (moved to mail_tracking, not installed in 20.0 analysis)
+# DONE: pre-migration: mail_tracking (and its auto_install bridges mail_tracking_sms / mail_tracking_mass_mailing) set 'to install', update_module_moved_models + rename of the XML-IDs (model, fields, action, menu, views, tracking_value_ids fields) to mail_tracking; field ids and field definitions snapshotted (openupgrade_legacy_20_0_field_id, openupgrade_legacy_20_0_mail_tracking_field); currency_id copied into field_info['currency_id'] (the column is gone in 20.0).
+# DONE: end-migration: 22 851 values / 18 938 messages rendered (field label: current 20.0 label when the ir.model.fields row still is a field of the registry with the same type, renamed fields included; else the 19.0 snapshot) into mail.message.body with mail.mail_tracking_template exactly like mail.thread._message_compute_body_with_trackings (values built by mail.track.mixin._create_mail_tracking_values in the author's lang/tz, body sanitized like at create), notification messages switched to message_type 'tracking'; old body/type kept in openupgrade_legacy_20_0_mail_message_tracking; field_info filled for tracking values of fields/models removed in 20.0 (e.g. stock.scrap.state)
+
+new model bus.sync.mixin [abstract]
+new model discuss.category
+new model discuss.channel.last.interest.update
+new model mail.call.artifact
+new model mail.poll
+new model mail.poll.option
+new model mail.poll.vote
+new model mail.thread.subject.suggested [abstract]
+new model mail.track.mixin [abstract]
+# NOTHING TO DO: new model
+
+---Fields in module 'mail'---
+mail         / discuss.call.history     / artifact_ids (one2many)       : NEW relation: mail.call.artifact
+mail         / discuss.category         / channel_ids (one2many)        : NEW relation: discuss.channel
+mail         / discuss.category         / name (char)                   : NEW required
+mail         / discuss.category         / sequence (integer)            : NEW hasdefault: default
+# NOTHING TO DO: new models / relations, no data
+
+mail         / discuss.channel          / discuss_category_id (many2one): NEW relation: discuss.category
+mail         / discuss.channel          / is_readonly (boolean)         : NEW
+# NOTHING TO DO: new field, default/empty
+
+mail         / discuss.channel          / member_indices (char)         : NEW isfunction: function, stored
+# NOTHING TO DO: new stored compute, computed by the ORM at column creation
+
+mail         / discuss.channel          / pinned_message_ids (one2many) : DEL relation: mail.message
+# NOTHING TO DO: one2many, no column
+
+mail         / discuss.channel.last.interest.update / channel_id (many2one)         : NEW relation: discuss.channel, required
+mail         / discuss.channel.last.interest.update / last_interest_dt (datetime)   : NEW required
+# NOTHING TO DO: new models / relations, no data
+
+mail         / discuss.channel.member   / channel_role (selection)      : NEW selection_keys: ['admin', 'owner']
+# DONE: post-migration noupdate_changes.xml sets the admin as owner of #general like a fresh install; pre-migration gives the XML-ID mail.channel_member_channel_admin_partner_admin to the existing admin membership of the administrators channel (else unique constraint violation on load)
+
+mail         / discuss.channel.member   / custom_channel_name (char)    : DEL
+# NOTHING TO DO: no data in production (0 rows)
+
+mail         / discuss.channel.member   / fetched_message_id (many2one) : DEL relation: mail.message
+# NOTHING TO DO: removed in 20.0 without replacement (5 rows with a value; seen_message_id, kept, carries the read status), the column stays
+
+mail         / discuss.channel.member   / invitation_sent_dt (datetime) : NEW
+mail         / discuss.channel.member   / is_favorite (boolean)         : NEW
+# NOTHING TO DO: new field
+
+mail         / hr.work.entry.type       / activity_ids (one2many)       : NEW relation: mail.activity
+mail         / hr.work.entry.type       / message_follower_ids (one2many): NEW relation: mail.followers
+mail         / hr.work.entry.type       / message_ids (one2many)        : NEW relation: mail.message
+mail         / ir.access                / active (boolean)              : NEW mode: modify, hasdefault: default
+mail         / ir.access                / domain (char)                 : NEW mode: modify
+mail         / ir.access                / message_follower_ids (one2many): NEW relation: mail.followers
+mail         / ir.access                / message_ids (one2many)        : NEW relation: mail.message
+mail         / ir.access                / operation (selection)         : NEW required, selection_keys: ['c', 'cd', 'cr', 'crd', 'cru', 'crud', 'cu', 'cud', 'd', 'r', 'rd', 'ru', 'rud', 'u', 'ud'], mode: modify
+# NOTHING TO DO: mail.thread added to other models / ir.access handled by base
+
+mail         / ir.actions.server        / activity_note (html)          : not a function anymore
+mail         / ir.actions.server        / activity_plan_id (many2one)   : NEW relation: mail.activity.plan, isfunction: function, stored
+mail         / ir.actions.server        / activity_role_id (many2one)   : NEW relation: res.role, isfunction: function, stored
+mail         / ir.actions.server        / activity_type_id (many2one)   : not related anymore
+mail         / ir.actions.server        / activity_type_id (many2one)   : now a function
+mail         / ir.actions.server        / activity_user_type (selection): selection_keys added: [role] (most likely nothing to do)
+# NOTHING TO DO: no 'next_activity'/'mail_post' server actions in production (all 156 are 'code'); existing columns are kept, new computed ones computed by the ORM
+
+mail         / ir.actions.server        / log_note_note (html)          : NEW translate, isfunction: function, stored
+mail         / ir.actions.server        / mail_post_method (selection)  : DEL selection_keys: ['comment', 'email', 'note']
+mail         / ir.actions.server        / state (selection)             : selection_keys added: [log_note] (most likely nothing to do)
+# DONE: pre-migration: actions 'mail_post' with mail_post_method 'note' become 'log_note' with the template body as log_note_note (0 in production); 'email'/'comment' stay 'mail_post'
+
+mail         / ir.actions.server        / subtype_ids (many2many)       : NEW relation: mail.message.subtype, hasdefault: default
+# NOTHING TO DO: no 'next_activity'/'mail_post' server actions in production (all 156 are 'code'); existing columns are kept, new computed ones computed by the ORM
+
+mail         / ir.ui.view               / technical_usage (selection)   : NEW selection_keys: ['mail_post_source', 'mass_mailing'], mode: modify
+mail         / ir.ui.view               / type (selection)              : selection_keys added: [card] (most likely nothing to do)
+# NOTHING TO DO: new selection; noupdate templates that use it are reloaded (portal, digest)
+
+mail         / mail.activity            / activity_plan_id (many2one)   : NEW relation: mail.activity.plan
+mail         / mail.activity            / activity_template_id (many2one): NEW relation: mail.activity.plan.template
+# NOTHING TO DO: new fields (0 activities in production)
+
+mail         / mail.activity            / date_deadline (date)          : now a function
+mail         / mail.activity            / note (html)                   : now a function
+# NOTHING TO DO: became stored computed (readonly=False), existing columns are not recomputed; 0 activities in production
+
+mail         / mail.activity            / phone (char)                  : NEW isfunction: function, stored
+# NOTHING TO DO: new fields (0 activities in production)
+
+mail         / mail.activity            / previous_activity_type_id (many2one): DEL relation: mail.activity.type
+mail         / mail.activity            / recommended_activity_type_id (many2one): DEL relation: mail.activity.type
+# NOTHING TO DO: removed, no data
+
+mail         / mail.activity            / role_id (many2one)            : NEW relation: res.role, isfunction: function, stored
+# NOTHING TO DO: new fields (0 activities in production)
+
+mail         / mail.activity            / summary (char)                : now a function
+# NOTHING TO DO: became stored computed (readonly=False), existing columns are not recomputed; 0 activities in production
+
+mail         / mail.activity            / technical_usage (selection)   : NEW selection_keys: ['hr_expiring_contract', 'hr_expiring_work_permit', 'none'], hasdefault: default
+# NOTHING TO DO: new fields (0 activities in production)
+
+mail         / mail.activity            / user_id (many2one)            : now a function
+# NOTHING TO DO: became stored computed (readonly=False), existing columns are not recomputed; 0 activities in production
+
+mail         / mail.activity.plan.template / next_activity_ids (many2many) : DEL relation: mail.activity.type
+# NOTHING TO DO: no data
+
+mail         / mail.activity.plan.template / responsible_type (selection)  : selection_keys added: [role], removed: [coach]
+# NOTHING TO DO: 'coach' not used in production (manager 4, employee 1)
+
+mail         / mail.activity.plan.template / role_id (many2one)            : NEW relation: res.role, isfunction: function, stored
+# NOTHING TO DO: no data
+
+mail         / mail.activity.type       / chaining_type (selection)     : DEL required, selection_keys: ['suggest', 'trigger']
+# DONE: pre-migration: suggested_next_type_id = triggered type (trigger) or first suggested type by sequence (suggest); triggered chains logged (20.0 only suggests). Production: 9 types, all 'suggest', no next types -> nothing changes
+
+mail         / mail.activity.type       / default_role_id (many2one)    : NEW relation: res.role
+mail         / mail.activity.type       / kpi_provider_visibility (selection): NEW selection_keys: ['all', 'none', 'own'], hasdefault: default
+# NOTHING TO DO: new field with default
+
+mail         / mail.activity.type       / suggested_next_type_id (many2one): NEW relation: mail.activity.type
+mail         / mail.activity.type       / suggested_next_type_ids (many2many): DEL relation: mail.activity.type
+mail         / mail.activity.type       / triggered_next_type_id (many2one): DEL relation: mail.activity.type
+# DONE: pre-migration: suggested_next_type_id = triggered type (trigger) or first suggested type by sequence (suggest); triggered chains logged (20.0 only suggests). Production: 9 types, all 'suggest', no next types -> nothing changes. The relation table mail_activity_rel is kept: 20.0 reads it as previous_type_ids (columns swapped: recommended_id -> activity_id), which is the same 'A precedes B' relation
+
+mail         / mail.call.artifact       / discuss_call_history_id (many2one): NEW relation: discuss.call.history
+mail         / mail.call.artifact       / end_ms (integer)              : NEW required, hasdefault: default
+mail         / mail.call.artifact       / recording_started_by_id (many2one): NEW relation: res.users
+mail         / mail.call.artifact       / recording_upload_pending (boolean): NEW
+mail         / mail.call.artifact       / start_ms (integer)            : NEW required, hasdefault: default
+# NOTHING TO DO: new models / relations, no data
+
+mail         / mail.guest               / im_status (char)              : selection_keys is now '['away', 'offline', 'online']' ('False')
+mail         / mail.guest               / im_status (char)              : type is now 'selection' ('char')
+# NOTHING TO DO: same varchar column, values valid (0 guests)
+
+mail         / mail.mail                / recipient_cc_ids (many2many)  : NEW relation: res.partner
+# NOTHING TO DO: new field
+
+mail         / mail.message             / bookmarked_partner_ids (many2many): NEW relation: res.partner
+# DONE: pre-migration: starred_partner_ids renamed to bookmarked_partner_ids with its relation table (0 rows in production)
+
+mail         / mail.message             / ended_poll_ids (one2many)     : NEW relation: mail.poll
+# NOTHING TO DO: new field
+
+mail         / mail.message             / message_type (selection)      : selection_keys added: [tracking] (most likely nothing to do)
+# DONE: end-migration: 'notification' messages carrying tracking values become 'tracking' like the messages Odoo 20 logs for tracking
+
+mail         / mail.message             / partner_cc_ids (many2many)    : NEW relation: res.partner
+# NOTHING TO DO: new field
+
+mail         / mail.message             / starred_partner_ids (many2many): DEL relation: res.partner
+# DONE: pre-migration: starred_partner_ids renamed to bookmarked_partner_ids with its relation table (0 rows in production)
+
+mail         / mail.message             / started_poll_ids (one2many)   : NEW relation: mail.poll
+# NOTHING TO DO: new field
+
+mail         / mail.message             / tracking_value_ids (one2many) : DEL relation: mail.tracking.value
+# DONE: field moved to mail_tracking (XML-IDs renamed in pre-migration)
+
+mail         / mail.notification        / failure_type (selection)      : selection_keys added: [sms_database_non_active, sn_undeliverable] (most likely nothing to do)
+# NOTHING TO DO: selection values added only
+
+mail         / mail.poll                / allow_multiple_options (boolean): NEW
+mail         / mail.poll                / end_message_id (many2one)     : NEW relation: mail.message
+mail         / mail.poll                / option_ids (one2many)         : NEW relation: mail.poll.option, required
+mail         / mail.poll                / poll_end_dt (datetime)        : NEW
+mail         / mail.poll                / poll_question (char)          : NEW required
+mail         / mail.poll                / start_message_id (many2one)   : NEW relation: mail.message, required
+mail         / mail.poll.option         / option_emoji (char)           : NEW
+mail         / mail.poll.option         / option_label (char)           : NEW required
+mail         / mail.poll.option         / poll_id (many2one)            : NEW relation: mail.poll, required
+mail         / mail.poll.option         / vote_ids (one2many)           : NEW relation: mail.poll.vote
+mail         / mail.poll.vote           / guest_id (many2one)           : NEW relation: mail.guest
+mail         / mail.poll.vote           / option_id (many2one)          : NEW relation: mail.poll.option, required
+mail         / mail.poll.vote           / user_id (many2one)            : NEW relation: res.users
+# NOTHING TO DO: new models / relations, no data
+
+mail         / mail.scheduled.message   / partner_cc_ids (many2many)    : NEW relation: res.partner
+mail         / mail.template            / email_layout_force_footer (boolean): NEW hasdefault: default
+mail         / mail.template            / email_layout_force_header (boolean): NEW hasdefault: default
+mail         / mail.template            / partner_cc (char)             : NEW
+# NOTHING TO DO: new field
+
+mail         / maintenance.request      / email_cc (char)               : DEL
+# NOTHING TO DO: here; mail.thread.cc dropped in 20.0 without successor field. maintenance post-migration subscribes the existing partners matching the 8 maintenance_request.email_cc values as followers (the column stays)
+
+mail         / mrp.workorder            / activity_ids (one2many)       : NEW relation: mail.activity
+mail         / mrp.workorder            / message_follower_ids (one2many): NEW relation: mail.followers
+mail         / mrp.workorder            / message_ids (one2many)        : NEW relation: mail.message
+# NOTHING TO DO: mail.thread added to other models / ir.access handled by base
+
+mail         / project.project          / duration_tracking (json)      : is now stored
+# NOTHING TO DO: here; project pre-migration fills the new stored column from the stage tracking history (20.0 format: minutes per stage, 's', 'd') for project.project and project.task, the only installed models of mail.tracking.duration.mixin
+
+mail         / project.project          / is_rotting (boolean)          : module is now 'project' ('mail')
+mail         / project.project          / rotting_days (integer)        : module is now 'project' ('mail')
+# NOTHING TO DO: non stored field moved between modules
+
+mail         / project.task             / duration_tracking (json)      : is now stored
+# NOTHING TO DO: here; project pre-migration fills the new stored column from the stage tracking history (20.0 format: minutes per stage, 's', 'd') for project.project and project.task, the only installed models of mail.tracking.duration.mixin
+
+mail         / project.task             / email_cc (char)               : DEL mode: modify
+mail         / project.update           / email_cc (char)               : DEL
+# NOTHING TO DO: mail.thread.cc dropped in 20.0 without successor field; 0 project.task / project.update rows with email_cc (maintenance.request handled by maintenance)
+
+mail         / res.partner              / contact_address_inline (char) : module is now 'base' ('mail')
+# NOTHING TO DO: non stored field moved between modules
+
+mail         / res.role                 / active (boolean)              : NEW hasdefault: default
+# NOTHING TO DO: new field
+
+mail         / res.users                / activity_date_deadline (date) : not related anymore
+mail         / res.users                / activity_date_deadline (date) : now a function
+mail         / res.users                / activity_date_deadline (date) : previously in module base
+mail         / res.users                / activity_exception_decoration (selection): not related anymore
+mail         / res.users                / activity_exception_decoration (selection): now a function
+mail         / res.users                / activity_exception_decoration (selection): previously in module base
+mail         / res.users                / activity_exception_decoration (selection): selection_keys is now '['danger', 'warning']' ('function')
+mail         / res.users                / activity_exception_icon (char): not related anymore
+mail         / res.users                / activity_exception_icon (char): now a function
+mail         / res.users                / activity_exception_icon (char): previously in module base
+mail         / res.users                / activity_ids (one2many)       : is now stored
+mail         / res.users                / activity_ids (one2many)       : not related anymore
+mail         / res.users                / activity_ids (one2many)       : previously in module base
+mail         / res.users                / activity_state (selection)    : not related anymore
+mail         / res.users                / activity_state (selection)    : now a function
+mail         / res.users                / activity_state (selection)    : previously in module base
+mail         / res.users                / activity_state (selection)    : selection_keys is now '['overdue', 'planned', 'today']' ('function')
+mail         / res.users                / activity_summary (char)       : previously in module base
+mail         / res.users                / activity_type_icon (char)     : previously in module base
+mail         / res.users                / activity_type_id (many2one)   : previously in module base
+mail         / res.users                / activity_user_id (many2one)   : not related anymore
+mail         / res.users                / activity_user_id (many2one)   : now a function
+mail         / res.users                / activity_user_id (many2one)   : previously in module base
+mail         / res.users                / has_message (boolean)         : not related anymore
+mail         / res.users                / has_message (boolean)         : now a function
+mail         / res.users                / has_message (boolean)         : previously in module base
+mail         / res.users                / im_status (char)              : selection_keys is now '['away', 'busy', 'offline', 'online']' ('False')
+mail         / res.users                / im_status (char)              : type is now 'selection' ('char')
+mail         / res.users                / message_attachment_count (integer): not related anymore
+mail         / res.users                / message_attachment_count (integer): now a function
+mail         / res.users                / message_attachment_count (integer): previously in module base
+mail         / res.users                / message_follower_ids (one2many): is now stored
+mail         / res.users                / message_follower_ids (one2many): not related anymore
+mail         / res.users                / message_follower_ids (one2many): previously in module base
+mail         / res.users                / message_has_error (boolean)   : not related anymore
+mail         / res.users                / message_has_error (boolean)   : now a function
+mail         / res.users                / message_has_error (boolean)   : previously in module base
+mail         / res.users                / message_has_error_counter (integer): not related anymore
+mail         / res.users                / message_has_error_counter (integer): now a function
+mail         / res.users                / message_has_error_counter (integer): previously in module base
+mail         / res.users                / message_ids (one2many)        : is now stored
+mail         / res.users                / message_ids (one2many)        : not related anymore
+mail         / res.users                / message_ids (one2many)        : previously in module base
+mail         / res.users                / message_is_follower (boolean) : not related anymore
+mail         / res.users                / message_is_follower (boolean) : now a function
+mail         / res.users                / message_is_follower (boolean) : previously in module base
+mail         / res.users                / message_needaction (boolean)  : not related anymore
+mail         / res.users                / message_needaction (boolean)  : now a function
+mail         / res.users                / message_needaction (boolean)  : previously in module base
+mail         / res.users                / message_needaction_counter (integer): not related anymore
+mail         / res.users                / message_needaction_counter (integer): now a function
+mail         / res.users                / message_needaction_counter (integer): previously in module base
+mail         / res.users                / message_partner_ids (many2many): not related anymore
+mail         / res.users                / message_partner_ids (many2many): now a function
+mail         / res.users                / message_partner_ids (many2many): previously in module base
+mail         / res.users                / my_activity_date_deadline (date): not related anymore
+mail         / res.users                / my_activity_date_deadline (date): now a function
+mail         / res.users                / my_activity_date_deadline (date): previously in module base
+mail         / res.users                / offline_since (datetime)      : not related anymore
+mail         / res.users                / offline_since (datetime)      : now a function
+mail         / res.users                / offline_since (datetime)      : previously in module base
+# NOTHING TO DO: res.users fields inherited from res.partner/mail.thread, not stored (res.users _inherits res.partner); 'is now stored' one2many have no column
+
+mail         / res.users.settings       / is_discuss_sidebar_category_channel_open (boolean): DEL
+mail         / res.users.settings       / is_discuss_sidebar_category_chat_open (boolean): DEL
+mail         / res.users.settings       / push_to_talk_key (char)       : DEL
+mail         / res.users.settings       / use_push_to_talk (boolean)    : DEL
+mail         / res.users.settings       / voice_active_duration (integer): DEL
+# NOTHING TO DO: UI preferences removed (3 rows with values), no successor
+
+mail         / stock.picking.batch      / activity_ids (one2many)       : NEW relation: mail.activity
+mail         / stock.picking.batch      / message_follower_ids (one2many): NEW relation: mail.followers
+mail         / stock.picking.batch      / message_ids (one2many)        : NEW relation: mail.message
+# NOTHING TO DO: mail.thread added to other models / ir.access handled by base
+
+mail         / stock.scrap              / message_follower_ids (one2many): DEL relation: mail.followers
+mail         / stock.scrap              / message_ids (one2many)        : DEL relation: mail.message
+# NOTHING TO DO: here; stock.scrap is removed in 20.0 (stock scripts relink its messages). The tracking values of its messages keep their label through field_info (end-migration)
+
+---XML records in module 'mail'---
+NEW discuss.channel.member: mail.channel_member_channel_admin_partner_admin (noupdate)
+# DONE: pre-migration add_xmlid on the existing membership (noupdate)
+
+NEW ir.access: mail.access_discuss_category_erp_manager
+NEW ir.access: mail.access_discuss_category_user
+NEW ir.access: mail.access_discuss_channel_last_interest_update_system
+NEW ir.access: mail.access_discuss_channel_rtc_session_system
+NEW ir.access: mail.access_discuss_voice_metadata_user
+NEW ir.access: mail.access_fetchmail_server
+NEW ir.access: mail.access_mail_activity_plan_template_user
+NEW ir.access: mail.access_mail_activity_plan_user
+NEW ir.access: mail.access_mail_activity_schedule_line_user
+NEW ir.access: mail.access_mail_activity_schedule_user
+NEW ir.access: mail.access_mail_activity_type_system
+NEW ir.access: mail.access_mail_activity_type_user
+NEW ir.access: mail.access_mail_alias_domain_system
+NEW ir.access: mail.access_mail_alias_domain_user
+NEW ir.access: mail.access_mail_alias_system
+NEW ir.access: mail.access_mail_alias_user
+NEW ir.access: mail.access_mail_blacklist_remove_system
+NEW ir.access: mail.access_mail_blacklist_system
+NEW ir.access: mail.access_mail_call_artifact_admin
+NEW ir.access: mail.access_mail_call_artifact_user
+NEW ir.access: mail.access_mail_canned_reponse
+NEW ir.access: mail.access_mail_compose_message
+NEW ir.access: mail.access_mail_followers_edit
+NEW ir.access: mail.access_mail_followers_system
+NEW ir.access: mail.access_mail_followers_user
+NEW ir.access: mail.access_mail_gateway_allowed_system
+NEW ir.access: mail.access_mail_guest_system
+NEW ir.access: mail.access_mail_guest_user
+NEW ir.access: mail.access_mail_ice_server_system
+NEW ir.access: mail.access_mail_link_preview_admin
+NEW ir.access: mail.access_mail_mail_system
+NEW ir.access: mail.access_mail_message_link_preview_erp_manager
+NEW ir.access: mail.access_mail_message_reaction_system
+NEW ir.access: mail.access_mail_message_scheduled_system
+NEW ir.access: mail.access_mail_message_subtype_system
+NEW ir.access: mail.access_mail_message_subtype_user
+NEW ir.access: mail.access_mail_message_translation_system
+NEW ir.access: mail.access_mail_notification_system
+NEW ir.access: mail.access_mail_notification_user
+NEW ir.access: mail.access_mail_poll_erp_manager
+NEW ir.access: mail.access_mail_poll_option_erp_manager
+NEW ir.access: mail.access_mail_poll_vote_erp_manager
+NEW ir.access: mail.access_mail_presence
+NEW ir.access: mail.access_mail_push_device_system
+NEW ir.access: mail.access_mail_push_system
+NEW ir.access: mail.access_mail_template
+NEW ir.access: mail.access_mail_template_editor
+NEW ir.access: mail.access_mail_template_preview
+NEW ir.access: mail.access_mail_template_reset
+NEW ir.access: mail.access_publisher_warranty_contract_all
+NEW ir.access: mail.access_res_role_admin
+NEW ir.access: mail.access_res_role_user
+NEW ir.access: mail.discuss_gif_favorite_admin_rule
+NEW ir.access: mail.discuss_gif_favorite_user_rule
+NEW ir.access: mail.ir_actions_report_access_user
+NEW ir.access: mail.ir_rule_discuss_call_history_read_all
+NEW ir.access: mail.ir_rule_discuss_channel_all
+NEW ir.access: mail.ir_rule_discuss_channel_all_user_write
+NEW ir.access: mail.ir_rule_discuss_channel_group_system
+NEW ir.access: mail.ir_rule_discuss_channel_member_create_is_group_matching_all
+NEW ir.access: mail.ir_rule_discuss_channel_member_create_is_group_matching_group_user
+NEW ir.access: mail.ir_rule_discuss_channel_member_create_is_member_group_user
+NEW ir.access: mail.ir_rule_discuss_channel_member_group_system
+NEW ir.access: mail.ir_rule_discuss_channel_member_is_channel_admin_unlink
+NEW ir.access: mail.ir_rule_discuss_channel_member_is_channel_owner_unlink
+NEW ir.access: mail.ir_rule_discuss_channel_member_is_self_all
+NEW ir.access: mail.ir_rule_discuss_channel_member_is_self_unlink
+NEW ir.access: mail.ir_rule_discuss_channel_member_read_all
+NEW ir.access: mail.ir_rule_mail_canned_response_admin
+NEW ir.access: mail.ir_rule_mail_canned_response_user_read
+NEW ir.access: mail.ir_rule_mail_canned_response_user_update
+NEW ir.access: mail.ir_rule_mail_notifications_group_portal
+NEW ir.access: mail.ir_rule_mail_notifications_group_user
+NEW ir.access: mail.ir_rule_mail_scheduled_message
+NEW ir.access: mail.ir_rule_mail_scheduled_message_user
+NEW ir.access: mail.mail_activity_plan_rule_admin
+NEW ir.access: mail.mail_activity_plan_template_rule_admin
+NEW ir.access: mail.mail_activity_rule_access_create
+NEW ir.access: mail.mail_activity_rule_access_read
+NEW ir.access: mail.mail_activity_rule_access_unlink
+NEW ir.access: mail.mail_activity_rule_access_write
+NEW ir.access: mail.mail_activity_rule_user
+NEW ir.access: mail.mail_compose_message_rule
+NEW ir.access: mail.mail_message_rule_access_create
+NEW ir.access: mail.mail_message_rule_access_create_1
+NEW ir.access: mail.mail_message_rule_access_read
+NEW ir.access: mail.mail_message_rule_access_unlink
+NEW ir.access: mail.mail_message_rule_access_unlink_1
+NEW ir.access: mail.mail_message_rule_access_write
+NEW ir.access: mail.mail_message_rule_access_write_1
+NEW ir.access: mail.mail_message_subtype_rule_public
+NEW ir.access: mail.mail_template_editor_rule
+NEW ir.access: mail.mail_template_employee_rule
+NEW ir.access: mail.res_users_settings_volumes_rule_admin
+NEW ir.access: mail.res_users_settings_volumes_rule_user
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.actions.act_url: mail.action_open_discuss_settings
+NEW ir.actions.act_window: mail.discuss_category_settings_action
+NEW ir.actions.act_window: mail.discuss_my_conversations_action
+NEW ir.actions.act_window: mail.ir_ui_view_action_usage_mail_post
+NEW ir.actions.act_window: mail.mail_activity_action_to_assign
+# NOTHING TO DO: handled by the module update
+
+DEL ir.actions.act_window: mail.action_view_mail_tracking_value
+# DONE: pre-migration: XML-IDs renamed to mail_tracking (same records)
+
+NEW ir.actions.act_window.view: mail.mail_activity_action_my_view_graph
+NEW ir.actions.act_window.view: mail.mail_activity_action_my_view_pivot
+NEW ir.actions.act_window.view: mail.mail_activity_action_to_assign_view_list
+NEW ir.actions.server: mail.ir_cron_discuss_channel_sync_last_interest_dt_ir_actions_server (noupdate)
+NEW ir.actions.server: mail.ir_cron_mail_end_polls_ir_actions_server (noupdate)
+NEW ir.cron: mail.ir_cron_discuss_channel_sync_last_interest_dt (noupdate)
+NEW ir.cron: mail.ir_cron_mail_end_polls (noupdate)
+# NOTHING TO DO: handled by the module update
+
+DEL ir.model.access: mail.access_discuss_call_history_portal
+DEL ir.model.access: mail.access_discuss_call_history_public
+DEL ir.model.access: mail.access_discuss_call_history_user
+DEL ir.model.access: mail.access_discuss_channel_member_portal
+DEL ir.model.access: mail.access_discuss_channel_member_public
+DEL ir.model.access: mail.access_discuss_channel_member_user
+DEL ir.model.access: mail.access_discuss_channel_portal
+DEL ir.model.access: mail.access_discuss_channel_public
+DEL ir.model.access: mail.access_discuss_channel_rtc_session_system
+DEL ir.model.access: mail.access_discuss_channel_system
+DEL ir.model.access: mail.access_discuss_channel_user
+DEL ir.model.access: mail.access_discuss_gif_favorite
+DEL ir.model.access: mail.access_discuss_voice_metadata_user
+DEL ir.model.access: mail.access_fetchmail_server
+DEL ir.model.access: mail.access_mail_activity_plan_system
+DEL ir.model.access: mail.access_mail_activity_plan_template_system
+DEL ir.model.access: mail.access_mail_activity_plan_template_user
+DEL ir.model.access: mail.access_mail_activity_plan_user
+DEL ir.model.access: mail.access_mail_activity_schedule_line_user
+DEL ir.model.access: mail.access_mail_activity_schedule_user
+DEL ir.model.access: mail.access_mail_activity_type_system
+DEL ir.model.access: mail.access_mail_activity_type_user
+DEL ir.model.access: mail.access_mail_activity_user
+DEL ir.model.access: mail.access_mail_alias_domain_system
+DEL ir.model.access: mail.access_mail_alias_domain_user
+DEL ir.model.access: mail.access_mail_alias_system
+DEL ir.model.access: mail.access_mail_alias_user
+DEL ir.model.access: mail.access_mail_blacklist_remove_system
+DEL ir.model.access: mail.access_mail_blacklist_system
+DEL ir.model.access: mail.access_mail_canned_reponse
+DEL ir.model.access: mail.access_mail_compose_message
+DEL ir.model.access: mail.access_mail_followers_edit
+DEL ir.model.access: mail.access_mail_followers_system
+DEL ir.model.access: mail.access_mail_followers_user
+DEL ir.model.access: mail.access_mail_gateway_allowed_system
+DEL ir.model.access: mail.access_mail_guest_system
+DEL ir.model.access: mail.access_mail_guest_user
+DEL ir.model.access: mail.access_mail_ice_server_system
+DEL ir.model.access: mail.access_mail_link_preview_admin
+DEL ir.model.access: mail.access_mail_mail_system
+DEL ir.model.access: mail.access_mail_message_all
+DEL ir.model.access: mail.access_mail_message_link_preview_erp_manager
+DEL ir.model.access: mail.access_mail_message_portal
+DEL ir.model.access: mail.access_mail_message_reaction_system
+DEL ir.model.access: mail.access_mail_message_scheduled_system
+DEL ir.model.access: mail.access_mail_message_subtype_portal
+DEL ir.model.access: mail.access_mail_message_subtype_public
+DEL ir.model.access: mail.access_mail_message_subtype_system
+DEL ir.model.access: mail.access_mail_message_subtype_user
+DEL ir.model.access: mail.access_mail_message_translation_system
+DEL ir.model.access: mail.access_mail_message_user
+DEL ir.model.access: mail.access_mail_notification_portal
+DEL ir.model.access: mail.access_mail_notification_system
+DEL ir.model.access: mail.access_mail_notification_user
+DEL ir.model.access: mail.access_mail_presence
+DEL ir.model.access: mail.access_mail_push_device_system
+DEL ir.model.access: mail.access_mail_push_system
+DEL ir.model.access: mail.access_mail_scheduled_message
+DEL ir.model.access: mail.access_mail_template
+DEL ir.model.access: mail.access_mail_template_editor
+DEL ir.model.access: mail.access_mail_template_preview
+DEL ir.model.access: mail.access_mail_template_reset
+DEL ir.model.access: mail.access_mail_template_system
+DEL ir.model.access: mail.access_mail_tracking_value_system
+DEL ir.model.access: mail.access_publisher_warranty_contract_all
+DEL ir.model.access: mail.access_res_role_admin
+DEL ir.model.access: mail.access_res_role_user
+DEL ir.model.access: mail.access_res_users_settings_volumes_user
+DEL ir.model.access: mail.ir_actions_report_access_user
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.model.constraint: mail.constraint_discuss_category_name_unique
+NEW ir.model.constraint: mail.constraint_discuss_channel_member_channel_id_id_idx
+NEW ir.model.constraint: mail.constraint_discuss_channel_member_indices_channel_check
+NEW ir.model.constraint: mail.constraint_discuss_channel_member_indices_chat_check
+NEW ir.model.constraint: mail.constraint_discuss_channel_member_indices_unique
+NEW ir.model.constraint: mail.constraint_discuss_channel_readonly_channel_type_check
+NEW ir.model.constraint: mail.constraint_ir_attachment_mail_call_artifact_uniq
+NEW ir.model.constraint: mail.constraint_mail_activity_unassigned_role_idx
+NEW ir.model.constraint: mail.constraint_mail_call_artifact_artifact_has_possessor
+NEW ir.model.constraint: mail.constraint_mail_call_artifact_start_before_end
+NEW ir.model.constraint: mail.constraint_mail_poll_option_check_option_label
+NEW ir.model.constraint: mail.constraint_mail_poll_unique_end_message_id
+NEW ir.model.constraint: mail.constraint_mail_poll_unique_start_message_id
+NEW ir.model.constraint: mail.constraint_mail_poll_vote_check_user_or_guest_set
+NEW ir.model.constraint: mail.constraint_mail_poll_vote_unique_option_id_guest_id
+NEW ir.model.constraint: mail.constraint_mail_poll_vote_unique_option_id_user_id
+# NOTHING TO DO: constraints created by the ORM; production data checked against them where relevant
+
+DEL ir.rule: mail.discuss_gif_favorite_admin_rule (noupdate)
+DEL ir.rule: mail.discuss_gif_favorite_user_rule (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_call_history_read_all (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_all (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_group_system (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_member_create_is_group_matching_all (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_member_create_is_group_matching_group_user (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_member_create_is_member_group_user (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_member_group_system (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_member_is_self_all (noupdate)
+DEL ir.rule: mail.ir_rule_discuss_channel_member_read_all (noupdate)
+DEL ir.rule: mail.ir_rule_mail_canned_response_admin (noupdate)
+DEL ir.rule: mail.ir_rule_mail_canned_response_user_read (noupdate)
+DEL ir.rule: mail.ir_rule_mail_canned_response_user_update (noupdate)
+DEL ir.rule: mail.ir_rule_mail_notifications_group_portal (noupdate)
+DEL ir.rule: mail.ir_rule_mail_notifications_group_user (noupdate)
+DEL ir.rule: mail.ir_rule_mail_scheduled_message_user (noupdate)
+DEL ir.rule: mail.mail_activity_plan_rule_admin (noupdate)
+DEL ir.rule: mail.mail_activity_plan_template_rule_admin (noupdate)
+DEL ir.rule: mail.mail_activity_rule_user (noupdate)
+DEL ir.rule: mail.mail_compose_message_rule (noupdate)
+DEL ir.rule: mail.mail_message_subtype_rule_public (noupdate)
+DEL ir.rule: mail.mail_template_editor_rule (noupdate)
+DEL ir.rule: mail.mail_template_employee_rule (noupdate)
+DEL ir.rule: mail.res_users_settings_volumes_rule_admin (noupdate)
+DEL ir.rule: mail.res_users_settings_volumes_rule_user (noupdate)
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.ui.menu: mail.ir_ui_view_menu_usage_mail_post
+NEW ir.ui.menu: mail.menu_discuss_category
+NEW ir.ui.menu: mail.menu_discuss_user_settings
+NEW ir.ui.menu: mail.menu_settings
+DEL ir.ui.menu: mail.discuss_technical
+# NOTHING TO DO: handled by the module update
+
+DEL ir.ui.menu: mail.menu_mail_tracking_value
+# DONE: pre-migration: XML-IDs renamed to mail_tracking (same records)
+
+NEW ir.ui.view: mail.content_markdown
+NEW ir.ui.view: mail.content_text
+NEW ir.ui.view: mail.discuss_call_history_view_search
+NEW ir.ui.view: mail.discuss_category_view_form
+NEW ir.ui.view: mail.discuss_category_view_kanban
+NEW ir.ui.view: mail.discuss_category_view_search
+NEW ir.ui.view: mail.discuss_category_view_tree
+NEW ir.ui.view: mail.discuss_my_conversations_view_search
+NEW ir.ui.view: mail.group_change_template
+NEW ir.ui.view: mail.ir_access_form_view_inherit_mail
+NEW ir.ui.view: mail.ir_attachment_view_list
+NEW ir.ui.view: mail.ir_ui_view_view_search_mail
+NEW ir.ui.view: mail.mail_activity_view_graph
+NEW ir.ui.view: mail.mail_activity_view_pivot
+# NOTHING TO DO: handled by the module update
+
+NEW ir.ui.view: mail.mail_tracking_template
+# DONE: used by end-migration to render the historical tracking values
+
+NEW ir.ui.view: mail.res_config_settings_view_form_sfu_client_source
+# NOTHING TO DO: handled by the module update
+
+DEL ir.ui.view: mail.view_mail_tracking_value_form
+DEL ir.ui.view: mail.view_mail_tracking_value_tree
+# DONE: pre-migration: XML-IDs renamed to mail_tracking (same records)
+
+NEW mail.message.subtype: mail.mt_important_notification (noupdate)
+# NOTHING TO DO: new noupdate record, created
+
+# DONE: post-migration noupdate_changes.xml (verified against the 20.0 data files): subtype names and sequences (mt_comment, mt_note, mt_activities), activity type icons (Material Symbols), admin owner of #general, canned response admin implies base.group_user. Channel names and the welcome message are only filled at install (_mail_post_init), not reloaded.
+# DONE: post-migration: translations of mt_comment.name dropped ('Discussions' -> 'Messages'), the translation update loads the 20.0 ones (cs: 'Zprávy'); mt_note keeps its translation (20.0 cs.po has none for 'Notes')
+# DONE: end-migration: remaining FontAwesome activity type icons (other modules, e.g. maintenance, hr_skills) mapped to their Material Symbols equivalent.

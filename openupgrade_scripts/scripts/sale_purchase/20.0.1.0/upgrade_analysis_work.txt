@@ -1,0 +1,9 @@
+---Models in module 'sale_purchase'---
+---Fields in module 'sale_purchase'---
+sale_purchase / product.template         / service_to_purchase (boolean) : DEL
+sale_purchase / product.template         / service_tracking (selection)  : selection_keys added: [subcontract] (most likely nothing to do)
+# DONE: pre-migration sets service_tracking = 'subcontract' (and purchase_ok) on non re-invoicing services that had service_to_purchase true in any company and have a vendor; without a vendor v20 write() would raise on every write of the product (0 in production).
+---XML records in module 'sale_purchase'---
+NEW ir.ui.view: sale_purchase.product_template_form_view
+DEL ir.ui.view: sale_purchase.product_template_form_view_inherit
+# NOTHING TO DO: standard data, created/removed by the ORM (_process_end).

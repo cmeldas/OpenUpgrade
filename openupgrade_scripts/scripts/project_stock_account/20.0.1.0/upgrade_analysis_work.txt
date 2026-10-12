@@ -1,0 +1,7 @@
+---Models in module 'project_stock_account'---
+---Fields in module 'project_stock_account'---
+project_stock_account / stock.picking.type       / analytic_costs (boolean)      : now a function
+
+# NOTHING TO DO: stored compute, existing values kept (see project_mrp_account post-migration for the manufacturing types)
+
+---XML records in module 'project_stock_account'---

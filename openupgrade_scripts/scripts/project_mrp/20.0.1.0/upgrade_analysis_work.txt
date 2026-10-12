@@ -1,0 +1,14 @@
+---Models in module 'project_mrp'---
+---Fields in module 'project_mrp'---
+---XML records in module 'project_mrp'---
+NEW ir.access: project_mrp.access_mrp_bom_line_project_user
+NEW ir.access: project_mrp.access_mrp_bom_project_user
+DEL ir.model.access: project_mrp.access_mrp_bom_line_project_user
+DEL ir.model.access: project_mrp.access_mrp_bom_project_user
+
+# NOTHING TO DO: ir.model.access/ir.rule -> ir.access, done by the framework/base (XML-IDs of the removed models dropped in base pre-migration, records recreated from the v20 data, deactivations transferred in base end-migration)
+
+NEW ir.ui.view: project_mrp.project_view_form_inherit_project_mrp
+
+# NOTHING TO DO: handled by ORM (views, actions, menus, reports)
+

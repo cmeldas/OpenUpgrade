@@ -1,0 +1,43 @@
+---Models in module 'loyalty'---
+---Fields in module 'loyalty'---
+loyalty      / loyalty.card             / points (float)                : not stored anymore
+loyalty      / loyalty.card             / points (float)                : now a function
+# DONE: pre-migration _loyalty_card_balance_history: v20 computes the balance from loyalty.history. 15 of the 16 cards reported as not matching only had NULL in history.used (fixed by _loyalty_history_cleanup, v20 read_group would fail on it); card 9 had 48 points more than its history (the v18 order Obchůdek/5198 wrote its consumption line twice, the card was debited once): a balancing history line is inserted so that every card keeps its v19 balance (33 cards, 7145.69). Stored column kept by the framework for checks
+loyalty      / loyalty.card             / program_id (many2one)         : now required
+# NOTHING TO DO: no card without program
+loyalty      / loyalty.history          / expiration_date (date)        : NEW
+# NOTHING TO DO: points expire only for programs with expire_after (new, empty)
+loyalty      / loyalty.history          / linked_loyalty_history_id (many2one): NEW relation: loyalty.history
+# NOTHING TO DO: consumptions of 'loyalty' cards without link are debts that v20 settles itself on the next award (_settle_outstanding_debt); without expiration the balance does not depend on the link (2 history lines on loyalty cards)
+loyalty      / loyalty.history          / points_changed_date (datetime): NEW required, hasdefault: default
+# DONE: pre-migration _loyalty_history_points_changed_date: = create_date of the line (the default now() would date the whole history to the migration)
+loyalty      / loyalty.program          / expire_after (integer)        : NEW
+loyalty      / loyalty.program          / once_per_user (boolean)       : NEW
+loyalty      / loyalty.program          / partner_ids (many2many)       : NEW relation: res.partner
+# NOTHING TO DO: new options, empty = v19 behaviour
+---XML records in module 'loyalty'---
+NEW ir.access: loyalty.loyalty_history_company_rule
+NEW ir.access: loyalty.sale_loyalty_card_company_rule
+NEW ir.access: loyalty.sale_loyalty_program_company_rule
+NEW ir.access: loyalty.sale_loyalty_reward_company_rule
+NEW ir.access: loyalty.sale_loyalty_rule_company_rule
+DEL ir.model.access: loyalty.access_loyalty_card
+DEL ir.model.access: loyalty.access_loyalty_card_update_balance_user
+DEL ir.model.access: loyalty.access_loyalty_generate_wizard
+DEL ir.model.access: loyalty.access_loyalty_history
+DEL ir.model.access: loyalty.access_loyalty_mail
+DEL ir.model.access: loyalty.access_loyalty_program
+DEL ir.model.access: loyalty.access_loyalty_reward
+DEL ir.model.access: loyalty.access_loyalty_rule
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records
+NEW ir.model.constraint: loyalty.constraint_loyalty_history_issued_and_used_positive
+NEW ir.model.constraint: loyalty.constraint_loyalty_history_issued_or_used
+# DONE: pre-migration _loyalty_history_cleanup: NULL -> 0, negative amounts flipped, lines that award and consume at once split (none in production), so the constraints can be created
+NEW ir.model.constraint: loyalty.constraint_loyalty_program_check_expire_after
+# NOTHING TO DO: new column, empty
+DEL ir.rule: loyalty.loyalty_history_company_rule (noupdate)
+DEL ir.rule: loyalty.sale_loyalty_card_company_rule (noupdate)
+DEL ir.rule: loyalty.sale_loyalty_program_company_rule (noupdate)
+DEL ir.rule: loyalty.sale_loyalty_reward_company_rule (noupdate)
+DEL ir.rule: loyalty.sale_loyalty_rule_company_rule (noupdate)
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records

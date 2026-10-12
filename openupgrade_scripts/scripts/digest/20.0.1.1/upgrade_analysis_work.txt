@@ -1,0 +1,23 @@
+---Models in module 'digest'---
+new model digest.test [transient]
+# NOTHING TO DO: new transient model
+
+---Fields in module 'digest'---
+digest       / res.users                / digest_ids (many2many)        : NEW relation: digest.digest
+# NOTHING TO DO: new many2many (inverse of the existing user_ids)
+
+---XML records in module 'digest'---
+NEW ir.access: digest.access_digest_digest_system
+NEW ir.access: digest.access_digest_digest_user
+NEW ir.access: digest.access_digest_test
+NEW ir.access: digest.access_digest_tip_system
+NEW ir.access: digest.access_digest_tip_user
+DEL ir.model.access: digest.access_digest_digest_system
+DEL ir.model.access: digest.access_digest_digest_user
+DEL ir.model.access: digest.access_digest_tip_system
+DEL ir.model.access: digest.access_digest_tip_user
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.ui.view: digest.digest_test_view_form
+# NOTHING TO DO: new view.
+# DONE: post-migration: the noupdate QWeb templates digest_mail_layout, digest_mail_main, digest_section_mobile and digest_tool_kpi changed in 20.0 (title with date, KPI icons and tips); never customized in production, reloaded from data/digest_data.xml (the file only holds them)

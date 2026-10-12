@@ -1,0 +1,49 @@
+---Models in module 'sale_timesheet'---
+---Fields in module 'sale_timesheet'---
+sale_timesheet / account.analytic.line    / order_id (many2one)           : module is now 'sale' ('sale_timesheet')
+sale_timesheet / account.analytic.line    / order_id (many2one)           : not related anymore
+sale_timesheet / account.analytic.line    / order_id (many2one)           : now a function
+
+# NOTHING TO DO: moved to sale, stored, existing values kept
+
+sale_timesheet / account.analytic.line    / product_id (many2one)         : now a function
+
+# NOTHING TO DO: stored compute, existing values kept
+
+sale_timesheet / account.analytic.line    / timesheet_invoice_id (many2one): DEL relation: account.move
+
+# DONE: post-migration, copied to sale's reinvoice_move_id (same meaning, 0 values in production)
+
+sale_timesheet / account.analytic.line    / timesheet_invoice_type (selection): DEL selection_keys: ['billable_fixed', 'billable_manual', 'billable_milestones', 'billable_time', 'non_billable', 'other_costs', 'other_revenues', 'service_revenues', 'timesheet_revenues']
+
+# DONE: replaced by sale_project billable_type/category_report (stored computes), recomputed in sale_project end-migration with the full registry; 2 x 'non_billable' -> '09_non_billable', differences logged; legacy column kept
+
+sale_timesheet / project.task             / portal_timesheet_ids (one2many): NEW relation: account.analytic.line, mode: modify
+
+# NOTHING TO DO: non stored
+
+---XML records in module 'sale_timesheet'---
+NEW ir.access: sale_timesheet.access_project_sale_line_employee_map
+NEW ir.access: sale_timesheet.access_project_sale_line_employee_map_manager
+NEW ir.access: sale_timesheet.account_analytic_line_rule_billing_user
+NEW ir.access: sale_timesheet.account_analytic_line_rule_readonly_user
+DEL ir.model.access: sale_timesheet.access_project_sale_line_employee_map
+DEL ir.model.access: sale_timesheet.access_project_sale_line_employee_map_manager
+
+# NOTHING TO DO: ir.model.access/ir.rule -> ir.access, done by the framework/base (XML-IDs of the removed models dropped in base pre-migration, records recreated from the v20 data, deactivations transferred in base end-migration)
+
+NEW ir.ui.view: sale_timesheet.account_analytic_line_view_search
+NEW ir.ui.view: sale_timesheet.hr_timesheet_line_search
+NEW ir.ui.view: sale_timesheet.portal_timesheet_table_with_total_inherit
+NEW ir.ui.view: sale_timesheet.project_project_view_card_inherit_sale_timesheet
+NEW ir.ui.view: sale_timesheet.project_project_view_card_inherit_sale_timesheet_so_button
+NEW ir.ui.view: sale_timesheet.report_timesheet_sale_timesheet
+NEW ir.ui.view: sale_timesheet.view_task_form2_inherit_sale_timesheet
+DEL ir.ui.view: sale_timesheet.project_project_view_kanban_inherit_sale_timesheet
+DEL ir.ui.view: sale_timesheet.project_project_view_kanban_inherit_sale_timesheet_so_button
+DEL ir.ui.view: sale_timesheet.view_hr_timesheet_line_graph_invoice_employee
+
+# NOTHING TO DO: handled by ORM (views, actions, menus, reports)
+
+# DONE: post-migration, noupdate_changes.xml (timesheet report linked to the invoice templates)
+

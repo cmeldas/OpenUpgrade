@@ -1,0 +1,63 @@
+---Models in module 'purchase_stock'---
+---Fields in module 'purchase_stock'---
+purchase_stock / purchase.order           / date_promised (datetime)      : NEW isfunction: function, stored
+
+# DONE: post-migration sets it to the earliest date_promised of the lines (stored compute, computed before the lines were filled)
+
+purchase_stock / purchase.order           / incoterm_location (char)      : module is now 'purchase' ('purchase_stock')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+purchase_stock / purchase.order           / incoterm_location (char)      : now a function
+
+# NOTHING TO DO: stored compute with readonly=False, existing values are kept
+
+purchase_stock / purchase.order           / receipt_status (selection)    : module is now 'purchase' ('purchase_stock')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+purchase_stock / purchase.order.line      / date_promised (datetime)      : NEW
+
+# DONE: post-migration sets it to date_planned on confirmed orders, as 20.0 does on confirmation
+
+purchase_stock / purchase.order.line      / forecasted_location_id (many2one): NEW relation: stock.location
+purchase_stock / purchase.order.line      / location_final_id (many2one)  : DEL relation: stock.location
+
+# DONE: pre-migration: rename_fields location_final_id -> forecasted_location_id (2 rows)
+
+purchase_stock / res.company              / days_to_purchase (float)      : type is now 'integer' ('float')
+
+# NOTHING TO DO: float -> integer cast works (NULL in production)
+
+---XML records in module 'purchase_stock'---
+NEW ir.access: purchase_stock.access_report_purchase_order_user
+NEW ir.access: purchase_stock.access_stock_location_purchase_user
+NEW ir.access: purchase_stock.access_stock_move_purchase_user
+NEW ir.access: purchase_stock.access_stock_move_purchase_user_manager
+NEW ir.access: purchase_stock.access_stock_picking_purchase_user
+NEW ir.access: purchase_stock.access_stock_warehouse_orderpoint_user
+NEW ir.access: purchase_stock.access_stock_warehouse_purchase_user
+NEW ir.access: purchase_stock.purchase_order_line_stock_user_rule
+NEW ir.access: purchase_stock.purchase_order_stock_user_rule
+DEL ir.model.access: purchase_stock.access_purchase_order_line_stock_worker
+DEL ir.model.access: purchase_stock.access_purchase_order_stock_worker
+DEL ir.model.access: purchase_stock.access_report_purchase_order
+DEL ir.model.access: purchase_stock.access_report_purchase_order_user
+DEL ir.model.access: purchase_stock.access_stock_location_purchase_user
+DEL ir.model.access: purchase_stock.access_stock_location_purchase_user_manager
+DEL ir.model.access: purchase_stock.access_stock_move_purchase_user
+DEL ir.model.access: purchase_stock.access_stock_move_purchase_user_manager
+DEL ir.model.access: purchase_stock.access_stock_picking_purchase_user
+DEL ir.model.access: purchase_stock.access_stock_picking_purchase_user_manager
+DEL ir.model.access: purchase_stock.access_stock_warehouse_orderpoint_manager
+DEL ir.model.access: purchase_stock.access_stock_warehouse_orderpoint_user
+DEL ir.model.access: purchase_stock.access_stock_warehouse_purchase_user
+DEL ir.model.access: purchase_stock.access_stock_warehouse_purchase_user_manager
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.ui.view: purchase_stock.exception_on_picking
+NEW ir.ui.view: purchase_stock.product_product_tree_view_stock
+NEW ir.ui.view: purchase_stock.product_template_form_view_stock
+
+# NOTHING TO DO: new views

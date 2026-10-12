@@ -1,0 +1,187 @@
+---Models in module 'stock_account'---
+obsolete model stock_account.stock.valuation.report [abstract]
+
+# NOTHING TO DO: abstract model
+
+---Fields in module 'stock_account'---
+stock_account / account.account          / account_stock_expense_id (many2one): module is now 'account' ('stock_account')
+stock_account / account.account          / account_stock_variation_id (many2one): module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / account.move             / closing_datetime (datetime)   : NEW
+
+# DONE: post-migration flags the closings stored in ir.config_parameter '<company>.stock_valuation_closing_ids' (19.0) with inventory_closing and closing_datetime; none in production
+
+stock_account / account.move             / product_value_id (one2many)   : NEW relation: product.value
+
+# NOTHING TO DO: one2many
+
+stock_account / account.move.line        / cogs_origin_id (many2one)     : module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / account.move.line        / stock_move_id (many2one)      : NEW relation: stock.move
+
+# NOTHING TO DO: new field, empty (account_move.stock_move_id of 18.0 is empty too)
+
+stock_account / product.category         / account_stock_variation_id (many2one): module is now 'account' ('stock_account')
+stock_account / product.category         / property_cost_method (selection): module is now 'account' ('stock_account')
+stock_account / product.category         / property_price_difference_account_id (many2one): module is now 'account' ('stock_account')
+stock_account / product.category         / property_stock_journal (many2one): module is now 'account' ('stock_account')
+stock_account / product.category         / property_stock_valuation_account_id (many2one): module is now 'account' ('stock_account')
+stock_account / product.category         / property_valuation (selection): module is now 'account' ('stock_account')
+stock_account / product.template         / cost_method (selection)       : module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / product.template         / property_price_difference_account_id (many2one): DEL relation: account.account
+
+# NOTHING TO DO: company_dependent column without values in production
+
+stock_account / product.template         / valuation (selection)         : module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / product.value            / account_move_id (many2one)    : NEW relation: account.move
+
+# DONE: pre-migration renames the stock.valuation.layer columns left in product_value by the old 19.0 script (quantity, account_move_id, unit_cost, ...) to legacy, so the ORM creates the new fields; post-migration fills quantity
+
+stock_account / product.value            / new_cost (float)              : NEW
+stock_account / product.value            / new_value (float)             : NEW hasdefault: default
+stock_account / product.value            / old_cost (float)              : NEW
+stock_account / product.value            / old_value (float)             : NEW hasdefault: default
+
+# DONE: post-migration fills the price history (product.value without move) like _change_standard_price() of 20.0
+
+stock_account / product.value            / quantity (float)              : NEW
+
+# DONE: pre-migration renames the stock.valuation.layer columns left in product_value by the old 19.0 script (quantity, account_move_id, unit_cost, ...) to legacy, so the ORM creates the new fields; post-migration fills quantity
+
+stock_account / res.company              / account_stock_journal_id (many2one): module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / res.company              / account_stock_journal_id (many2one): not stored anymore
+
+# DONE: now company_default_for() on the product.category ir.default; post-migration creates the missing ir.default from the 19.0 columns (production already has all 4, values equal)
+
+stock_account / res.company              / account_stock_journal_id (many2one): now a function
+
+# NOTHING TO DO: see above
+
+stock_account / res.company              / account_stock_valuation_id (many2one): module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / res.company              / account_stock_valuation_id (many2one): not stored anymore
+
+# DONE: now company_default_for() on the product.category ir.default; post-migration creates the missing ir.default from the 19.0 columns (production already has all 4, values equal)
+
+stock_account / res.company              / account_stock_valuation_id (many2one): now a function
+
+# NOTHING TO DO: see above
+
+stock_account / res.company              / cost_method (selection)       : module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / res.company              / cost_method (selection)       : not stored anymore
+
+# DONE: now company_default_for() on the product.category ir.default; post-migration creates the missing ir.default from the 19.0 columns (production already has all 4, values equal)
+
+stock_account / res.company              / cost_method (selection)       : now a function
+
+# NOTHING TO DO: see above
+
+stock_account / res.company              / inventory_period (selection)  : module is now 'account' ('stock_account')
+stock_account / res.company              / inventory_valuation (selection): module is now 'account' ('stock_account')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+stock_account / res.company              / inventory_valuation (selection): not stored anymore
+
+# DONE: now company_default_for() on the product.category ir.default; post-migration creates the missing ir.default from the 19.0 columns (production already has all 4, values equal)
+
+stock_account / res.company              / inventory_valuation (selection): now a function
+
+# NOTHING TO DO: see above
+
+stock_account / stock.move               / invoice_line_ids (one2many)   : NEW relation: account.move.line
+stock_account / stock.move               / product_value_ids (one2many)  : NEW relation: product.value
+
+# NOTHING TO DO: one2many
+
+---XML records in module 'stock_account'---
+NEW ir.access: stock_account.access_account_account_stock_manager
+NEW ir.access: stock_account.access_account_journal_stock_manager
+NEW ir.access: stock_account.access_product_value_account_manager
+NEW ir.access: stock_account.access_product_value_stock_manager
+NEW ir.access: stock_account.access_stock_avco_report_account_readonly
+NEW ir.access: stock_account.access_stock_avco_report_stock_manager
+NEW ir.access: stock_account.access_stock_move_invoicing_payments
+NEW ir.access: stock_account.access_stock_move_invoicing_payments_readonly
+NEW ir.access: stock_account.access_stock_picking_invoicing_payments
+NEW ir.access: stock_account.access_stock_picking_invoicing_payments_readonly
+NEW ir.access: stock_account.product_value_rule
+NEW ir.access: stock_account.stock_avco_report_rule
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.actions.act_window: stock_account.product_value_list_action
+
+# NOTHING TO DO: new actions
+
+DEL ir.actions.client: stock_account.action_report_stock_valuation [renamed to account module]
+
+# DONE: product pre-migration (account is updated before stock_account) renames the XML-ID to account.action_report_stock_valuation; post-migration drops the old record if account created a duplicate anyway
+
+DEL ir.actions.server: stock_account.ir_cron_post_stock_valuation_ir_actions_server [renamed to account module] (noupdate)
+DEL ir.cron: stock_account.ir_cron_post_stock_valuation [renamed to account module] (noupdate)
+
+# DONE: product pre-migration renames the XML-IDs to account (noupdate switched to False); post-migration drops the old records if account created duplicates anyway
+
+NEW ir.filters: stock_account.filter_stock_move_aging_report
+NEW ir.filters: stock_account.filter_stock_move_intercompany_deliveries
+
+# NOTHING TO DO: new filters
+
+DEL ir.model.access: stock_account.access_account_account_stock_manager
+DEL ir.model.access: stock_account.access_account_journal_stock_manager
+DEL ir.model.access: stock_account.access_stock_avco_report_account_readonly
+DEL ir.model.access: stock_account.access_stock_avco_report_stock_manager
+DEL ir.model.access: stock_account.access_stock_move_invoicing_payments
+DEL ir.model.access: stock_account.access_stock_move_invoicing_payments_readonly
+DEL ir.model.access: stock_account.access_stock_picking_invoicing_payments
+DEL ir.model.access: stock_account.access_stock_picking_invoicing_payments_readonly
+DEL ir.model.access: stock_account.access_stock_product_value
+DEL ir.rule: stock_account.product_value_rule (noupdate)
+DEL ir.rule: stock_account.stock_avco_report_rule (noupdate)
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.ui.menu: stock_account.valuation_adjustments_menu
+
+# NOTHING TO DO: new menus
+
+NEW ir.ui.view: stock_account.product_template_form_view_stock_account
+NEW ir.ui.view: stock_account.product_value_list_view
+NEW ir.ui.view: stock_account.product_value_search_view
+NEW ir.ui.view: stock_account.stock_move_view_pivot
+NEW ir.ui.view: stock_account.view_move_form
+
+# NOTHING TO DO: new views
+
+DEL ir.ui.view: stock_account.product_product_view_list_at_date
+DEL ir.ui.view: stock_account.view_account_form
+DEL ir.ui.view: stock_account.view_category_property_form
+DEL ir.ui.view: stock_account.view_category_property_form_stock
+DEL ir.ui.view: stock_account.view_picking_form
+DEL ir.ui.view: stock_account.view_stock_return_picking_form_inherit_stock_account
+DEL ir.ui.view: stock_account.view_template_property_form_stock_account
+
+# NOTHING TO DO: obsolete views are removed by the ORM
+
+---noupdate and other changes not listed above---
+
+# DONE: pre-migration repairs product_value damaged by the old 19.0 script (backup of the 28638 layers to openupgrade_legacy_20_0_stock_valuation_layer, 30 revaluations -> unit cost, foreign keys of the layer columns and of legacy layer tables pointing to product_value dropped first, so that no legacy row cascades, then 28608 move layers deleted and the layer columns renamed to legacy) and makes the value of outgoing moves negative (1266 moves created in 19.0)

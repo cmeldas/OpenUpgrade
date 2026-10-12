@@ -1,0 +1,5 @@
+---Models in module 'base_report_wkhtmltox'---
+---Fields in module 'base_report_wkhtmltox'---
+base_report_wkhtmltox / ir.actions.report        / report_type (selection)       : selection_keys added: [qweb-pdf-wkhtmltopdf] (most likely nothing to do)
+# NOTHING TO DO: new module (the wkhtmltopdf engine moved out of base). It has no dependency, so a plain -u all would not install it; the framework's update_list patch installs it as an auto_install module. Without it no module implements a PDF engine (base ir.actions.report._run_pdf_engine() raises NotImplementedError), and its post_init_hook sets report.pdf_engine_default = wkhtmltopdf (it runs, since the module is installed during the update). Existing reports keep report_type qweb-pdf, which uses that default engine: 57 in production, of which 13 are removed by the v20 data of product/stock/mrp (label, lot, package and reception reports, owned by those modules), so 44 remain plus 8 new ones, 52 as in a clean v20 database
+---XML records in module 'base_report_wkhtmltox'---

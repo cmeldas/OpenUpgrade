@@ -1,0 +1,62 @@
+---Models in module 'utm'---
+obsolete model utm.source.mixin [abstract]
+# NOTHING TO DO: abstract model
+
+---Fields in module 'utm'---
+utm          / account.move             / utm_reference (reference)     : NEW
+utm          / link.tracker             / utm_reference (reference)     : NEW
+# NOTHING TO DO: new field
+
+utm          / mailing.mailing          / source_id (many2one)          : module is now 'mass_mailing' ('utm')
+utm          / mailing.mailing          / source_id (many2one)          : now a function
+# NOTHING TO DO: see mass_mailing
+
+utm          / sale.order               / utm_reference (reference)     : NEW
+# NOTHING TO DO: new field
+
+---XML records in module 'utm'---
+NEW ir.access: utm.access_utm_campaign_system
+NEW ir.access: utm.access_utm_campaign_user
+NEW ir.access: utm.access_utm_medium_system
+NEW ir.access: utm.access_utm_medium_user
+NEW ir.access: utm.access_utm_source_system
+NEW ir.access: utm.access_utm_source_user
+NEW ir.access: utm.access_utm_stage_system
+NEW ir.access: utm.access_utm_stage_user
+NEW ir.access: utm.access_utm_tag_system
+NEW ir.access: utm.access_utm_tag_user
+DEL ir.model.access: utm.access_utm_campaign_system
+DEL ir.model.access: utm.access_utm_campaign_user
+DEL ir.model.access: utm.access_utm_medium_system
+DEL ir.model.access: utm.access_utm_medium_user
+DEL ir.model.access: utm.access_utm_source_system
+DEL ir.model.access: utm.access_utm_source_user
+DEL ir.model.access: utm.access_utm_stage_system
+DEL ir.model.access: utm.access_utm_stage_user
+DEL ir.model.access: utm.access_utm_tag_system
+DEL ir.model.access: utm.access_utm_tag_user
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW utm.medium: utm.utm_medium_messaging (noupdate)
+NEW utm.medium: utm.utm_medium_social_media (noupdate)
+# NOTHING TO DO: new noupdate records, no name collision in production
+
+DEL utm.medium: utm.utm_medium_banner (noupdate)
+DEL utm.medium: utm.utm_medium_facebook (noupdate)
+DEL utm.medium: utm.utm_medium_google_adwords (noupdate)
+DEL utm.medium: utm.utm_medium_linkedin (noupdate)
+DEL utm.medium: utm.utm_medium_television (noupdate)
+DEL utm.medium: utm.utm_medium_twitter (noupdate)
+# NOTHING TO DO: noupdate records are not deleted by _process_end and may be referenced, kept.
+# DONE: post-migration noupdate_changes.xml: utm.utm_source_mailing renamed 'Lead Recall' -> 'Mass Mailing'
+
+NEW utm.source: utm.utm_source_google (noupdate)
+NEW utm.source: utm.utm_source_instagram (noupdate)
+NEW utm.source: utm.utm_source_livechat (noupdate)
+NEW utm.source: utm.utm_source_survey (noupdate)
+NEW utm.source: utm.utm_source_youtube (noupdate)
+# NOTHING TO DO: new noupdate records, no name collision in production
+
+DEL utm.source: utm.utm_source_search_engine (noupdate)
+# NOTHING TO DO: noupdate records are not deleted by _process_end and may be referenced, kept.
+# DONE: post-migration noupdate_changes.xml: utm.utm_source_mailing renamed 'Lead Recall' -> 'Mass Mailing'

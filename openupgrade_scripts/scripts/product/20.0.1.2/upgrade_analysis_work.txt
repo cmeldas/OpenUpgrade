@@ -1,0 +1,397 @@
+---Models in module 'product'---
+obsolete model product.template.attribute.exclusion
+
+# NOTHING TO DO: no exclusions in production (0 rows); the table is kept as legacy (excluded_value_ids is a new many2many, see below)
+
+obsolete model report.product.report_producttemplatelabel2x7 [abstract]
+obsolete model report.product.report_producttemplatelabel4x12 [abstract]
+obsolete model report.product.report_producttemplatelabel4x12noprice [abstract]
+obsolete model report.product.report_producttemplatelabel4x7 [abstract]
+obsolete model report.product.report_producttemplatelabel_dymo [abstract]
+
+# NOTHING TO DO: no data (transient/abstract model)
+
+new model product.base.unit
+
+# DONE: pre-migration: website.base.unit (website_sale) renamed to product.base.unit (model, table, sequence, constraints, XML-IDs of model and fields moved to product; base_unit_action and group_show_uom_price XML-IDs moved too). Must happen in product (website_sale is updated after product, the relation of base_unit_id would point to an empty new table)
+
+new model product.catalog.line.mixin [abstract]
+new model report.product.label.base [abstract]
+new model report.product.report_product_label_dymo [abstract]
+new model report.product.report_product_label_pdf [abstract]
+new model report.product.report_product_label_zpl [abstract]
+
+# NOTHING TO DO: new model
+
+---Fields in module 'product'---
+product      / product.attribute        / display_type (selection)      : selection_keys added: [range] (most likely nothing to do)
+
+# NOTHING TO DO: new selection value only
+
+product      / product.base.unit        / name (char)                   : NEW required, translate
+
+# DONE: pre-migration: website.base.unit renamed, name is already a translatable jsonb column
+
+product      / product.category         / company_id (many2one)         : NEW relation: res.company
+
+# NOTHING TO DO: new optional field, empty = shared category as before
+
+product      / product.category         / complete_name (char)          : not stored anymore
+
+# NOTHING TO DO: now a non stored compute, the old column is kept by the framework
+
+product      / product.category         / name (char)                   : translate is now 'True' ('False')
+product      / product.combo            / name (char)                   : translate is now 'True' ('False')
+
+# DONE: the ORM converts the column to {"en_US": value}; post-migration copies the value to the other active languages (cs_CZ)
+
+product      / product.pricelist.item   / applied_on (selection)        : now a function
+
+# NOTHING TO DO: stored compute with the same rule as the 19.0 onchange (checked: 0 rows differ in production); existing values are kept
+
+product      / product.pricelist.item   / compute_price (selection)     : selection_keys added: [discount, markup], removed: [formula, percentage]
+
+# DONE: pre-migration: legacy copy, 'percentage' -> 'discount' (price_discount = percent_price, rounding/surcharge/margins reset as they were ignored), 'formula' -> 'discount'/'markup' (price_discount = -price_markup on the cost base). Production only has 'fixed'
+
+product      / product.pricelist.item   / display_applied_on (selection): DEL required, selection_keys: ['1_product', '2_product_category']
+product      / product.pricelist.item   / percent_price (float)         : DEL
+
+# DONE: used in pre-migration for compute_price; column kept as legacy, no other use in 20.0
+
+product      / product.pricelist.item   / price_markup (float)          : not stored anymore
+
+# DONE: pre-migration folds price_markup into price_discount for 'formula' rules on the cost base; now a non stored compute (-price_discount)
+
+product      / product.pricelist.item   / uom_id (many2one)             : NEW relation: uom.uom
+
+# NOTHING TO DO: new optional field
+
+product      / product.product          / base_unit_count (float)       : previously in module website_sale
+product      / product.product          / base_unit_id (many2one)       : previously in module website_sale
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.product          / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')
+
+# DONE: pre-migration renames website.base.unit to product.base.unit (table renamed, ids and FKs kept)
+
+product      / product.product          / base_unit_name (char)         : previously in module website_sale
+product      / product.product          / base_unit_price (float)       : previously in module website_sale
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.product          / catalog_is_in_order (boolean) : NEW stored: False
+
+# NOTHING TO DO: non stored field
+
+product      / product.product          / country_of_origin (many2one)  : is now stored
+product      / product.product          / country_of_origin (many2one)  : module is now 'stock_delivery' ('product')
+product      / product.product          / country_of_origin (many2one)  : not related anymore
+
+# DONE: stock_delivery post-migration copies the template values to the variants
+
+product      / product.product          / extra_uom_ids (many2many)     : NEW relation: uom.uom
+
+# NOTHING TO DO: new many2many, empty
+
+product      / product.product          / free_qty (float)              : previously in module stock
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.product          / hs_code (char)                : is now stored
+product      / product.product          / hs_code (char)                : module is now 'stock_delivery' ('product')
+product      / product.product          / hs_code (char)                : not related anymore
+
+# DONE: stock_delivery post-migration copies the template values to the variants
+
+product      / product.product          / incoming_qty (float)          : previously in module stock
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.product          / invoice_policy (selection)    : now required
+
+# NOTHING TO DO: not stored on product.product
+
+product      / product.product          / is_in_selected_section_of_order (boolean): DEL
+
+# NOTHING TO DO: non stored field
+
+product      / product.product          / lst_price (float)             : is now stored
+
+# NOTHING TO DO: stored compute, computed by the ORM when the column is created (no SQL write on its dependencies)
+
+product      / product.product          / outgoing_qty (float)          : previously in module stock
+product      / product.product          / product_template_image_ids (one2many): module is now 'website_sale' ('product')
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.product          / qty_available (float)         : not a function anymore
+product      / product.product          / qty_available (float)         : now company_dependent
+
+# NOTHING TO DO: company_dependent only in product alone; stock overrides it as a non stored compute (the ORM creates an empty jsonb column while updating product)
+
+product      / product.product          / qty_available (float)         : previously in module stock
+product      / product.product          / virtual_available (float)     : previously in module stock
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.supplierinfo     / product_uom_id (many2one)     : DEL relation: uom.uom, required
+product      / product.supplierinfo     / uom_id (many2one)             : NEW relation: uom.uom, required, isfunction: function, stored
+
+# DONE: pre-migration: rename_fields product_uom_id -> uom_id (17 rows)
+
+product      / product.template         / barcode (char)                : is now stored
+
+# NOTHING TO DO: stored compute, computed by the ORM when the column is created
+
+product      / product.template         / base_unit_count (float)       : previously in module website_sale
+product      / product.template         / base_unit_id (many2one)       : previously in module website_sale
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.template         / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')
+
+# DONE: pre-migration renames website.base.unit to product.base.unit (table renamed, ids and FKs kept)
+
+product      / product.template         / base_unit_name (char)         : previously in module website_sale
+product      / product.template         / base_unit_price (float)       : previously in module website_sale
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.template         / fixed_pricelist_rule_ids (one2many): NEW relation: product.pricelist.item
+
+# NOTHING TO DO: one2many
+
+product      / product.template         / incoming_qty (float)          : previously in module stock
+product      / product.template         / is_storable (boolean)         : previously in module stock
+product      / product.template         / outgoing_qty (float)          : previously in module stock
+product      / product.template         / qty_available (float)         : previously in module stock
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.template         / service_tracking (selection)  : selection_keys added: [subcontract] (most likely nothing to do)
+
+# NOTHING TO DO: new selection value only
+
+product      / product.template         / show_qty_update_button (boolean): previously in module stock
+product      / product.template         / virtual_available (float)     : previously in module stock
+
+# NOTHING TO DO: field moved between modules, the column is unchanged; update_module_moved_fields is not needed: Odoo 20 _reflect_fields() creates the XML-ID of the new module and _process_end() only drops the stale one, the ir.model.fields record (and its tracking values) is kept
+
+product      / product.template.attribute.exclusion / product_template_attribute_value_id (many2one): DEL relation: product.template.attribute.value
+product      / product.template.attribute.exclusion / product_tmpl_id (many2one)    : DEL relation: product.template, required
+product      / product.template.attribute.exclusion / value_ids (many2many)         : DEL relation: product.template.attribute.value
+
+# NOTHING TO DO: obsolete model, 0 rows in production
+
+product      / product.template.attribute.value / exclude_for (one2many)        : DEL relation: product.template.attribute.exclusion
+
+# NOTHING TO DO: one2many of the obsolete exclusion model (0 rows)
+
+product      / product.template.attribute.value / excluded_value_ids (many2many): NEW relation: product.template.attribute.value
+
+# NOTHING TO DO: new many2many; would be filled from the exclusions, there are none in production
+
+product      / product.template.attribute.value / sequence (integer)            : NEW
+
+# NOTHING TO DO: new field, NULL keeps the 19.0 order (_order now starts with sequence)
+
+product      / product.template.attribute.value / show_price_extra (boolean)    : NEW
+
+# DONE: post-migration sets it on values with an extra price, 19.0 always showed the extra price on the website
+
+---XML records in module 'product'---
+NEW ir.access: product.access_product_attribute
+NEW ir.access: product.access_product_attribute_custom_value_manager
+NEW ir.access: product.access_product_attribute_custom_value_user
+NEW ir.access: product.access_product_attribute_manager
+NEW ir.access: product.access_product_attribute_value
+NEW ir.access: product.access_product_attribute_value_manager
+NEW ir.access: product.access_product_base_unit_product_manager
+NEW ir.access: product.access_product_base_unit_public_user
+NEW ir.access: product.access_product_category_manager
+NEW ir.access: product.access_product_category_user
+NEW ir.access: product.access_product_combo_item_manager
+NEW ir.access: product.access_product_combo_item_user
+NEW ir.access: product.access_product_combo_manager
+NEW ir.access: product.access_product_combo_user
+NEW ir.access: product.access_product_document_manager
+NEW ir.access: product.access_product_document_user
+NEW ir.access: product.access_product_label_layout_user
+NEW ir.access: product.access_product_pricelist_item_manager
+NEW ir.access: product.access_product_pricelist_item_user
+NEW ir.access: product.access_product_pricelist_manager
+NEW ir.access: product.access_product_pricelist_user
+NEW ir.access: product.access_product_product_attribute
+NEW ir.access: product.access_product_product_attribute_manager
+NEW ir.access: product.access_product_product_employee
+NEW ir.access: product.access_product_product_manager
+NEW ir.access: product.access_product_supplierinfo_manager
+NEW ir.access: product.access_product_supplierinfo_user
+NEW ir.access: product.access_product_tag_manager
+NEW ir.access: product.access_product_tag_user
+NEW ir.access: product.access_product_template_attribute_line
+NEW ir.access: product.access_product_template_attribute_line_manager
+NEW ir.access: product.access_product_template_manager
+NEW ir.access: product.access_product_template_user
+NEW ir.access: product.access_product_uom_manager
+NEW ir.access: product.access_product_uom_user
+NEW ir.access: product.access_uom_uom_product_manager
+NEW ir.access: product.access_update_product_attribute_value_manager
+NEW ir.access: product.product_category_comp_rule
+NEW ir.access: product.product_combo_comp_rule
+NEW ir.access: product.product_comp_rule
+NEW ir.access: product.product_document_comp_rule
+NEW ir.access: product.product_pricelist_comp_rule
+NEW ir.access: product.product_pricelist_item_comp_rule
+NEW ir.access: product.product_supplierinfo_comp_rule
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.actions.act_window: product.base_unit_action [renamed from website_sale module]
+
+# DONE: pre-migration rename_xmlids website_sale.base_unit_action -> product.base_unit_action
+
+NEW ir.actions.act_window: product.product_uom_action_view_list
+NEW ir.actions.act_window: product.product_variant_edit_qty_action
+
+# NOTHING TO DO: new actions
+
+DEL ir.actions.act_window: product.product_combo_action
+DEL ir.actions.act_window: product.product_normal_action
+DEL ir.actions.act_window: product.product_normal_action_sell
+
+# NOTHING TO DO: obsolete actions are removed by the ORM
+
+NEW ir.actions.report: product.action_report_product_label_dymo
+NEW ir.actions.report: product.action_report_product_label_pdf
+NEW ir.actions.report: product.report_product_template_label_zpl
+
+# NOTHING TO DO: new actions
+
+DEL ir.actions.report: product.report_product_packaging
+DEL ir.actions.report: product.report_product_template_label_2x7
+DEL ir.actions.report: product.report_product_template_label_4x12
+DEL ir.actions.report: product.report_product_template_label_4x12_noprice
+DEL ir.actions.report: product.report_product_template_label_4x7
+DEL ir.actions.report: product.report_product_template_label_dymo
+
+# NOTHING TO DO: obsolete actions are removed by the ORM
+
+NEW ir.actions.server: product.action_product_uom_print_labels
+
+# NOTHING TO DO: new actions
+
+DEL ir.model.access: product.access_product_attribute
+DEL ir.model.access: product.access_product_attribute_custom_value_manager
+DEL ir.model.access: product.access_product_attribute_custom_value_user
+DEL ir.model.access: product.access_product_attribute_manager
+DEL ir.model.access: product.access_product_attribute_value
+DEL ir.model.access: product.access_product_attribute_value_manager
+DEL ir.model.access: product.access_product_category_manager
+DEL ir.model.access: product.access_product_category_user
+DEL ir.model.access: product.access_product_combo_item_manager
+DEL ir.model.access: product.access_product_combo_item_user
+DEL ir.model.access: product.access_product_combo_manager
+DEL ir.model.access: product.access_product_combo_user
+DEL ir.model.access: product.access_product_document_manager
+DEL ir.model.access: product.access_product_document_user
+DEL ir.model.access: product.access_product_label_layout_user
+DEL ir.model.access: product.access_product_pricelist_item_manager
+DEL ir.model.access: product.access_product_pricelist_item_user
+DEL ir.model.access: product.access_product_pricelist_manager
+DEL ir.model.access: product.access_product_pricelist_partner_manager
+DEL ir.model.access: product.access_product_pricelist_user
+DEL ir.model.access: product.access_product_product_attribute
+DEL ir.model.access: product.access_product_product_attribute_manager
+DEL ir.model.access: product.access_product_product_employee
+DEL ir.model.access: product.access_product_product_manager
+DEL ir.model.access: product.access_product_supplierinfo_manager
+DEL ir.model.access: product.access_product_supplierinfo_user
+DEL ir.model.access: product.access_product_tag_manager
+DEL ir.model.access: product.access_product_tag_user
+DEL ir.model.access: product.access_product_template_attribute_exclusion
+DEL ir.model.access: product.access_product_template_attribute_exclusion_manager
+DEL ir.model.access: product.access_product_template_attribute_line
+DEL ir.model.access: product.access_product_template_attribute_line_manager
+DEL ir.model.access: product.access_product_template_manager
+DEL ir.model.access: product.access_product_template_user
+DEL ir.model.access: product.access_product_uom_manager
+DEL ir.model.access: product.access_product_uom_user
+DEL ir.model.access: product.access_uom_uom_product_manager
+DEL ir.model.access: product.access_update_product_attribute_value_manager
+DEL ir.rule: product.product_combo_comp_rule (noupdate)
+DEL ir.rule: product.product_comp_rule (noupdate)
+DEL ir.rule: product.product_document_comp_rule (noupdate)
+DEL ir.rule: product.product_pricelist_comp_rule (noupdate)
+DEL ir.rule: product.product_pricelist_item_comp_rule (noupdate)
+DEL ir.rule: product.product_supplierinfo_comp_rule (noupdate)
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.ui.view: product.barcode_2x7_label
+NEW ir.ui.view: product.barcode_4x12_label
+NEW ir.ui.view: product.barcode_4x7_label
+NEW ir.ui.view: product.barcode_alternative_label
+NEW ir.ui.view: product.barcode_dymo_label
+NEW ir.ui.view: product.barcode_jewelry_label
+NEW ir.ui.view: product.barcode_normal_label
+NEW ir.ui.view: product.barcode_small_label
+NEW ir.ui.view: product.product_attribute_value_form
+NEW ir.ui.view: product.product_pricelist_item_calendar
+NEW ir.ui.view: product.product_pricelist_item_form_multi_create
+NEW ir.ui.view: product.product_uom_view_form
+NEW ir.ui.view: product.product_view_list_qty
+NEW ir.ui.view: product.qr_2x7_label
+NEW ir.ui.view: product.qr_4x12_label
+NEW ir.ui.view: product.qr_4x7_label
+NEW ir.ui.view: product.qr_alternative_label
+NEW ir.ui.view: product.qr_dymo_label
+NEW ir.ui.view: product.qr_jewelry_label
+NEW ir.ui.view: product.qr_normal_label
+NEW ir.ui.view: product.qr_small_label
+NEW ir.ui.view: product.report_label_barcode
+NEW ir.ui.view: product.report_label_contour_marks
+NEW ir.ui.view: product.report_label_value_block
+NEW ir.ui.view: product.report_product_label_dymo
+NEW ir.ui.view: product.report_product_label_pdf
+NEW ir.ui.view: product.report_product_label_zpl
+NEW ir.ui.view: product.report_productlabel_pdf
+NEW ir.ui.view: product.report_productlabel_zpl
+NEW ir.ui.view: product.uom_uom_view_form
+
+# NOTHING TO DO: new views
+
+DEL ir.ui.view: product.product_product_view_tree_tag
+DEL ir.ui.view: product.product_variant_easy_edit_view
+DEL ir.ui.view: product.report_packagingbarcode
+DEL ir.ui.view: product.report_productlabel
+DEL ir.ui.view: product.report_producttemplatelabel2x7
+DEL ir.ui.view: product.report_producttemplatelabel4x12
+DEL ir.ui.view: product.report_producttemplatelabel4x12noprice
+DEL ir.ui.view: product.report_producttemplatelabel4x7
+DEL ir.ui.view: product.report_producttemplatelabel_dymo
+DEL ir.ui.view: product.report_simple_label2x7
+DEL ir.ui.view: product.report_simple_label4x12
+DEL ir.ui.view: product.report_simple_label4x12_no_price
+DEL ir.ui.view: product.report_simple_label4x7
+DEL ir.ui.view: product.report_simple_label_dymo
+DEL ir.ui.view: product.uom_uom_form_view_inherit
+
+# NOTHING TO DO: obsolete views are removed by the ORM
+
+NEW product.attribute: product.pa_brand (noupdate)
+NEW product.attribute: product.pa_color (noupdate)
+NEW product.attribute: product.pa_material (noupdate)
+NEW product.attribute: product.pa_pattern (noupdate)
+NEW product.attribute: product.pa_size (noupdate)
+
+# NOTHING TO DO: new noupdate records, created by the module update
+
+NEW res.groups: product.group_show_uom_price [renamed from website_sale module] (noupdate switched)
+
+# DONE: pre-migration rename_xmlids from website_sale (9 users kept) and noupdate set to False
+
+---noupdate and other changes not listed above---
+
+# DONE: pre-migration also moves the stock_account valuation cron/action XML-IDs to account (see stock_account)

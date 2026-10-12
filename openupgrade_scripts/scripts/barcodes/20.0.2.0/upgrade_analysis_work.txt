@@ -1,0 +1,21 @@
+---Models in module 'barcodes'---
+obsolete model barcodes.barcode_events_mixin [abstract]
+
+# NOTHING TO DO: abstract model
+
+---Fields in module 'barcodes'---
+---XML records in module 'barcodes'---
+NEW ir.access: barcodes.access_barcode_nomenclature_manager
+NEW ir.access: barcodes.access_barcode_nomenclature_user
+NEW ir.access: barcodes.access_barcode_rule_manager
+NEW ir.access: barcodes.access_barcode_rule_user
+DEL ir.model.access: barcodes.access_barcode_nomenclature_manager
+DEL ir.model.access: barcodes.access_barcode_nomenclature_user
+DEL ir.model.access: barcodes.access_barcode_rule_manager
+DEL ir.model.access: barcodes.access_barcode_rule_user
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.ui.view: barcodes.view_partner_barcodes_form
+
+# NOTHING TO DO: new views

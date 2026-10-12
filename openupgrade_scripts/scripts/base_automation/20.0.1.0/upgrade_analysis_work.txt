@@ -1,0 +1,9 @@
+---Models in module 'base_automation'---
+---Fields in module 'base_automation'---
+base_automation / base.automation          / previous_domain (char)        : now a function
+# NOTHING TO DO: non stored field (was non stored with a default, now a non stored compute)
+---XML records in module 'base_automation'---
+NEW ir.access: base_automation.access_base_automation_config
+DEL ir.model.access: base_automation.access_base_automation_config
+# NOTHING TO DO: ir.model.access is replaced by ir.access; the old XML-ID is saved and released in base pre-migration. The ACL is active and unmodified in production
+# Production has 2 automation rules (on_create_or_write, Python code with record['barcode'] and the ir.sequence codes product.barcode/partner.barcode): the fields, the trigger selection and the noupdate cron ir_cron_data_base_automation_check are unchanged in v20 and res.partner.barcode/product.product.barcode still exist. The code does not use ir.config_parameter.get_param (removed in v20; no ir.actions.server in production uses it)

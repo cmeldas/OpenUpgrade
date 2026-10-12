@@ -1,0 +1,10 @@
+---Models in module 'privacy_lookup'---
+---Fields in module 'privacy_lookup'---
+---XML records in module 'privacy_lookup'---
+NEW ir.access: privacy_lookup.access_privacy_log
+NEW ir.access: privacy_lookup.access_privacy_lookup_wizard
+NEW ir.access: privacy_lookup.access_privacy_lookup_wizard_line
+DEL ir.model.access: privacy_lookup.access_privacy_log
+DEL ir.model.access: privacy_lookup.access_privacy_lookup_wizard
+DEL ir.model.access: privacy_lookup.access_privacy_lookup_wizard_line
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv

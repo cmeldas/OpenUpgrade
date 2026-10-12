@@ -1,0 +1,19 @@
+---Models in module 'link_tracker'---
+---Fields in module 'link_tracker'---
+---XML records in module 'link_tracker'---
+NEW ir.access: link_tracker.access_link_tracker_click_system
+NEW ir.access: link_tracker.access_link_tracker_click_user
+NEW ir.access: link_tracker.access_link_tracker_code_system
+NEW ir.access: link_tracker.access_link_tracker_code_user
+NEW ir.access: link_tracker.access_link_tracker_system
+NEW ir.access: link_tracker.access_link_tracker_user
+DEL ir.model.access: link_tracker.access_link_tracker_click_public
+DEL ir.model.access: link_tracker.access_link_tracker_click_system
+DEL ir.model.access: link_tracker.access_link_tracker_click_user
+DEL ir.model.access: link_tracker.access_link_tracker_code_public
+DEL ir.model.access: link_tracker.access_link_tracker_code_system
+DEL ir.model.access: link_tracker.access_link_tracker_code_user
+DEL ir.model.access: link_tracker.access_link_tracker_public
+DEL ir.model.access: link_tracker.access_link_tracker_system
+DEL ir.model.access: link_tracker.access_link_tracker_user
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv

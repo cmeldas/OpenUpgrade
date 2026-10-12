@@ -1,0 +1,7 @@
+---Models in module 'web_hierarchy'---
+---Fields in module 'web_hierarchy'---
+web_hierarchy / ir.ui.view               / type (selection)              : selection_keys added: [card] (most likely nothing to do)
+
+# NOTHING TO DO: selection key added
+
+---XML records in module 'web_hierarchy'---

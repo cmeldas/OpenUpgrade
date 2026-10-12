@@ -1,0 +1,129 @@
+---Models in module 'website_blog'---
+---Fields in module 'website_blog'---
+website_blog / blog.post                / post_date (datetime)          : DEL
+
+# DONE: pre-migration keeps the column as legacy; 20.0 uses published_date, which equals post_date for the 20 published posts in production; the 4 drafts keep an empty published_date (their post_date was only the creation date) so 20.0 stamps the real date when they get published; post-migration converts future dates of published posts (scheduled publication in 19.0) to publish_on
+
+website_blog / blog.post                / published_date (datetime)     : module is now 'website' ('website_blog')
+
+# NOTHING TO DO: same column, now defined by website.published.mixin
+
+website_blog / blog.post                / recommended_next_post_id (many2one): NEW relation: blog.post
+
+# NOTHING TO DO: new fields
+
+website_blog / blog.post                / website_message_ids (one2many): DEL relation: mail.message
+
+# NOTHING TO DO: non stored one2many
+
+website_blog / res.partner              / blog_post_ids (one2many)      : NEW relation: blog.post
+
+# NOTHING TO DO: new fields
+
+website_blog / website.track            / blog_post_id (many2one)       : NEW relation: blog.post
+
+# NOTHING TO DO: new tracking field; no /blog visits are tracked in production (0 website.track rows with a /blog url)
+
+---XML records in module 'website_blog'---
+NEW ir.access: website_blog.blog_blog_employee
+NEW ir.access: website_blog.blog_blog_manager
+NEW ir.access: website_blog.blog_post_employee
+NEW ir.access: website_blog.blog_post_manager
+NEW ir.access: website_blog.blog_tag_category_manager
+NEW ir.access: website_blog.blog_tag_category_public
+NEW ir.access: website_blog.blog_tag_manager
+NEW ir.access: website_blog.blog_tag_public
+NEW ir.access: website_blog.website_blog_post_public
+NEW ir.access: website_blog.website_blog_public
+
+# NOTHING TO DO: ir.model.access/ir.rule are replaced by ir.access, handled in base
+
+NEW ir.actions.act_window: website_blog.website_blog_visitor_blog_post_action
+
+# NOTHING TO DO: new records
+
+DEL ir.model.access: website_blog.blog_blog
+DEL ir.model.access: website_blog.blog_blog_employee
+DEL ir.model.access: website_blog.blog_blog_portal
+DEL ir.model.access: website_blog.blog_blog_public
+DEL ir.model.access: website_blog.blog_post
+DEL ir.model.access: website_blog.blog_post_employee
+DEL ir.model.access: website_blog.blog_post_portal
+DEL ir.model.access: website_blog.blog_post_public
+DEL ir.model.access: website_blog.blog_tag_category
+DEL ir.model.access: website_blog.blog_tag_category_employee
+DEL ir.model.access: website_blog.blog_tag_category_portal
+DEL ir.model.access: website_blog.blog_tag_category_public
+DEL ir.model.access: website_blog.blog_tag_edition
+DEL ir.model.access: website_blog.blog_tag_employee
+DEL ir.model.access: website_blog.blog_tag_portal
+DEL ir.model.access: website_blog.blog_tag_public
+DEL ir.rule: website_blog.website_blog_post_public (noupdate)
+DEL ir.rule: website_blog.website_blog_public (noupdate)
+
+# NOTHING TO DO: ir.model.access/ir.rule are replaced by ir.access, handled in base
+
+NEW ir.ui.view: website_blog.blog_post_card
+NEW ir.ui.view: website_blog.blog_post_comment_count
+NEW ir.ui.view: website_blog.blog_post_content_footer_archive
+NEW ir.ui.view: website_blog.blog_post_content_footer_share_links
+NEW ir.ui.view: website_blog.blog_post_content_mobile_toc
+NEW ir.ui.view: website_blog.blog_post_list_card
+NEW ir.ui.view: website_blog.blog_post_minimal_list_card
+NEW ir.ui.view: website_blog.blog_post_next_compact
+NEW ir.ui.view: website_blog.blog_post_next_full_cover
+NEW ir.ui.view: website_blog.blog_post_regular_cover_share_links
+NEW ir.ui.view: website_blog.blog_post_split_cover_share_links
+NEW ir.ui.view: website_blog.blog_post_split_sticky_card
+NEW ir.ui.view: website_blog.opt_blog_bordered_grid_view
+NEW ir.ui.view: website_blog.opt_blog_compact_list_view
+NEW ir.ui.view: website_blog.opt_blog_fullwidth
+NEW ir.ui.view: website_blog.opt_blog_grid_columns_2
+NEW ir.ui.view: website_blog.opt_blog_grid_columns_3
+NEW ir.ui.view: website_blog.opt_blog_grid_columns_4
+NEW ir.ui.view: website_blog.opt_blog_large_list_view
+NEW ir.ui.view: website_blog.opt_blog_page_title
+NEW ir.ui.view: website_blog.opt_blog_post_footer_share_links_display
+NEW ir.ui.view: website_blog.opt_blog_post_footer_tags_display
+NEW ir.ui.view: website_blog.opt_blog_post_full_container
+NEW ir.ui.view: website_blog.opt_blog_post_full_width_cover
+NEW ir.ui.view: website_blog.opt_blog_post_header_author_avatar_display
+NEW ir.ui.view: website_blog.opt_blog_post_header_share_links_display
+NEW ir.ui.view: website_blog.opt_blog_post_header_tags_display
+NEW ir.ui.view: website_blog.opt_blog_post_large_container
+NEW ir.ui.view: website_blog.opt_blog_post_split_cover
+NEW ir.ui.view: website_blog.opt_blog_post_toc_display
+NEW ir.ui.view: website_blog.opt_blog_promoted_post
+NEW ir.ui.view: website_blog.opt_blog_simple_list_view
+NEW ir.ui.view: website_blog.opt_blog_split_grid_view
+NEW ir.ui.view: website_blog.opt_posts_loop_show_date
+NEW ir.ui.view: website_blog.opt_posts_loop_show_filter
+NEW ir.ui.view: website_blog.opt_posts_loop_show_tags
+NEW ir.ui.view: website_blog.opt_sidebar_blog_index_about_us
+NEW ir.ui.view: website_blog.post_published_info
+NEW ir.ui.view: website_blog.post_tags
+NEW ir.ui.view: website_blog.post_unpublished_badge
+NEW ir.ui.view: website_blog.robots
+NEW ir.ui.view: website_blog.s_blog_posts_carousel
+NEW ir.ui.view: website_blog.s_blog_posts_carousel_preview_card
+NEW ir.ui.view: website_blog.s_dynamic_snippet_blog_posts_carousel_preview_data
+NEW ir.ui.view: website_blog.website_blog_visitor_page_view_search
+NEW ir.ui.view: website_blog.website_blog_visitor_page_view_tree
+NEW ir.ui.view: website_blog.website_blog_visitor_track_view_tree
+NEW ir.ui.view: website_blog.website_blog_visitor_view_form
+NEW ir.ui.view: website_blog.website_blog_visitor_view_tree
+
+# NOTHING TO DO: new records
+
+NEW res.groups: website_blog.group_website_blog_manager (noupdate)
+
+# DONE: post-migration adds the internal website designers to the new group (19.0 gave them CRUD on blogs, posts and tags; 20.0 restricts it to this group, the XML only adds root and admin)
+
+NEW res.groups.privilege: website_blog.res_groups_privilege_blog (noupdate)
+
+# NOTHING TO DO: new record
+
+# Not in the analysis:
+# DONE: post-migration sets technical_usage = 'mail_post_source' on the noupdate mail body
+#   website_blog.blog_post_template_new_post (new attribute in 20.0); its arch is kept (Czech translation)
+# NOTHING TO DO: noupdate change of blog_blog_1.cover_properties not loaded (user configuration)

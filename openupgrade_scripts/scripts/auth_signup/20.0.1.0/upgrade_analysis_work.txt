@@ -1,0 +1,8 @@
+---Models in module 'auth_signup'---
+---Fields in module 'auth_signup'---
+auth_signup  / res.users                / state (selection)             : selection_keys added: [inactive] (most likely nothing to do)
+# NOTHING TO DO: non stored computed field
+---XML records in module 'auth_signup'---
+# DONE: post-migration: the noupdate mail templates mail_template_data_unregistered_users, mail_template_user_signup_account_created, portal_set_password_email and set_password_email are updated from noupdate_changes.xml (generated from the v20 data: generic layout mail.mail_notification_layout with forced header/footer and a new body) and their body_html translations are deleted, so that the v20 .po files fill them again (cs_CZ is translated in v20 for all but set_password_email, which falls back to en_US).
+# Not only cosmetics: the v19 body of set_password_email (en_US and cs_CZ) calls ir.config_parameter.get_param(), removed in v20 (only get_str/get_int/get_bool/get_float remain), so inviting a new internal user would fail to render.
+# Subjects are not touched (unchanged in v20, one is customized in production). ir_config_parameter_data.xml only switched set_param to set_str/set_bool (noupdate, same stored values 'b2c' and 'True', which get_bool parses).

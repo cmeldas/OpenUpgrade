@@ -1,0 +1,18 @@
+---Models in module 'l10n_eu_account_vies'---
+---Fields in module 'l10n_eu_account_vies'---
+l10n_eu_account_vies / res.country              / has_foreign_fiscal_position (boolean): previously in module base_vat
+l10n_eu_account_vies / res.partner              / perform_vies_validation (boolean): previously in module base_vat
+l10n_eu_account_vies / res.partner              / vies_valid (boolean)          : previously in module base_vat
+# NOTHING TO DO: has_foreign_fiscal_position and perform_vies_validation are not
+# stored. vies_valid is a stored compute (readonly=False) in v19 base_vat and in v20:
+# the column exists, so installing this module keeps the values (production: 30
+# partners False, the others NULL) instead of recomputing them, which would query the
+# VIES IAP service for every partner with a VAT number
+---XML records in module 'l10n_eu_account_vies'---
+NEW ir.actions.server: l10n_eu_account_vies.vies_iap_check_update_ir_actions_server [renamed from base_vat module]
+NEW ir.cron: l10n_eu_account_vies.vies_iap_check_update [renamed from base_vat module]
+# NOTHING TO DO here: base pre-migration renames base_vat.vies_iap_check_update and its
+# server action to l10n_eu_account_vies before merging base_vat; the module is installed
+# through apriori.split_modules (base group)
+NEW ir.ui.view: l10n_eu_account_vies.view_partner_l10n_eu_account_vies_form
+# NOTHING TO DO: new view. res.company.vat_check_vies stays in account (NULL in production)

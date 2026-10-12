@@ -1,0 +1,18 @@
+---Models in module 'auth_passkey'---
+---Fields in module 'auth_passkey'---
+---XML records in module 'auth_passkey'---
+NEW ir.access: auth_passkey.rule_auth_passkey_key_admin
+NEW ir.access: auth_passkey.rule_auth_passkey_key_create_portal
+NEW ir.access: auth_passkey.rule_auth_passkey_key_create_portal_1
+NEW ir.access: auth_passkey.rule_auth_passkey_key_user
+NEW ir.access: auth_passkey.rule_auth_passkey_key_user_1
+NEW ir.access: auth_passkey.rule_auth_passkey_key_user_2
+DEL ir.model.access: auth_passkey.access_auth_passkey_key
+DEL ir.model.access: auth_passkey.access_auth_passkey_key_admin
+DEL ir.model.access: auth_passkey.access_auth_passkey_key_create
+DEL ir.model.access: auth_passkey.access_auth_passkey_key_create_portal
+DEL ir.model.access: auth_passkey.access_auth_passkey_key_portal
+DEL ir.rule: auth_passkey.rule_auth_passkey_key_admin (noupdate)
+DEL ir.rule: auth_passkey.rule_auth_passkey_key_create_portal (noupdate)
+DEL ir.rule: auth_passkey.rule_auth_passkey_key_user (noupdate)
+# NOTHING TO DO: ir.model.access/ir.rule are replaced by ir.access; the old XML-IDs are saved and released in base pre-migration, deactivations are carried over in base end-migration. All ACLs and rules of this module are active and unmodified in production (0 passkeys). The rules were noupdate in 19.0 (set by the 19.0 pre-migration), but v20 declares them in security/ir.access.csv, loaded as updatable data: the noupdate flag is deliberately not carried over to the new ir.access XML-IDs

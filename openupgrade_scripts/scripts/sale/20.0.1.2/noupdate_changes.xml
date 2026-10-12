@@ -1,0 +1,15 @@
+<?xml version='1.0' encoding='utf-8'?>
+<odoo>
+  <record id="email_template_edi_sale" model="mail.template">
+    <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
+  </record>
+  <record id="email_template_proforma" model="mail.template">
+    <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
+  </record>
+  <record id="mail_template_sale_confirmation" model="mail.template">
+    <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
+  </record>
+  <record id="mail_template_sale_payment_executed" model="mail.template">
+    <field name="email_layout_xmlid">mail.mail_notification_layout_with_responsible_signature</field>
+  </record>
+</odoo>

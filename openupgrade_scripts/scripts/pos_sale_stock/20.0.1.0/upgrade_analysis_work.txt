@@ -1,0 +1,6 @@
+---Models in module 'pos_sale_stock'---
+---Fields in module 'pos_sale_stock'---
+---XML records in module 'pos_sale_stock'---
+NEW ir.ui.view: pos_sale_stock.message_body
+# NOTHING TO DO: handled by the module update
+# NOTE: new module in v20 (auto_install of pos_sale + pos_stock), not in the v19 database: must be installed by the migration (no scripts needed)

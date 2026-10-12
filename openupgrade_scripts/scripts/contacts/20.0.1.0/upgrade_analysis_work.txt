@@ -1,0 +1,8 @@
+---Models in module 'contacts'---
+---Fields in module 'contacts'---
+---XML records in module 'contacts'---
+NEW ir.ui.menu: contacts.menu_res_city
+DEL ir.ui.menu: contacts.menu_action_res_bank_form
+DEL ir.ui.menu: contacts.menu_config_bank_accounts
+NEW ir.ui.view: contacts.res_partner_view_hierarchy
+# NOTHING TO DO: updatable menus and views; the bank menus go away with res.bank (handled in base). contacts now depends on base_address_extended (installed as a new dependency) and web_hierarchy (already installed)

@@ -1,0 +1,9 @@
+---Models in module 'account_payment_custom'---
+---Fields in module 'account_payment_custom'---
+---XML records in module 'account_payment_custom'---
+NEW account.payment.method: account_payment_custom.account_payment_method_wire_transfer (noupdate)
+NEW ir.actions.server: account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs_ir_actions_server
+NEW ir.cron: account_payment_custom.cron_auto_confirm_paid_wire_transfer_txs
+# NOTHING TO DO: new auto_install module (bridge payment_custom / account_payment),
+# installed by the framework. No v19 account.payment.method has the code
+# 'wire_transfer' (only manual in/out), so no clash on unique (code, payment_type)

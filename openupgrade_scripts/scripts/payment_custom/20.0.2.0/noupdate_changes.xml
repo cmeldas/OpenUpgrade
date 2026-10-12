@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+  <!-- New provider: created by payment (code 'none'), its noupdate setup in
+       payment_custom is skipped by the update because the record exists -->
+  <record id="payment.payment_provider_pay_on_invoice" model="payment.provider">
+    <field name="code">custom</field>
+    <field name="custom_mode">pay_on_invoice</field>
+    <field name="is_live">True</field>
+    <field name="sequence">50</field>
+    <field name="redirect_form_view_id" ref="payment.generic_redirect_form"/>
+    <field name="done_msg" type="html">
+      <p>Your order is confirmed, you will receive your invoice shortly.</p>
+    </field>
+  </record>
+  <!-- default payment method of the provider, active like on a new database -->
+  <record id="payment_method_pay_on_invoice" model="payment.method">
+    <field name="active">True</field>
+  </record>
+  <!-- is_live comes from the former state (pre-migration of payment);
+       payment_custom.redirect_form is removed -->
+  <record id="payment.payment_provider_transfer" model="payment.provider">
+    <field name="redirect_form_view_id" ref="payment.generic_redirect_form"/>
+  </record>
+</odoo>

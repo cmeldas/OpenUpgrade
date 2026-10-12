@@ -1,0 +1,29 @@
+---Models in module 'rating'---
+---Fields in module 'rating'---
+rating       / hr.work.entry.type       / rating_ids (one2many)         : NEW relation: rating.rating
+rating       / ir.access                / rating_ids (one2many)         : NEW relation: rating.rating
+rating       / mrp.workorder            / rating_ids (one2many)         : NEW relation: rating.rating
+# NOTHING TO DO: one2many on models gaining mail.thread
+
+rating       / rating.rating            / parent_res_id (integer)       : type is now 'many2one_reference' ('integer')
+# NOTHING TO DO: still an integer column, now a many2one_reference on parent_res_model (1 row: project.project 6, consistent)
+
+rating       / res.users                / rating_ids (one2many)         : is now stored
+rating       / res.users                / rating_ids (one2many)         : not related anymore
+rating       / res.users                / rating_ids (one2many)         : previously in module base
+# NOTHING TO DO: res.users fields inherited from res.partner/mail.thread, not stored (res.users _inherits res.partner); 'is now stored' one2many have no column
+
+rating       / stock.picking.batch      / rating_ids (one2many)         : NEW relation: rating.rating
+# NOTHING TO DO: one2many on models gaining mail.thread
+
+rating       / stock.scrap              / rating_ids (one2many)         : DEL relation: rating.rating
+# NOTHING TO DO: model removed, one2many
+
+---XML records in module 'rating'---
+NEW ir.access: rating.access_rating_user
+NEW ir.access: rating.rating_rating_access_system
+DEL ir.model.access: rating.access_rating_portal
+DEL ir.model.access: rating.access_rating_public
+DEL ir.model.access: rating.access_rating_user
+DEL ir.model.access: rating.rating_rating_access_system
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv

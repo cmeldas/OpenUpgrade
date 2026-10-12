@@ -1,0 +1,22 @@
+---Models in module 'phone_validation'---
+---Fields in module 'phone_validation'---
+phone_validation / hr.employee              / phone_mobile_search (char)    : NEW mode: modify, stored: False
+# NOTHING TO DO: non stored
+
+phone_validation / hr.employee              / phone_sanitized (char)        : NEW isfunction: function, stored
+# NOTHING TO DO: new stored compute, computed at column creation
+
+---XML records in module 'phone_validation'---
+NEW ir.access: phone_validation.access_phone_blacklist_remove_system
+NEW ir.access: phone_validation.access_phone_blacklist_system
+DEL ir.model.access: phone_validation.access_phone_blacklist_all
+DEL ir.model.access: phone_validation.access_phone_blacklist_remove_system
+DEL ir.model.access: phone_validation.access_phone_blacklist_system
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.ui.view: phone_validation.mail_activity_schedule_view_form
+NEW ir.ui.view: phone_validation.res_partner_view_form
+NEW ir.ui.view: phone_validation.res_partner_view_kanban
+NEW ir.ui.view: phone_validation.res_partner_view_list
+NEW ir.ui.view: phone_validation.res_partner_view_simple_form
+# NOTHING TO DO: handled by the module update (new records loaded, obsolete ones removed by _process_end)

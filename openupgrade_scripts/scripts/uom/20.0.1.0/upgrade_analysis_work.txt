@@ -1,0 +1,34 @@
+---Models in module 'uom'---
+---Fields in module 'uom'---
+---XML records in module 'uom'---
+NEW ir.access: uom.access_uom_uom_manager
+NEW ir.access: uom.access_uom_uom_user
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.actions.act_window: uom.uom_uom_action_list
+
+# NOTHING TO DO: new actions
+
+DEL ir.actions.act_window: uom.product_uom_form_action
+
+# NOTHING TO DO: obsolete actions are removed by the ORM
+
+DEL ir.model.access: uom.access_uom_uom_manager
+DEL ir.model.access: uom.access_uom_uom_user
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.ui.view: uom.uom_uom_view_form
+NEW ir.ui.view: uom.uom_uom_view_list
+
+# NOTHING TO DO: new views
+
+DEL ir.ui.view: uom.product_uom_form_view
+DEL ir.ui.view: uom.product_uom_tree_view
+
+# NOTHING TO DO: obsolete views are removed by the ORM
+
+---noupdate and other changes not listed above---
+
+# DONE: post-migration loads noupdate_changes.xml (uom.product_uom_ton name 'Ton' -> 't') and repairs ft² (uom.product_uom_square_foot without relative_uom_id since the 19.0 migration)

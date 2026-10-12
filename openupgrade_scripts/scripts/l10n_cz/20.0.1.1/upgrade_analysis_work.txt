@@ -1,0 +1,55 @@
+---Models in module 'l10n_cz'---
+---Fields in module 'l10n_cz'---
+l10n_cz      / res.company              / l10n_cz_economic_activity_code (selection): NEW selection_keys: ['10000', '11000', '11100', '11200', '11300', '11400', '11500', '11600', '11900', '12000', '12100', '12200', '12300', '12400', '12500', '12600', '12700', '12800', '12900', '13000', '14000', '14100', '14200', '14300', '14400', '14500', '14600', '14700', '14900', '14910', '14920', '14930', '14990', '15000', '16000', '16100', '16200', '16300', '16400', '17000', '20000', '21000', '22000', '23000', '24000', '30000', '31000', '31100', '31200', '32000']
+l10n_cz      / res.company              / l10n_cz_person_authorized (many2one): NEW relation: res.partner
+l10n_cz      / res.company              / l10n_cz_relationship_person_authorized (char): NEW isfunction: function, stored
+# NOTHING TO DO: new fields (to be filled by the user for the VAT return)
+---XML records in module 'l10n_cz'---
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_10_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_12_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_13_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_14_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_16_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_17_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_19_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_20_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_39_raw_in_full_amount
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_3_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_40_raw_in_full_amount
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_41_raw_in_full_amount
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_47_raw_in_full_amount
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_4_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_6_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_7_raw_output_tax
+NEW account.report.expression: l10n_cz.l10n_cz_vat_declaration_line_9_raw_output_tax
+# NOTHING TO DO: data/tax_report.xml is not noupdate. The tax_tags expressions move to
+# the new *_raw_* expressions (created before the former expression of the same line is
+# rewritten; create() reuses the existing tags found by name in _create_tax_tags); the
+# former ones become aggregations with rounding (account.report.expression.write with a
+# new engine leaves the tags alone). The 50 tax_tags formulas are identical in 19 and
+# 20, so no tag is renamed or created; tags on move lines and repartition lines are
+# untouched (see verification checks).
+NEW ir.access: l10n_cz.access_l10n_cz_tax_office_account_manager
+NEW ir.access: l10n_cz.access_l10n_cz_tax_office_account_user
+DEL ir.model.access: l10n_cz.access_l10n_cz_tax_office_account_manager
+DEL ir.model.access: l10n_cz.access_l10n_cz_tax_office_account_user
+# NOTHING TO DO here: ir.model.access -> ir.access handled by base
+NEW ir.ui.view: l10n_cz.cz_partner_address_form
+DEL ir.ui.view: l10n_cz.l10n_cz_external_layout_bold
+DEL ir.ui.view: l10n_cz.l10n_cz_external_layout_boxed
+DEL ir.ui.view: l10n_cz.l10n_cz_external_layout_bubble
+DEL ir.ui.view: l10n_cz.l10n_cz_external_layout_striped
+DEL ir.ui.view: l10n_cz.l10n_cz_external_layout_wave
+DEL ir.ui.view: l10n_cz.res_partner_view_form_inherit_l10n_cz
+# NOTHING TO DO: views of the module. data/res_country_data.xml (not noupdate) sets
+# enforce_cities and address_view_id on base.cz
+# Other changes checked in the sources:
+# - template cz: account.group-cz.csv removed and cz is not in COA_TO_MIGRATE of
+#   odoo/upgrade_code/19.3-00-account-groups.py (no parent accounts in v20): the
+#   account post-migration drops the template groups (kept in
+#   openupgrade_legacy_20_0_account_group, XML-IDs deleted), tax group accounts
+#   removed, receivable/payable accounts moved to the company (ir.default, already
+#   present in production), new depreciation models (Enterprise): chart templates are
+#   not reloaded on update, NOTHING TO DO
+# - models/res_bank.py: new QR method 'czk_qr' (new selection key, no data)
+# - core script l10n_cz/migrations/1.1 does not run (1.1 -> 1.1)

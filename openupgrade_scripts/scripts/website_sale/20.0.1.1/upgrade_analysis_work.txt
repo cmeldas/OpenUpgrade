@@ -1,0 +1,590 @@
+---Models in module 'website_sale'---
+obsolete model website.base.unit
+
+# DONE in product pre-migration (requested from the product group): rename model/table website.base.unit -> product.base.unit (1 record 'kg', referenced by 3 templates and 8 variants), move model XML-ID and website_sale.base_unit_action to product; website_sale pre-migration only warns if records were left in website_base_unit
+
+new model product.stock.notification
+new model website.checkout.alert.mixin [abstract]
+new model withdrawal.request
+
+# NOTHING TO DO: new models (back in stock subscriptions of website_sale_stock are migrated to product.stock.notification in website_sale_stock post-migration)
+
+---Fields in module 'website_sale'---
+website_sale / account.move             / website_id (many2one)         : not a function anymore
+
+# NOTHING TO DO: same column, now a plain stored field
+
+website_sale / delivery.carrier         / delivery_calendar_id (many2one): NEW relation: resource.calendar
+website_sale / delivery.carrier         / delivery_estimate_lead_days (integer): NEW
+website_sale / delivery.carrier         / delivery_estimate_range_days (integer): NEW
+website_sale / delivery.carrier         / enable_delivery_estimate (boolean): NEW
+
+# NOTHING TO DO: new delivery estimate fields
+
+website_sale / product.attribute        / external_identifier (char)    : NEW
+
+# NOTHING TO DO: new field (set by noupdate data only on the product.pa_* demo attributes, not in production)
+
+website_sale / product.document         / attached_on_sale (selection)  : selection_keys added: [shown_on_product_page], removed: [inside]
+website_sale / product.document         / shown_on_product_page (boolean): DEL
+
+# DONE: pre-migration keeps shown_on_product_page as legacy column, post-migration maps it to attached_on_sale = 'shown_on_product_page' for hidden documents ('inside' is not a website_sale value; production: 1 hidden document)
+
+website_sale / product.image            / attribute_value_ids (many2many): NEW relation: product.template.attribute.value
+website_sale / product.image            / has_attribute_value (boolean) : NEW isfunction: function, stored
+
+# NOTHING TO DO: new fields (has_attribute_value computed by the ORM)
+
+website_sale / product.image            / product_variant_id (many2one) : DEL relation: product.product
+
+# NOTHING TO DO: 0 variant images in production (15 template images unchanged); 20.0 links images to attribute values instead
+
+website_sale / product.image            / type (selection)              : NEW selection_keys: ['primary', 'secondary']
+
+# NOTHING TO DO: new fields (has_attribute_value computed by the ORM)
+
+website_sale / product.pricelist        / tax_display (selection)       : NEW selection_keys: ['tax_excluded', 'tax_included']
+
+# NOTHING TO DO: new field
+
+website_sale / product.product          / base_unit_count (float)       : module is now 'product' ('website_sale')
+website_sale / product.product          / base_unit_id (many2one)       : module is now 'product' ('website_sale')
+website_sale / product.product          / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')
+website_sale / product.product          / base_unit_name (char)         : module is now 'product' ('website_sale')
+website_sale / product.product          / base_unit_price (float)       : module is now 'product' ('website_sale')
+
+# DONE in product pre-migration (product group): fields moved to product with the model rename website.base.unit -> product.base.unit, columns unchanged
+
+website_sale / product.product          / product_template_image_ids (one2many): previously in module product
+website_sale / product.product          / product_variant_image_ids (one2many): DEL relation: product.image
+website_sale / product.product          / variant_image_ids (many2many) : NEW relation: product.image, isfunction: function, stored
+
+# NOTHING TO DO: variant images replaced by images linked to attribute values (stored compute, empty: no variant images in production)
+
+website_sale / product.public.category  / align_category_content (boolean): DEL
+
+# DONE: pre-migration renames the columns to legacy, post-migration sets the website options from them (production: description shown on all 4 categories, as the 20.0 default)
+
+website_sale / product.public.category  / not_in_shop (boolean)         : NEW isfunction: function, stored
+
+# NOTHING TO DO: new stored compute
+
+website_sale / product.public.category  / show_category_description (boolean): DEL
+website_sale / product.public.category  / show_category_title (boolean) : DEL
+
+# DONE: pre-migration renames the columns to legacy, post-migration sets the website options from them (production: description shown on all 4 categories, as the 20.0 default)
+
+website_sale / product.stock.notification / partner_id (many2one)         : NEW relation: res.partner, required
+website_sale / product.stock.notification / product_id (many2one)         : NEW relation: product.product, required
+website_sale / product.stock.notification / website_id (many2one)         : NEW relation: website, required
+
+# NOTHING TO DO: new model, see website_sale_stock
+
+website_sale / product.template         / allow_out_of_stock_order (boolean): previously in module website_sale_stock
+website_sale / product.template         / available_threshold (float)   : previously in module website_sale_stock
+
+# NOTHING TO DO: moved from website_sale_stock, same columns; Odoo keeps the field and drops only the old XML-ID
+
+website_sale / product.template         / base_unit_count (float)       : module is now 'product' ('website_sale')
+website_sale / product.template         / base_unit_id (many2one)       : module is now 'product' ('website_sale')
+website_sale / product.template         / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')
+website_sale / product.template         / base_unit_name (char)         : module is now 'product' ('website_sale')
+website_sale / product.template         / base_unit_price (float)       : module is now 'product' ('website_sale')
+
+# DONE in product pre-migration (product group): see website.base.unit
+
+website_sale / product.template         / dropzone_above_price (html)   : NEW translate
+website_sale / product.template         / dropzone_above_specification (html): NEW translate
+
+# NOTHING TO DO: new fields (defaults/stored computes filled by the ORM)
+
+website_sale / product.template         / is_published (boolean)        : now a function
+
+# NOTHING TO DO: stored computed field with readonly=False, only assigned when website_sale.group_unpublish_out_of_stock is enabled (not by migration); values kept
+
+website_sale / product.template         / minimum_quantity (integer)    : NEW
+
+# NOTHING TO DO: new fields (defaults/stored computes filled by the ORM)
+
+website_sale / product.template         / out_of_stock_message (html)   : previously in module website_sale_stock
+website_sale / product.template         / show_availability (boolean)   : previously in module website_sale_stock
+
+# NOTHING TO DO: moved from website_sale_stock, same columns; Odoo keeps the field and drops only the old XML-ID
+
+website_sale / product.template         / suggest_accessory_products (boolean): NEW isfunction: function, stored
+website_sale / product.template         / suggest_alternative_products (boolean): NEW isfunction: function, stored
+website_sale / product.template         / suggest_optional_products (boolean): NEW isfunction: function, stored
+website_sale / product.template         / suggested_products_last_update (datetime): NEW
+
+# NOTHING TO DO: new fields (defaults/stored computes filled by the ORM)
+
+website_sale / res.company              / free_order_label (char)       : NEW hasdefault: default, translate
+
+# NOTHING TO DO: new field with default
+
+website_sale / sale.order               / alerts (json)                 : NEW
+website_sale / sale.order               / assigned_website_id (many2one): NEW relation: website, isfunction: function, stored
+website_sale / sale.order               / is_rating_email_sent (boolean): NEW
+
+# NOTHING TO DO: new fields (assigned_website_id computed by the ORM)
+
+website_sale / sale.order               / shop_warning (char)           : DEL
+
+# NOTHING TO DO: transient cart warnings, 0 rows with a value
+
+website_sale / sale.order.line          / alerts (json)                 : NEW
+
+# NOTHING TO DO: new fields (assigned_website_id computed by the ORM)
+
+website_sale / sale.order.line          / shop_warning (char)           : DEL
+
+# NOTHING TO DO: transient cart warnings, 0 rows with a value
+
+website_sale / website                  / add_to_cart_action (selection): DEL selection_keys: ['go_to_cart', 'stay']
+
+# NOTHING TO DO: removed option (production 'stay', the 20.0 behaviour); pre-migration keeps it as legacy column
+
+website_sale / website                  / align_category_content (boolean): NEW hasdefault: default
+
+# DONE: post-migration, from the legacy category columns
+
+website_sale / website                  / contact_us_button_url (char)  : DEL
+website_sale / website                  / contact_us_link_url (char)    : NEW hasdefault: default, translate
+
+# DONE: pre-migration renames contact_us_button_url -> contact_us_link_url (both translatable jsonb)
+
+website_sale / website                  / enabled_gmc_src (boolean)     : DEL
+
+# NOTHING TO DO: removed option (False in production), kept as legacy column
+
+website_sale / website                  / extra_step_category_ids (many2many): NEW relation: product.public.category
+website_sale / website                  / journal_id (many2one)         : NEW relation: account.journal
+
+# NOTHING TO DO: new options, defaults
+
+website_sale / website                  / prevent_sale (boolean)        : NEW
+website_sale / website                  / prevent_sale_for (selection)  : NEW selection_keys: ['specific_categories', 'zero_price'], hasdefault: default
+website_sale / website                  / prevent_sale_for_categories (many2many): NEW relation: product.public.category
+website_sale / website                  / prevent_zero_price_sale (boolean): DEL
+
+# DONE: pre-migration renames prevent_zero_price_sale -> prevent_sale (production True, still used by the website setting; website_sale_showcase_only does not depend on it in 20.0), post-migration sets prevent_sale_for = 'zero_price'
+
+website_sale / website                  / rating_email_delay (integer)  : NEW hasdefault: default
+website_sale / website                  / rating_email_template_id (many2one): NEW relation: mail.template, hasdefault: default
+website_sale / website                  / restricted_uom_ids (many2many): NEW relation: uom.uom
+
+# NOTHING TO DO: new options, defaults
+
+website_sale / website                  / send_abandoned_cart_email (boolean): DEL
+website_sale / website                  / send_abandoned_cart_followup (boolean): NEW
+
+# DONE: pre-migration renames send_abandoned_cart_email -> send_abandoned_cart_followup (same meaning, used by the 20.0 cron)
+
+website_sale / website                  / send_order_rating_emails (boolean): NEW hasdefault: default
+
+# NOTHING TO DO: new options, defaults
+
+website_sale / website                  / shop_default_sort (selection) : selection_keys is now '['list_price asc', 'list_price desc', 'name asc', 'publish_date desc', 'website_sequence asc']' ('function')
+
+# NOTHING TO DO: production value 'website_sequence asc' is valid
+
+website_sale / website                  / show_category_description (boolean): NEW hasdefault: default
+website_sale / website                  / show_category_title (boolean) : NEW hasdefault: default
+
+# DONE: post-migration, from the legacy category columns
+
+website_sale / website                  / show_line_subtotals_tax_selection (selection): now required
+
+# NOTHING TO DO: set in production ('tax_included')
+
+website_sale / website                  / show_product_reference_price (boolean): NEW
+
+# NOTHING TO DO: new options, defaults
+
+website_sale / website.base.unit        / name (char)                   : DEL required
+
+# DONE in product pre-migration (product group)
+
+website_sale / website.checkout.step    / show_in_breadcrumb (boolean)  : NEW hasdefault: default
+
+# NOTHING TO DO: new field with default
+
+website_sale / withdrawal.request       / email (char)                  : NEW required
+website_sale / withdrawal.request       / log_message (text)            : NEW
+website_sale / withdrawal.request       / order_id (many2one)           : NEW relation: sale.order, required
+website_sale / withdrawal.request       / order_reference (char)        : NEW isrelated: related, stored
+website_sale / withdrawal.request       / recipient_emails (char)       : NEW
+
+# NOTHING TO DO: new model
+
+---XML records in module 'website_sale'---
+NEW ir.access: website_sale.access_account_tax_user
+NEW ir.access: website_sale.access_ecom_extra_fields_public_public
+NEW ir.access: website_sale.access_ecom_extra_fields_restricted_editor
+NEW ir.access: website_sale.access_fiscal_position_public
+NEW ir.access: website_sale.access_payment_term
+NEW ir.access: website_sale.access_product_attribute_category_public_public
+NEW ir.access: website_sale.access_product_attribute_category_public_saleman
+NEW ir.access: website_sale.access_product_attribute_public_public
+NEW ir.access: website_sale.access_product_attribute_value_public_public
+NEW ir.access: website_sale.access_product_base_unit_public_public
+NEW ir.access: website_sale.access_product_base_unit_sale_manager
+NEW ir.access: website_sale.access_product_category_pos_manager
+NEW ir.access: website_sale.access_product_category_public_public
+NEW ir.access: website_sale.access_product_feed_website_group_website_designer
+NEW ir.access: website_sale.access_product_image_public_public
+NEW ir.access: website_sale.access_product_image_restricted_editor
+NEW ir.access: website_sale.access_product_pricelist_item_public_public
+NEW ir.access: website_sale.access_product_pricelist_public_public
+NEW ir.access: website_sale.access_product_product_attribute_custom_value_public
+NEW ir.access: website_sale.access_product_product_attribute_public
+NEW ir.access: website_sale.access_product_product_public_public
+NEW ir.access: website_sale.access_product_public_category_designer
+NEW ir.access: website_sale.access_product_public_category_public_employee
+NEW ir.access: website_sale.access_product_ribbon_public_public
+NEW ir.access: website_sale.access_product_ribbon_sale_manager
+NEW ir.access: website_sale.access_product_tag_public_public
+NEW ir.access: website_sale.access_product_template_attribute_line_public_public
+NEW ir.access: website_sale.access_uom_public
+NEW ir.access: website_sale.access_website_checkout_step_website_designer
+NEW ir.access: website_sale.access_withdrawal_request_system
+NEW ir.access: website_sale.all_product_wishlist_rule
+NEW ir.access: website_sale.empty_public_categories_rule
+NEW ir.access: website_sale.product_feed_comp_rule
+NEW ir.access: website_sale.product_pricelist_comp_rule
+NEW ir.access: website_sale.product_pricelist_item_comp_rule
+NEW ir.access: website_sale.product_template_public
+NEW ir.access: website_sale.product_wishlist_rule
+NEW ir.access: website_sale.product_wishlist_rule_1
+
+# NOTHING TO DO: ir.model.access/ir.rule are replaced by ir.access, handled in base (cross-module noupdate deactivations such as product_pricelist_comp_rule replayed in base end-migration)
+
+NEW ir.actions.act_url: website_sale.action_open_shop_page
+
+# NOTHING TO DO: new records
+
+NEW ir.actions.act_window: website_sale.product_attribute_category_action [renamed from website_sale_comparison module]
+
+# DONE by the module merge website_sale_comparison/website_sale_wishlist -> website_sale (apriori merged_modules, base pre-migration update_module_names(merge_modules=True)): XML-IDs moved to website_sale
+
+DEL ir.actions.act_window: website_sale.action_product_pages_list
+DEL ir.actions.act_window: website_sale.action_view_unpaid_quotation_tree
+
+# NOTHING TO DO: removed by Odoo at the end of the update (with their website-specific copies)
+
+DEL ir.actions.act_window: website_sale.base_unit_action [renamed to product module]
+
+# DONE in product pre-migration (product group): XML-ID renamed to product.base_unit_action
+
+DEL ir.actions.act_window: website_sale_comparison.product_attribute_category_action [renamed to website_sale module]
+
+# DONE by the module merge website_sale_comparison/website_sale_wishlist -> website_sale (apriori merged_modules, base pre-migration update_module_names(merge_modules=True)): XML-IDs moved to website_sale
+
+NEW ir.actions.act_window.view: website_sale.website_sale_order_kanban
+NEW ir.actions.act_window.view: website_sale.website_sale_order_list
+NEW ir.actions.server: website_sale.action_update_suggested_products
+NEW ir.actions.server: website_sale.ir_cron_send_abandoned_email_ir_actions_server (noupdate)
+
+# NOTHING TO DO: new records
+
+ir.actions.server: website_sale.ir_cron_send_availability_email_ir_actions_server (noupdate) (noupdate switched)
+
+# DONE: 19.0 website_sale.ir_cron_send_availability_email was the abandoned cart cron, the back in stock cron was website_sale_stock.ir_cron_send_availability_email; the 20.0 file is noupdate (existing records are not updated), so pre-migration renames them to website_sale.ir_cron_send_abandoned_email / website_sale.ir_cron_send_availability_email (with their _ir_actions_server XML-IDs) and post-migration points the abandoned cart cron to _cron_send_abandoned_cart_email() and toggles it from the website settings (without this the db20 run deleted the active back in stock cron)
+
+NEW ir.actions.server: website_sale.ir_cron_send_order_rating_emails_ir_actions_server (noupdate)
+NEW ir.actions.server: website_sale.update_suggested_products_cron_ir_actions_server (noupdate)
+
+# NOTHING TO DO: new records
+
+NEW ir.asset: website_sale.s_donation_000_scss [renamed from website_payment module]
+
+# DONE: pre-migration renames website_payment.s_donation_000_scss to website_sale
+
+NEW ir.cron: website_sale.ir_cron_send_abandoned_email (noupdate)
+
+# NOTHING TO DO: new records
+
+ir.cron: website_sale.ir_cron_send_availability_email (noupdate) (noupdate switched)
+
+# DONE: 19.0 website_sale.ir_cron_send_availability_email was the abandoned cart cron, the back in stock cron was website_sale_stock.ir_cron_send_availability_email; the 20.0 file is noupdate (existing records are not updated), so pre-migration renames them to website_sale.ir_cron_send_abandoned_email / website_sale.ir_cron_send_availability_email (with their _ir_actions_server XML-IDs) and post-migration points the abandoned cart cron to _cron_send_abandoned_cart_email() and toggles it from the website settings (without this the db20 run deleted the active back in stock cron)
+
+NEW ir.cron: website_sale.ir_cron_send_order_rating_emails (noupdate)
+NEW ir.cron: website_sale.update_suggested_products_cron (noupdate)
+NEW ir.filters: website_sale.dynamic_snippet_all_products_filter
+
+# NOTHING TO DO: new records
+
+NEW ir.filters: website_sale.dynamic_snippet_newest_arrivals_filter
+DEL ir.filters: website_sale.dynamic_snippet_newest_products_filter
+
+# DONE: pre-migration renames the XML-ID to dynamic_snippet_newest_arrivals_filter (same filter, kept for website_snippet_filter.filter_id)
+
+DEL ir.model.access: website_sale.access_account_tax_user
+DEL ir.model.access: website_sale.access_ecom_extra_fields_public_employee
+DEL ir.model.access: website_sale.access_ecom_extra_fields_public_portal
+DEL ir.model.access: website_sale.access_ecom_extra_fields_public_public
+DEL ir.model.access: website_sale.access_ecom_extra_fields_restricted_editor
+DEL ir.model.access: website_sale.access_fiscal_position_public
+DEL ir.model.access: website_sale.access_payment_term
+DEL ir.model.access: website_sale.access_product_attribute_public_employee
+DEL ir.model.access: website_sale.access_product_attribute_public_portal
+DEL ir.model.access: website_sale.access_product_attribute_public_public
+DEL ir.model.access: website_sale.access_product_attribute_value_public_employee
+DEL ir.model.access: website_sale.access_product_attribute_value_public_portal
+DEL ir.model.access: website_sale.access_product_attribute_value_public_public
+DEL ir.model.access: website_sale.access_product_category_pos_manager
+DEL ir.model.access: website_sale.access_product_category_public_employee
+DEL ir.model.access: website_sale.access_product_category_public_portal
+DEL ir.model.access: website_sale.access_product_category_public_public
+DEL ir.model.access: website_sale.access_product_feed_base_group_system
+DEL ir.model.access: website_sale.access_product_feed_website_group_website_designer
+DEL ir.model.access: website_sale.access_product_image_public_employee
+DEL ir.model.access: website_sale.access_product_image_public_portal
+DEL ir.model.access: website_sale.access_product_image_public_public
+DEL ir.model.access: website_sale.access_product_image_restricted_editor
+DEL ir.model.access: website_sale.access_product_image_sale
+DEL ir.model.access: website_sale.access_product_pricelist_item_public_employee
+DEL ir.model.access: website_sale.access_product_pricelist_item_public_portal
+DEL ir.model.access: website_sale.access_product_pricelist_item_public_public
+DEL ir.model.access: website_sale.access_product_pricelist_public_employee
+DEL ir.model.access: website_sale.access_product_pricelist_public_portal
+DEL ir.model.access: website_sale.access_product_pricelist_public_public
+DEL ir.model.access: website_sale.access_product_product_attribute_custom_value_employee
+DEL ir.model.access: website_sale.access_product_product_attribute_custom_value_portal
+DEL ir.model.access: website_sale.access_product_product_attribute_custom_value_public
+DEL ir.model.access: website_sale.access_product_product_attribute_employee
+DEL ir.model.access: website_sale.access_product_product_attribute_portal
+DEL ir.model.access: website_sale.access_product_product_attribute_public
+DEL ir.model.access: website_sale.access_product_product_public_employee
+DEL ir.model.access: website_sale.access_product_product_public_portal
+DEL ir.model.access: website_sale.access_product_product_public_public
+DEL ir.model.access: website_sale.access_product_public_category_designer
+DEL ir.model.access: website_sale.access_product_public_category_public_employee
+DEL ir.model.access: website_sale.access_product_public_category_public_portal
+DEL ir.model.access: website_sale.access_product_public_category_public_public
+DEL ir.model.access: website_sale.access_product_ribbon_public_employee
+DEL ir.model.access: website_sale.access_product_ribbon_public_portal
+DEL ir.model.access: website_sale.access_product_ribbon_public_public
+DEL ir.model.access: website_sale.access_product_ribbon_sale_manager
+DEL ir.model.access: website_sale.access_product_tag_public_employee
+DEL ir.model.access: website_sale.access_product_tag_public_portal
+DEL ir.model.access: website_sale.access_product_tag_public_public
+DEL ir.model.access: website_sale.access_product_template_attribute_exclusion_employee
+DEL ir.model.access: website_sale.access_product_template_attribute_exclusion_portal
+DEL ir.model.access: website_sale.access_product_template_attribute_exclusion_public
+DEL ir.model.access: website_sale.access_product_template_attribute_line_public_employee
+DEL ir.model.access: website_sale.access_product_template_attribute_line_public_portal
+DEL ir.model.access: website_sale.access_product_template_attribute_line_public_public
+DEL ir.model.access: website_sale.access_product_template_public_employee
+DEL ir.model.access: website_sale.access_product_template_public_portal
+DEL ir.model.access: website_sale.access_product_template_public_public
+DEL ir.model.access: website_sale.access_uom_portal
+DEL ir.model.access: website_sale.access_uom_public
+DEL ir.model.access: website_sale.access_website_base_unit_public_employee
+DEL ir.model.access: website_sale.access_website_base_unit_public_portal
+DEL ir.model.access: website_sale.access_website_base_unit_public_public
+DEL ir.model.access: website_sale.access_website_base_unit_sale_manager
+DEL ir.model.access: website_sale.access_website_checkout_step_website_designer
+DEL ir.model.access: website_sale_comparison.access_product_attribute_category_public_employee
+DEL ir.model.access: website_sale_comparison.access_product_attribute_category_public_portal
+DEL ir.model.access: website_sale_comparison.access_product_attribute_category_public_public
+DEL ir.model.access: website_sale_comparison.access_product_attribute_category_public_saleman
+DEL ir.model.access: website_sale_wishlist.access_product_wishlist_default
+DEL ir.model.access: website_sale_wishlist.access_product_wishlist_portal
+DEL ir.model.access: website_sale_wishlist.access_product_wishlist_public
+DEL ir.model.access: website_sale_wishlist.access_product_wishlist_user
+
+# NOTHING TO DO: ir.model.access/ir.rule are replaced by ir.access, handled in base (cross-module noupdate deactivations such as product_pricelist_comp_rule replayed in base end-migration)
+
+NEW ir.model.constraint: website_sale.constraint_product_stock_notification_rel_product_stock_notificat_a3552ee5
+NEW ir.model.constraint: website_sale.constraint_product_template_description_ecommerce_gist_idx
+NEW ir.model.constraint: website_sale.constraint_product_template_minimum_quantity_non_negative
+
+# NOTHING TO DO: new records
+
+NEW ir.model.constraint: website_sale.constraint_product_wishlist_product_unique_partner_id [renamed from website_sale_wishlist module]
+DEL ir.model.constraint: website_sale_wishlist.constraint_product_wishlist_product_unique_partner_id [renamed to website_sale module]
+
+# DONE by the module merge website_sale_comparison/website_sale_wishlist -> website_sale (apriori merged_modules, base pre-migration update_module_names(merge_modules=True)): XML-IDs moved to website_sale
+
+DEL ir.rule: website_sale.empty_public_categories_rule (noupdate)
+DEL ir.rule: website_sale.product_pricelist_comp_rule (noupdate)
+DEL ir.rule: website_sale.product_pricelist_item_comp_rule (noupdate)
+DEL ir.rule: website_sale.product_template_public (noupdate)
+DEL ir.rule: website_sale_wishlist.all_product_wishlist_rule (noupdate)
+DEL ir.rule: website_sale_wishlist.product_wishlist_rule (noupdate)
+
+# NOTHING TO DO: ir.model.access/ir.rule are replaced by ir.access, handled in base (cross-module noupdate deactivations such as product_pricelist_comp_rule replayed in base end-migration)
+
+NEW ir.ui.menu: website_sale.menu_attribute_category_action [renamed from website_sale_comparison module]
+
+# DONE by the module merge website_sale_comparison/website_sale_wishlist -> website_sale (apriori merged_modules, base pre-migration update_module_names(merge_modules=True)): XML-IDs moved to website_sale
+
+NEW ir.ui.menu: website_sale.menu_open_shop
+
+# NOTHING TO DO: new records
+
+DEL ir.ui.menu: website_sale.menu_ecommerce_payment_methods
+DEL ir.ui.menu: website_sale.menu_ecommerce_payment_tokens
+DEL ir.ui.menu: website_sale.menu_ecommerce_payment_transactions
+DEL ir.ui.menu: website_sale.menu_orders_unpaid_orders
+DEL ir.ui.menu: website_sale.menu_product_combos
+DEL ir.ui.menu: website_sale.menu_product_pages
+DEL ir.ui.menu: website_sale.product_catalog_product_tags
+
+# NOTHING TO DO: removed by Odoo at the end of the update (with their website-specific copies)
+
+DEL ir.ui.menu: website_sale_comparison.menu_attribute_category_action [renamed to website_sale module]
+
+# DONE by the module merge website_sale_comparison/website_sale_wishlist -> website_sale (apriori merged_modules, base pre-migration update_module_names(merge_modules=True)): XML-IDs moved to website_sale
+
+NEW ir.ui.view: website_sale.accordion_specs_item
+NEW ir.ui.view: website_sale.add_to_compare
+NEW ir.ui.view: website_sale.add_to_wishlist
+NEW ir.ui.view: website_sale.alert_inline
+NEW ir.ui.view: website_sale.checkout_container_dropzone
+NEW ir.ui.view: website_sale.comparison_button
+NEW ir.ui.view: website_sale.container_dropzone_above_price
+NEW ir.ui.view: website_sale.container_dropzone_above_product_details
+NEW ir.ui.view: website_sale.container_dropzone_above_specification
+NEW ir.ui.view: website_sale.container_dropzone_below_product_details
+NEW ir.ui.view: website_sale.documents
+NEW ir.ui.view: website_sale.empty_wishlist_svg
+NEW ir.ui.view: website_sale.filter_range_attributes
+NEW ir.ui.view: website_sale.footer_pricelist_selector
+NEW ir.ui.view: website_sale.footer_pricelist_selector_with_language_selector
+NEW ir.ui.view: website_sale.header_hide_empty_wishlist_link
+NEW ir.ui.view: website_sale.header_pricelist_selector
+NEW ir.ui.view: website_sale.header_wishlist_link
+NEW ir.ui.view: website_sale.order_tax_lines
+NEW ir.ui.view: website_sale.placeholder_header_pricelist_selector
+NEW ir.ui.view: website_sale.pricelist_selector
+NEW ir.ui.view: website_sale.product_add_to_compare
+NEW ir.ui.view: website_sale.product_add_to_wishlist
+NEW ir.ui.view: website_sale.product_attribute_category_tree_view
+NEW ir.ui.view: website_sale.product_attributes_body
+NEW ir.ui.view: website_sale.product_cart_lines
+NEW ir.ui.view: website_sale.product_compare
+NEW ir.ui.view: website_sale.product_image_and_ribbon
+NEW ir.ui.view: website_sale.product_normal_form_view
+NEW ir.ui.view: website_sale.product_packaging_selector
+NEW ir.ui.view: website_sale.product_ribbon
+NEW ir.ui.view: website_sale.product_title_and_details
+NEW ir.ui.view: website_sale.product_variant_product_image_view_kanban
+NEW ir.ui.view: website_sale.product_wishlist
+NEW ir.ui.view: website_sale.required_attributes
+NEW ir.ui.view: website_sale.ribbon_filter_pills
+NEW ir.ui.view: website_sale.robots
+NEW ir.ui.view: website_sale.s_donation
+NEW ir.ui.view: website_sale.s_donation_form
+NEW ir.ui.view: website_sale.s_donation_inline
+NEW ir.ui.view: website_sale.s_dynamic_snippet_product_grid_template
+NEW ir.ui.view: website_sale.s_dynamic_snippet_products_carousel
+NEW ir.ui.view: website_sale.s_dynamic_snippet_products_grid
+NEW ir.ui.view: website_sale.s_dynamic_snippet_products_grid_preview_data
+NEW ir.ui.view: website_sale.s_dynamic_snippet_products_preview_cards
+NEW ir.ui.view: website_sale.sale_order_abandoned_cart_search
+NEW ir.ui.view: website_sale.sale_order_kanban_view_ecommerce
+NEW ir.ui.view: website_sale.sale_order_list_view_ecommerce
+NEW ir.ui.view: website_sale.search_result_items
+NEW ir.ui.view: website_sale.shop_page_empty_screen
+NEW ir.ui.view: website_sale.specifications_table
+NEW ir.ui.view: website_sale.submit_button
+NEW ir.ui.view: website_sale.typeahead_language_selector
+NEW ir.ui.view: website_sale.wishlist_button
+
+# NOTHING TO DO: new records
+
+DEL ir.ui.view: website_sale.pricelist_list
+DEL ir.ui.view: website_sale.product_category_extra_link
+DEL ir.ui.view: website_sale.product_document_form
+DEL ir.ui.view: website_sale.product_document_kanban
+DEL ir.ui.view: website_sale.product_document_list
+DEL ir.ui.view: website_sale.product_pages_kanban_view
+DEL ir.ui.view: website_sale.product_pages_tree_view
+DEL ir.ui.view: website_sale.product_pricelist_item_form
+DEL ir.ui.view: website_sale.product_product_normal_website_form_view
+DEL ir.ui.view: website_sale.product_product_view_form_easy_inherit_website_sale
+DEL ir.ui.view: website_sale.product_terms_and_conditions
+DEL ir.ui.view: website_sale.products_list_view
+DEL ir.ui.view: website_sale.s_dynamic_snippet_category_template
+DEL ir.ui.view: website_sale.s_mega_menu_big_icons_subtitles
+DEL ir.ui.view: website_sale.s_mega_menu_cards
+DEL ir.ui.view: website_sale.s_mega_menu_images_subtitles
+DEL ir.ui.view: website_sale.s_mega_menu_little_icons
+DEL ir.ui.view: website_sale.s_mega_menu_menu_image_menu
+DEL ir.ui.view: website_sale.s_mega_menu_menus_logos
+DEL ir.ui.view: website_sale.s_mega_menu_multi_menus
+DEL ir.ui.view: website_sale.s_mega_menu_odoo_menu
+DEL ir.ui.view: website_sale.s_mega_menu_thumbnails
+DEL ir.ui.view: website_sale.view_sales_order_filter_ecommerce_abondand
+
+# NOTHING TO DO: removed by Odoo at the end of the update (with their website-specific copies)
+
+DEL ir.ui.view: website_sale_comparison.accordion_specs_item
+DEL ir.ui.view: website_sale_comparison.add_to_compare
+DEL ir.ui.view: website_sale_comparison.product_add_to_compare
+DEL ir.ui.view: website_sale_comparison.product_attribute_category_tree_view
+DEL ir.ui.view: website_sale_comparison.product_attribute_tree_view_inherit
+DEL ir.ui.view: website_sale_comparison.product_attribute_view_form
+DEL ir.ui.view: website_sale_comparison.product_attributes_body
+DEL ir.ui.view: website_sale_comparison.product_compare
+DEL ir.ui.view: website_sale_comparison.specifications_table
+DEL ir.ui.view: website_sale_comparison_wishlist.product_wishlist
+DEL ir.ui.view: website_sale_stock_wishlist.product_wishlist
+DEL ir.ui.view: website_sale_wishlist.add_to_wishlist
+DEL ir.ui.view: website_sale_wishlist.empty_wishlist_svg
+DEL ir.ui.view: website_sale_wishlist.header_hide_empty_wishlist_link
+DEL ir.ui.view: website_sale_wishlist.header_wishlist_link
+DEL ir.ui.view: website_sale_wishlist.product_add_to_wishlist
+DEL ir.ui.view: website_sale_wishlist.product_cart_lines
+DEL ir.ui.view: website_sale_wishlist.product_wishlist
+DEL ir.ui.view: website_sale_wishlist.template_header_boxed
+DEL ir.ui.view: website_sale_wishlist.template_header_default
+DEL ir.ui.view: website_sale_wishlist.template_header_hamburger
+DEL ir.ui.view: website_sale_wishlist.template_header_mobile
+DEL ir.ui.view: website_sale_wishlist.template_header_sales_four
+DEL ir.ui.view: website_sale_wishlist.template_header_sales_one
+DEL ir.ui.view: website_sale_wishlist.template_header_sales_three
+DEL ir.ui.view: website_sale_wishlist.template_header_sales_two
+DEL ir.ui.view: website_sale_wishlist.template_header_search
+DEL ir.ui.view: website_sale_wishlist.template_header_sidebar
+DEL ir.ui.view: website_sale_wishlist.template_header_stretch
+DEL ir.ui.view: website_sale_wishlist.template_header_vertical
+
+# NOTHING TO DO: XML-IDs colliding with website_sale ones are renamed by the module merge and removed by Odoo with their website-specific copies (production: COW 4359-4361 of the wishlist headers, whose content is now in website_sale.template_header_*)
+
+NEW mail.template: website_sale.email_template_back_in_stock (noupdate)
+NEW mail.template: website_sale.mail_template_sale_order_rating (noupdate)
+NEW mail.template: website_sale.mail_template_sale_withdrawal_request_confirmation (noupdate)
+NEW mail.template: website_sale.mail_template_withdrawal_request_notification (noupdate)
+NEW product.category: website_sale.product_category_donations (noupdate)
+NEW product.template: website_sale.product_donation (noupdate)
+NEW res.groups: website_sale.group_automate_suggested_products (noupdate)
+NEW res.groups: website_sale.group_unpublish_out_of_stock (noupdate)
+
+# NOTHING TO DO: new records
+
+DEL res.groups: website_sale.group_show_uom_price [renamed to product module] (noupdate)
+
+# DONE in product pre-migration (product group): XML-ID renamed to product.group_show_uom_price, keeping the group and its 9 users/implications
+
+NEW website.checkout.step: website_sale.checkout_step_address (noupdate)
+NEW website.checkout.step: website_sale.checkout_step_confirmation (noupdate)
+
+# DONE: post-migration copies the new generic steps (/shop/address, /shop/payment/transaction) for each existing website, as website._create_checkout_steps() does for new websites
+
+NEW website.snippet.filter: website_sale.dynamic_filter_all_products
+
+# NOTHING TO DO: new records
+
+NEW website.snippet.filter: website_sale.dynamic_filter_newest_arrivals
+DEL website.snippet.filter: website_sale.dynamic_filter_newest_products
+
+# DONE: pre-migration renames the XML-ID to dynamic_filter_newest_arrivals (record kept for dynamic snippets)
+
+# Not in the analysis (noupdate changes, not loaded):
+# NOTHING TO DO: base.default_website salesperson_id/salesteam_id (user configuration; rating_email_template_id
+#   gets its default when the column is created)
+# NOTHING TO DO: mail_template_sale_cart_recovery body (would drop the Czech translation; the template is
+#   unused: abandoned cart follow-up is disabled in production)

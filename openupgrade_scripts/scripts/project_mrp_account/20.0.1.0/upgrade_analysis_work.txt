@@ -1,0 +1,9 @@
+---Models in module 'project_mrp_account'---
+---Fields in module 'project_mrp_account'---
+---XML records in module 'project_mrp_account'---
+NEW ir.ui.view: project_mrp_account.view_picking_type_form_inherit_project_mrp_account
+
+# NOTHING TO DO: handled by ORM (views, actions, menus, reports)
+
+# DONE: post-migration, analytic_costs = True on all manufacturing operation types (v19 always applied the MO project distribution and hid the field on these types; v20 sets it only on install through noupdate data); production: 1 type (id 12, NULL)
+

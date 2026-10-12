@@ -1,0 +1,21 @@
+---Models in module 'pos_sale'---
+---Fields in module 'pos_sale'---
+pos_sale     / pos.config               / default_product_id (many2one) : NEW relation: product.product, required, hasdefault: default
+pos_sale     / pos.config               / down_payment_product_id (many2one): now required
+# NOTHING TO DO: init_storage _init_column_default_products creates the products with their XML-IDs if needed and the default fills existing configs (down payment product exists, 2 configs had it empty)
+pos_sale     / sale.order               / amount_unpaid (float)         : module is now 'sale' ('pos_sale')
+# NOTHING TO DO: sale is updated first and owns the field, the XML-ID of pos_sale is only removed at the end
+---XML records in module 'pos_sale'---
+NEW ir.access: pos_sale.pos_sale_rule_pos_channel_pos_manager
+NEW ir.access: pos_sale.rule_pos_sale_order
+NEW ir.access: pos_sale.rule_pos_sale_order_line
+DEL ir.model.access: pos_sale.access_crm_team_pos_manager
+DEL ir.rule: pos_sale.pos_sale_rule_pos_channel_pos_manager (noupdate)
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records
+NEW ir.ui.view: pos_sale.pos_orderline_receipt_information
+# NOTHING TO DO: handled by the module update
+DEL ir.ui.view: pos_sale.message_body
+# NOTHING TO DO: moved to the new module pos_sale_stock (auto_install pos_sale + pos_stock)
+NEW product.product: pos_sale.default_sol_product (noupdate)
+NEW product.template: pos_sale.default_sol_product_product_template (noupdate)
+# NOTHING TO DO: created by init_storage of pos.config.default_product_id (XML-ID noupdate) or by the data

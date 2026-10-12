@@ -1,0 +1,53 @@
+---Models in module 'sms'---
+---Fields in module 'sms'---
+sms          / ir.actions.server        / sms_method (selection)        : DEL selection_keys: ['comment', 'note', 'sms']
+sms          / ir.actions.server        / state (selection)             : selection_keys added: [log_note] (most likely nothing to do)
+# NOTHING TO DO: no 'sms' server actions in production (all 156 are 'code'); 20.0 always posts the SMS with a log
+
+sms          / mail.message             / message_type (selection)      : selection_keys added: [tracking] (most likely nothing to do)
+sms          / mail.notification        / failure_type (selection)      : selection_keys added: [sms_database_non_active, sn_undeliverable] (most likely nothing to do)
+# NOTHING TO DO: selection values added only (tracking type handled in mail)
+
+sms          / mail.scheduled.message   / send_method (selection)       : NEW required, selection_keys: ['email', 'sms'], hasdefault: default
+# NOTHING TO DO: required with default, 0 scheduled messages
+
+sms          / res.users                / message_has_sms_error (boolean): not related anymore
+sms          / res.users                / message_has_sms_error (boolean): now a function
+sms          / res.users                / message_has_sms_error (boolean): previously in module base
+# NOTHING TO DO: res.users fields inherited from res.partner/mail.thread, not stored (res.users _inherits res.partner); 'is now stored' one2many have no column
+
+sms          / sms.sms                  / failure_type (selection)      : selection_keys added: [sms_database_non_active] (most likely nothing to do)
+# NOTHING TO DO: selection values added only (tracking type handled in mail)
+
+sms          / sms.sms                  / sms_type (selection)          : NEW selection_keys: ['alert', 'marketing']
+# NOTHING TO DO: new field, 0 sms.sms rows
+
+---XML records in module 'sms'---
+NEW ir.access: sms.access_sms_account_registration_phone_number_wizard_system
+NEW ir.access: sms.access_sms_account_sender_name_wizard_system
+NEW ir.access: sms.access_sms_account_verification_code_wizard_system
+NEW ir.access: sms.access_sms_composer
+NEW ir.access: sms.access_sms_sms_system
+NEW ir.access: sms.access_sms_template_preview
+NEW ir.access: sms.access_sms_template_reset
+NEW ir.access: sms.access_sms_template_user
+NEW ir.access: sms.access_sms_tracker_system
+NEW ir.access: sms.ir_rule_sms_template_system
+DEL ir.model.access: sms.access_sms_account_registration_phone_number_wizard_system
+DEL ir.model.access: sms.access_sms_account_sender_name_wizard_system
+DEL ir.model.access: sms.access_sms_account_verification_code_wizard_system
+DEL ir.model.access: sms.access_sms_composer
+DEL ir.model.access: sms.access_sms_sms_all
+DEL ir.model.access: sms.access_sms_sms_system
+DEL ir.model.access: sms.access_sms_template_all
+DEL ir.model.access: sms.access_sms_template_preview
+DEL ir.model.access: sms.access_sms_template_reset
+DEL ir.model.access: sms.access_sms_template_system
+DEL ir.model.access: sms.access_sms_template_user
+DEL ir.model.access: sms.access_sms_tracker_all
+DEL ir.model.access: sms.access_sms_tracker_system
+DEL ir.rule: sms.ir_rule_sms_template_system
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; the old XML-IDs are released in base pre-migration, the new records are loaded from ir.access.csv
+
+NEW ir.ui.view: sms.sms_composer_view_form_template_save
+# NOTHING TO DO: handled by the module update (new records loaded, obsolete ones removed by _process_end)

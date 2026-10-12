@@ -1,0 +1,641 @@
+---Models in module 'account'---
+obsolete model account.group
+# DONE: pre-migration: table copied to openupgrade_legacy_20_0_account_group.
+# post-migration: semantics of odoo/upgrade_code/19.3-00-account-groups.py, which
+# converts only the charts of COA_TO_MIGRATE (their v20 templates define parent
+# accounts with the XML-IDs of the groups): the groups of companies on these charts
+# and the groups created by users become archived parent accounts (code start or
+# start-end, type of the last covered account, parent = most specific containing
+# group, XML-IDs moved to the accounts, parent_path recomputed). The template groups
+# of the other charts are dropped like in v20 (Odoo removed account.group-<coa>.csv
+# without replacement), their XML-IDs are deleted. Production (chart cz, 313 template
+# groups, 0 user groups): nothing converted, 313 XML-IDs deleted, data kept in the
+# legacy table; no custom module uses account.group (tax_reporting_cz checked)
+new model account.stock.valuation.report [abstract]
+new model res.currency.rate.consolidation.mixin [abstract]
+# NOTHING TO DO: new abstract models
+---Fields in module 'account'---
+account      / account.account          / account_stock_expense_id (many2one): previously in module stock_account
+account      / account.account          / account_stock_variation_id (many2one): previously in module stock_account
+# NOTHING TO DO: same table/column, field moved from stock_account (xmlid reflected by Odoo)
+account      / account.account          / parent_id (many2one)          : NEW relation: account.account
+account      / account.account          / parent_path (char)            : NEW
+# DONE: post-migration: filled from the converted account groups (see account.group),
+# parent_path by _parent_store_compute. Created and computed (id/) by the ORM for the
+# other accounts. Production: no parent account (chart cz)
+account      / account.analytic.line    / product_id (many2one)         : now a function
+# NOTHING TO DO: stored compute (readonly=False), existing values are kept
+account      / account.bank.statement   / is_statement_posted (boolean) : NEW hasdefault: default
+# NOTHING TO DO: new field with default
+account      / account.bank.statement.line / invoice_outstanding_credits_debits_widget (binary): type is now 'json' ('binary')
+account      / account.bank.statement.line / invoice_payments_widget (binary): type is now 'json' ('binary')
+account      / account.bank.statement.line / needed_terms (binary)         : type is now 'json' ('binary')
+account      / account.bank.statement.line / payment_term_details (binary) : type is now 'json' ('binary')
+account      / account.bank.statement.line / tax_totals (binary)           : type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / account.cash.rounding    / active (boolean)              : NEW hasdefault: default
+account      / account.cash.rounding    / company_id (many2one)         : NEW relation: res.company
+account      / account.cash.rounding    / currency_ids (many2many)      : NEW relation: res.currency
+account      / account.cash.rounding    / partner_category_ids (many2many): NEW relation: res.partner.category
+account      / account.cash.rounding    / payment_method_line_ids (many2many): NEW relation: account.payment.method.line
+account      / account.cash.rounding    / sequence (integer)            : NEW required, hasdefault: default
+# NOTHING TO DO: new fields, defaults filled by the ORM (1 cash rounding in prod,
+# empty filters keep the old behaviour)
+account      / account.fiscal.position  / account_map (binary)          : type is now 'json' ('binary')
+account      / account.fiscal.position  / tax_map (binary)              : type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / account.group            / code_prefix_end (char)        : DEL
+account      / account.group            / code_prefix_start (char)      : DEL
+account      / account.group            / company_id (many2one)         : DEL relation: res.company, required
+account      / account.group            / name (char)                   : DEL required
+account      / account.group            / parent_id (many2one)          : DEL relation: account.group
+# DONE: pre-migration: table copied to openupgrade_legacy_20_0_account_group.
+# post-migration: semantics of odoo/upgrade_code/19.3-00-account-groups.py, which
+# converts only the charts of COA_TO_MIGRATE (their v20 templates define parent
+# accounts with the XML-IDs of the groups): the groups of companies on these charts
+# and the groups created by users become archived parent accounts (code start or
+# start-end, type of the last covered account, parent = most specific containing
+# group, XML-IDs moved to the accounts, parent_path recomputed). The template groups
+# of the other charts are dropped like in v20 (Odoo removed account.group-<coa>.csv
+# without replacement), their XML-IDs are deleted. Production (chart cz, 313 template
+# groups, 0 user groups): nothing converted, 313 XML-IDs deleted, data kept in the
+# legacy table; no custom module uses account.group (tax_reporting_cz checked)
+account      / account.journal          / disable_dashboard_graph (boolean): NEW
+account      / account.journal          / display_invoice_template_pdf_report_id (boolean): now a function
+# NOTHING TO DO: new field / non-stored compute
+account      / account.journal          / journal_group_id (many2one)   : NEW relation: account.journal.group
+account      / account.journal          / journal_group_ids (many2many) : DEL relation: account.journal.group
+account      / account.journal.group    / company_id (many2one)         : DEL relation: res.company
+account      / account.journal.group    / excluded_journal_ids (many2many): DEL relation: account.journal
+account      / account.journal.group    / included_journal_ids (one2many): NEW relation: account.journal
+# DONE: post-migration: v19 groups contained every journal except their
+# excluded_journal_ids (journal_group_ids is the same relation, i.e. the groups
+# excluding the journal); v20 journals without ledger post to the statutory ledger.
+# journal_group_id is set only when the company has several groups and the journal is
+# included in exactly one of them (journal specific to that ledger); journals included
+# in all groups stay statutory, other cases are logged. 0 ledger groups in production
+account      / account.move             / checked (boolean)             : DEL
+# DONE: pre-migration: review_state = 'reviewed' (posted and checked), 'todo' (posted,
+# not checked), 'no_review' otherwise (= v20 set_moves_checked); production: 1278
+# posted and checked moves -> reviewed. account_move_checked_idx dropped (see Indexes)
+account      / account.move             / document_tax_mode (selection) : NEW selection_keys: ['tax_excluded', 'tax_included'], isfunction: function, stored
+# DONE: pre-migration: column pre-filled like _compute_document_tax_mode
+# (company.account_price_include on invoices) so that the SQL constraint
+# check_document_tax_mode_set can be created
+account      / account.move             / import_source_attachment_id (many2one): NEW relation: ir.attachment
+account      / account.move             / inventory_closing (boolean)   : NEW hasdefault: default
+# NOTHING TO DO: new field with default / removed one2many
+account      / account.move             / invoice_cash_rounding_id (many2one): now a function
+# NOTHING TO DO: becomes a stored compute with readonly=False, existing values kept
+account      / account.move             / invoice_outstanding_credits_debits_widget (binary): type is now 'json' ('binary')
+account      / account.move             / invoice_payments_widget (binary): type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / account.move             / journal_group_id (many2one)   : now related
+# NOTHING TO DO: related non-stored
+account      / account.move             / journal_line_ids (one2many)   : DEL relation: account.move.line
+# NOTHING TO DO: new field with default / removed one2many
+account      / account.move             / needed_terms (binary)         : type is now 'json' ('binary')
+account      / account.move             / payment_term_details (binary) : type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / account.move             / qr_code_method (selection)    : now a function
+# NOTHING TO DO: becomes a stored compute with readonly=False, existing values kept
+account      / account.move             / review_state (selection)      : NEW required, selection_keys: ['anomaly', 'no_review', 'reviewed', 'supervised', 'todo'], hasdefault: default
+# DONE: pre-migration, see checked
+account      / account.move             / tax_totals (binary)           : type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / account.move.line        / cogs_origin_id (many2one)     : previously in module stock_account
+# NOTHING TO DO: same column, field moved from stock_account
+account      / account.move.line        / count_reconciled_lines_excluding_exchange_diff (boolean): type is now 'integer' ('boolean')
+# NOTHING TO DO: non-stored compute
+account      / account.move.line        / deductible_amount (float)     : DEL
+account      / account.move.line        / deductible_percentage (float) : NEW hasdefault: default
+# DONE: pre-migration: deductible_percentage = deductible_amount / 100 (3135 lines,
+# all 100 -> 1.0); old column kept
+account      / account.move.line        / discount_allocation_key (binary): type is now 'json' ('binary')
+account      / account.move.line        / discount_allocation_needed (binary): type is now 'json' ('binary')
+account      / account.move.line        / epd_key (binary)              : type is now 'json' ('binary')
+account      / account.move.line        / epd_needed (binary)           : type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / account.move.line        / journal_group_id (many2one)   : now related
+# NOTHING TO DO: related non-stored
+account      / account.move.line        / name (char)                   : type is now 'text' ('char')
+# NOTHING TO DO: varchar -> text, the ALTER TYPE cast cannot fail (3111 lines)
+account      / account.move.line        / open_on (date)                : NEW stored: False
+# NOTHING TO DO: non-stored
+account      / account.move.line        / term_key (binary)             : type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / account.payment          / commercial_partner_id (many2one): NEW relation: res.partner, isfunction: function, stored
+account      / account.payment          / return_partner_bank_id (many2one): NEW relation: res.partner.bank, isfunction: function, stored
+# NOTHING TO DO: new stored computes, computed by the ORM on the new columns (207 payments)
+account      / account.payment          / state (selection)             : selection_keys added: [reconciled], removed: [in_process]
+# DONE: pre-migration: copy to openupgrade_legacy_20_0_state, 'in_process' -> 'paid',
+# 'paid' -> 'reconciled' (v20 renamed the states: _compute_state, action_post,
+# action_validate, account.move payment_state and is_matched shift the same way);
+# asset_cash payments whose liquidity line is not reconciled -> 'paid' (v20 never
+# reconciles them by hand). No recompute: 9 of the 17 v19 'paid' payments were
+# validated by hand (liquidity not reconciled, no invoice) and would go back to
+# 'paid'. Production: 190 in_process -> paid, 17 paid -> reconciled, 0 asset_cash
+account      / account.payment          / transaction_uuid (char)       : NEW isfunction: function, stored
+# NOTHING TO DO: new stored computes, computed by the ORM on the new columns (207 payments)
+account      / account.reconcile.model  / matching_order (selection)    : NEW required, selection_keys: ['new_first', 'old_first'], hasdefault: default
+account      / account.reconcile.model  / payment_tolerance (float)     : NEW required, hasdefault: default
+account      / account.reconcile.model  / payment_tolerance_type (selection): NEW required, selection_keys: ['amount', 'percentage'], hasdefault: default
+account      / account.reconcile.model  / rule_type (selection)         : NEW selection_keys: ['matching_rule', 'reco_model'], hasdefault: default
+account      / account.reconcile.model  / trigger (selection)           : now a function
+# DONE: pre-migration: the columns still hold v18 values: invoice_matching models
+# archived (missing OCA#5981) and mapped to matching_rule + auto_reconcile, other values
+# -> reco_model, fixed_amount -> amount, payment_tolerance from payment_tolerance_param;
+# post-migration: can_be_proposed recomputed (stale since the 19.0 SQL update of trigger)
+account      / account.report           / active (boolean)              : not stored anymore
+account      / account.report           / active (boolean)              : now a function
+account      / account.report           / active_fallback (boolean)     : NEW hasdefault: default
+account      / account.report           / active_selection (selection)  : NEW selection_keys: ['False', 'True']
+# DONE: pre-migration: active_fallback = active (4 reports, all active);
+# active_selection (company dependent) left empty -> fallback is used
+account      / account.report           / availability_condition (selection): selection_keys added: [consolidation] (most likely nothing to do)
+account      / account.report           / enable_snapshots (boolean)    : NEW isfunction: function, stored
+account      / account.report           / filter_analytic (boolean)     : DEL
+account      / account.report           / filter_line_comparison (boolean): NEW isfunction: function, stored
+account      / account.report           / groupby (char)                : NEW
+# NOTHING TO DO: new stored computes / new fields / removed field without data in
+# Community; selection key added
+account      / account.report           / prefix_groups_threshold (integer): DEL
+# NOTHING TO DO: only used by the hierarchy option of account_reports (Enterprise);
+# column kept by the framework (4 rows with the default 4000)
+account      / account.report           / use_fiscal_periods (boolean)  : NEW isfunction: function, stored
+account      / account.report           / user_groupby (char)           : NEW isfunction: function, stored
+# NOTHING TO DO: new stored computes / new fields / removed field without data in
+# Community; selection key added
+account      / account.report.column    / figure_type (selection)       : selection_keys added: [many2one] (most likely nothing to do)
+account      / account.report.column    / report_id (many2one)          : now required
+# NOTHING TO DO: selection key added; report_id now required, 12/12 columns have one
+account      / account.report.expression / engine (selection)            : selection_keys added: [reference, text] (most likely nothing to do)
+account      / account.report.expression / figure_type (selection)       : selection_keys added: [many2one] (most likely nothing to do)
+# NOTHING TO DO: selection keys added
+account      / account.report.expression / formula (char)                : type is now 'text' ('char')
+account      / account.report.expression / subformula (char)             : type is now 'text' ('char')
+# NOTHING TO DO: varchar -> text, safe cast (74 / 16 rows)
+account      / account.report.line      / foldability (selection)       : NEW selection_keys: ['always_unfolded', 'foldable', 'never_unfolded'], isfunction: function, stored
+account      / account.report.line      / foldable (boolean)            : DEL
+# DONE: post-migration: foldable=True on lines without XML-ID -> 'foldable' (like
+# upgrade_code 19.3-00-account-report-foldable.py); data lines come from their module,
+# 0 foldable lines in prod
+account      / account.tax              / account_move_line_ids (many2many): NEW relation: account.move.line
+account      / account.tax              / account_reconcile_model_line_ids (many2many): NEW relation: account.reconcile.model.line
+# NOTHING TO DO: inverse of existing many2many tables
+account      / account.tax.group        / advance_tax_payment_account_id (many2one): DEL relation: account.account
+account      / account.tax.group        / tax_payable_account_id (many2one): DEL relation: account.account
+account      / account.tax.group        / tax_receivable_account_id (many2one): DEL relation: account.account
+# NOTHING TO DO: only used by the tax closing of account_reports (Enterprise), no
+# replacement in Community 20 (template cz drops them too). Columns kept by the
+# framework for reference (4 groups -> 343001/343002)
+account      / account.tax.repartition.line / tag_ids_domain (binary)       : type is now 'json' ('binary')
+account      / ir.module.module         / account_templates (binary)    : type is now 'json' ('binary')
+# NOTHING TO DO: non-stored computed fields, no column
+account      / product.category         / account_stock_variation_id (many2one): previously in module stock_account
+account      / product.category         / property_cost_method (selection): previously in module stock_account
+account      / product.category         / property_price_difference_account_id (many2one): previously in module stock_account
+account      / product.category         / property_stock_journal (many2one): previously in module stock_account
+account      / product.category         / property_stock_valuation_account_id (many2one): previously in module stock_account
+account      / product.category         / property_valuation (selection): previously in module stock_account
+# NOTHING TO DO: same jsonb columns, fields moved from stock_account
+account      / product.product          / catalog_is_in_selected_section (boolean): NEW stored: False
+# NOTHING TO DO: non-stored
+account      / product.template         / cost_method (selection)       : previously in module stock_account
+account      / product.template         / valuation (selection)         : previously in module stock_account
+# NOTHING TO DO: same jsonb columns, fields moved from stock_account
+account      / res.company              / account_stock_journal_id (many2one): not stored anymore
+account      / res.company              / account_stock_journal_id (many2one): now a function
+account      / res.company              / account_stock_journal_id (many2one): previously in module stock_account
+account      / res.company              / account_stock_valuation_id (many2one): not stored anymore
+account      / res.company              / account_stock_valuation_id (many2one): now a function
+account      / res.company              / account_stock_valuation_id (many2one): previously in module stock_account
+account      / res.company              / cost_method (selection)       : not stored anymore
+account      / res.company              / cost_method (selection)       : now a function
+account      / res.company              / cost_method (selection)       : previously in module stock_account
+# DONE: post-migration: now computed from ir.default (company_default_for): missing
+# ir.default rows of the product.category fields are created from the v19 columns
+# (production already has all of them: 247/186/55/8/standard/periodic)
+account      / res.company              / document_sequence_editable (boolean): NEW
+# NOTHING TO DO: new fields with default False / stored compute keeping existing values
+account      / res.company              / expense_account_id (many2one) : not stored anymore
+account      / res.company              / expense_account_id (many2one) : now a function
+account      / res.company              / income_account_id (many2one)  : not stored anymore
+account      / res.company              / income_account_id (many2one)  : now a function
+# DONE: post-migration: now computed from ir.default (company_default_for): missing
+# ir.default rows of the product.category fields are created from the v19 columns
+# (production already has all of them: 247/186/55/8/standard/periodic)
+account      / res.company              / inventory_period (selection)  : previously in module stock_account
+# NOTHING TO DO: field moved from stock_account, new required field with default
+account      / res.company              / inventory_valuation (selection): not stored anymore
+account      / res.company              / inventory_valuation (selection): now a function
+account      / res.company              / inventory_valuation (selection): previously in module stock_account
+# DONE: post-migration: now computed from ir.default (company_default_for): missing
+# ir.default rows of the product.category fields are created from the v19 columns
+# (production already has all of them: 247/186/55/8/standard/periodic)
+account      / res.company              / qr_code (boolean)             : now a function
+# NOTHING TO DO: new fields with default False / stored compute keeping existing values
+account      / res.company              / quick_edit_mode_enabled (boolean): NEW
+# DONE: pre-migration: True where quick_edit_mode was set (0 in prod); empty
+# quick_edit_mode set to its new default 'out_and_in_invoices' (it now only selects the
+# documents), so that enabling quick encoding later works without picking a mode
+account      / res.company              / set_to_review_documents (boolean): NEW
+# NOTHING TO DO: new fields with default False / stored compute keeping existing values
+account      / res.company              / vat_check_vies (boolean)      : previously in module base_vat
+# NOTHING TO DO: same column, field moved from base_vat (merged by base). NULL in prod
+account      / res.company              / vat_disabled (boolean)        : NEW isfunction: function, stored
+# NOTHING TO DO: new fields with default False / stored compute keeping existing values
+account      / res.partner              / display_invoice_template_pdf_report_id (boolean): now a function
+account      / res.partner              / duplicate_bank_partner_ids (many2many): not related anymore
+account      / res.partner              / duplicate_bank_partner_ids (many2many): now a function
+# NOTHING TO DO: non-stored
+account      / res.partner              / global_location_number (char) : not stored anymore
+account      / res.partner              / global_location_number (char) : now a function
+# NOTHING TO DO: stored in additional_identifiers['EAN_GLN'] by base post-migration
+# (account_add_gln merged), 0 values in prod
+account      / res.partner              / qr_code_method (selection)    : NEW selection_keys: function
+# NOTHING TO DO: new company dependent field
+account      / res.partner.bank         / acc_holder_name (char)        : DEL mode: modify
+account      / res.partner.bank         / acc_number (char)             : DEL required, mode: modify
+account      / res.partner.bank         / account_number (char)         : NEW required, mode: modify
+account      / res.partner.bank         / bank_bic (char)               : is now stored
+account      / res.partner.bank         / bank_bic (char)               : not related anymore
+account      / res.partner.bank         / bank_id (many2one)            : DEL relation: res.bank, mode: modify
+account      / res.partner.bank         / currency_id (many2one)        : DEL relation: res.currency, mode: modify
+account      / res.partner.bank         / has_iban_warning (boolean)    : DEL
+account      / res.partner.bank         / has_money_transfer_warning (boolean): DEL
+account      / res.partner.bank         / has_phishing_warnings (boolean): NEW isfunction: function, stored
+account      / res.partner.bank         / holder_name (char)            : NEW mode: modify, isfunction: function, stored
+# NOTHING TO DO here: res.partner.bank is converted by base (pre: acc_number ->
+# account_number, acc_holder_name -> holder_name; post: bank_name/bank_bic from
+# res.bank). post-migration of account: mail templates using
+# partner_bank_id.acc_number/acc_holder_name rewritten in all languages
+# (account.email_template_edi_invoice). currency_id dropped without replacement
+---XML records in module 'account'---
+NEW account.account: account.1_accrued_expenses (noupdate)
+NEW account.account: account.1_accrued_income (noupdate)
+NEW account.account: account.1_bank_journal_default_account_46 (noupdate)
+DEL account.account: account.1_bank_journal_default_account_47 (noupdate)
+DEL account.account: account.1_prepaid_expenses (noupdate)
+DEL account.account: account.1_to_receive_pay (noupdate)
+DEL account.account: account.1_to_receive_rec (noupdate)
+# NOTHING TO DO: company chart records (noupdate), differences between the analysis
+# database and production, not changes of the module
+DEL digest.tip: account.digest_tip_account_0
+# NOTHING TO DO: removed by the update (not noupdate)
+NEW ir.access: account.access_account_account_manager
+NEW ir.access: account.access_account_account_tax
+NEW ir.access: account.access_account_account_user
+NEW ir.access: account.access_account_accrued_orders_wizard
+NEW ir.access: account.access_account_analytic_account
+NEW ir.access: account.access_account_analytic_accountant
+NEW ir.access: account.access_account_analytic_applicability_accountant
+NEW ir.access: account.access_account_analytic_distribution_invoice
+NEW ir.access: account.access_account_analytic_distribution_readonly
+NEW ir.access: account.access_account_analytic_plan_accountant
+NEW ir.access: account.access_account_automatic_entry_wizard
+NEW ir.access: account.access_account_autopost_bills_wizard
+NEW ir.access: account.access_account_bank_statement
+NEW ir.access: account.access_account_bank_statement_group_invoice
+NEW ir.access: account.access_account_bank_statement_group_readonly
+NEW ir.access: account.access_account_cash_rounding_readonly
+NEW ir.access: account.access_account_cash_rounding_uinvoice
+NEW ir.access: account.access_account_code_mapping
+NEW ir.access: account.access_account_code_mapping_manager
+NEW ir.access: account.access_account_financial_year_op
+NEW ir.access: account.access_account_fiscal_position
+NEW ir.access: account.access_account_fiscal_position_account
+NEW ir.access: account.access_account_fiscal_position_account_product_manager
+NEW ir.access: account.access_account_fiscal_position_product_manager
+NEW ir.access: account.access_account_full_reconcile_group_invoice
+NEW ir.access: account.access_account_full_reconcile_group_readonly
+NEW ir.access: account.access_account_incoterms_all
+NEW ir.access: account.access_account_incoterms_manager
+NEW ir.access: account.access_account_journal_group_invoice
+NEW ir.access: account.access_account_journal_group_manager
+NEW ir.access: account.access_account_journal_group_readonly
+NEW ir.access: account.access_account_journal_invoice
+NEW ir.access: account.access_account_journal_manager
+NEW ir.access: account.access_account_journal_readonly
+NEW ir.access: account.access_account_lock_exception
+NEW ir.access: account.access_account_lock_exception_manager
+NEW ir.access: account.access_account_merge_wizard_line_manager
+NEW ir.access: account.access_account_merge_wizard_manager
+NEW ir.access: account.access_account_move_reversal
+NEW ir.access: account.access_account_partial_reconcile_group_invoice
+NEW ir.access: account.access_account_partial_reconcile_readonly
+NEW ir.access: account.access_account_payment
+NEW ir.access: account.access_account_payment_method
+NEW ir.access: account.access_account_payment_method_line
+NEW ir.access: account.access_account_payment_method_line_readonly
+NEW ir.access: account.access_account_payment_method_readonly
+NEW ir.access: account.access_account_payment_readonly
+NEW ir.access: account.access_account_payment_register
+NEW ir.access: account.access_account_payment_term_line_manager
+NEW ir.access: account.access_account_payment_term_line_partner_manager
+NEW ir.access: account.access_account_payment_term_manager
+NEW ir.access: account.access_account_payment_term_partner_manager
+NEW ir.access: account.access_account_payment_term_portal
+NEW ir.access: account.access_account_reconcile_model
+NEW ir.access: account.access_account_reconcile_model_billing
+NEW ir.access: account.access_account_reconcile_model_line
+NEW ir.access: account.access_account_reconcile_model_line_billing
+NEW ir.access: account.access_account_reconcile_model_line_readonly
+NEW ir.access: account.access_account_reconcile_model_readonly
+NEW ir.access: account.access_account_report_ac_user
+NEW ir.access: account.access_account_report_column_ac_user
+NEW ir.access: account.access_account_report_column_readonly
+NEW ir.access: account.access_account_report_expression_ac_user
+NEW ir.access: account.access_account_report_expression_readonly
+NEW ir.access: account.access_account_report_external_value_ac_user
+NEW ir.access: account.access_account_report_external_value_readonly
+NEW ir.access: account.access_account_report_line_ac_user
+NEW ir.access: account.access_account_report_line_readonly
+NEW ir.access: account.access_account_report_readonly
+NEW ir.access: account.access_account_resequence
+NEW ir.access: account.access_account_root
+NEW ir.access: account.access_account_secure_entries_wizard
+NEW ir.access: account.access_account_setup_bank_manual_config
+NEW ir.access: account.access_account_tag_internal_user
+NEW ir.access: account.access_account_tax_group_internal_user
+NEW ir.access: account.access_account_tax_group_manager
+NEW ir.access: account.access_account_tax_internal_user
+NEW ir.access: account.access_account_tax_manager
+NEW ir.access: account.access_account_tax_repartition_line_manager
+NEW ir.access: account.access_account_tax_repartition_line_user
+NEW ir.access: account.access_base_document_layout_account_user
+NEW ir.access: account.access_ir_model_account_reports
+NEW ir.access: account.access_product_product_account_user
+NEW ir.access: account.access_res_currency_account_manager
+NEW ir.access: account.access_res_currency_rate_account_manager
+NEW ir.access: account.access_validate_account_move
+NEW ir.access: account.account_analytic_line_rule_billing_user
+NEW ir.access: account.account_analytic_line_rule_readonly_user
+NEW ir.access: account.account_bank_statement_comp_rule
+NEW ir.access: account.account_bank_statement_line_comp_rule
+NEW ir.access: account.account_bank_statement_line_rule_basic_user
+NEW ir.access: account.account_bank_statement_line_rule_invoice_user
+NEW ir.access: account.account_bank_statement_line_rule_readonly_user
+NEW ir.access: account.account_cash_rounding_comp_rule
+NEW ir.access: account.account_comp_rule
+NEW ir.access: account.account_fiscal_position_comp_rule
+NEW ir.access: account.account_invoice_line_rule_portal
+NEW ir.access: account.account_invoice_report_rule_invoice
+NEW ir.access: account.account_invoice_report_rule_readonly
+NEW ir.access: account.account_invoice_rule_portal
+NEW ir.access: account.account_move_comp_rule
+NEW ir.access: account.account_move_line_comp_rule
+NEW ir.access: account.account_move_line_rule_group_readonly
+NEW ir.access: account.account_move_line_see_all
+NEW ir.access: account.account_move_rule_group_readonly
+NEW ir.access: account.account_move_see_all
+NEW ir.access: account.account_move_send_batch_rule_group_invoice
+NEW ir.access: account.account_move_send_single_rule_group_invoice
+NEW ir.access: account.account_payment_comp_rule
+NEW ir.access: account.account_payment_term_comp_rule
+NEW ir.access: account.account_reconcile_model_line_template_comp_rule
+NEW ir.access: account.account_reconcile_model_template_comp_rule
+NEW ir.access: account.invoice_analysis_comp_rule
+NEW ir.access: account.ir_rule_res_partner_bank_billing_officers
+NEW ir.access: account.journal_comp_rule
+NEW ir.access: account.report_external_value_comp_rule
+NEW ir.access: account.res_partner_rule_user
+NEW ir.access: account.tax_comp_rule
+NEW ir.access: account.tax_group_comp_rule
+NEW ir.access: account.tax_rep_comp_rule
+# NOTHING TO DO here: ir.model.access + ir.rule -> ir.access handled by base
+# (XML-IDs released in pre, deactivations restored in end-migration)
+NEW ir.actions.act_window: account.action_account_cashflow_analysis
+NEW ir.actions.act_window: account.action_account_matching_rules
+# NOTHING TO DO: new records (noupdate ones are created as they do not exist)
+NEW ir.actions.client: account.action_report_stock_valuation [renamed from stock_account module]
+# DONE: pre-migration: rename_xmlids stock_account.* -> account.* (account is loaded
+# before stock_account), noupdate set to False for the cron and its server action
+NEW ir.actions.server: account.accountant_reset_to_draft_entries_action
+NEW ir.actions.server: account.action_mark_payment_as_reconciled
+NEW ir.actions.server: account.action_server_payment_receipt
+# NOTHING TO DO: new records (noupdate ones are created as they do not exist)
+NEW ir.actions.server: account.ir_cron_post_stock_valuation_ir_actions_server [renamed from stock_account module] (noupdate switched)
+# DONE: pre-migration: rename_xmlids stock_account.* -> account.* (account is loaded
+# before stock_account), noupdate set to False for the cron and its server action
+DEL ir.actions.server: account.accountant_confirm_entries_action
+# NOTHING TO DO: removed by the update (not noupdate)
+NEW ir.config_parameter: account.disable_dashboard_kpis (noupdate)
+# NOTHING TO DO: new records (noupdate ones are created as they do not exist)
+NEW ir.cron: account.ir_cron_post_stock_valuation [renamed from stock_account module] (noupdate switched)
+# DONE: pre-migration: rename_xmlids stock_account.* -> account.* (account is loaded
+# before stock_account), noupdate set to False for the cron and its server action
+DEL ir.model.access: account.access_account_account
+DEL ir.model.access: account.access_account_account_invoice
+DEL ir.model.access: account.access_account_account_manager
+DEL ir.model.access: account.access_account_account_partner_manager
+DEL ir.model.access: account.access_account_account_tax
+DEL ir.model.access: account.access_account_account_tax_readonly
+DEL ir.model.access: account.access_account_account_tax_user
+DEL ir.model.access: account.access_account_account_user
+DEL ir.model.access: account.access_account_accrued_orders_wizard
+DEL ir.model.access: account.access_account_analytic_account
+DEL ir.model.access: account.access_account_analytic_accountant
+DEL ir.model.access: account.access_account_analytic_applicability_accountant
+DEL ir.model.access: account.access_account_analytic_distribution_invoice
+DEL ir.model.access: account.access_account_analytic_distribution_readonly
+DEL ir.model.access: account.access_account_analytic_line_invoice
+DEL ir.model.access: account.access_account_analytic_line_manager
+DEL ir.model.access: account.access_account_analytic_line_readonly
+DEL ir.model.access: account.access_account_analytic_plan_accountant
+DEL ir.model.access: account.access_account_automatic_entry_wizard
+DEL ir.model.access: account.access_account_autopost_bills_wizard
+DEL ir.model.access: account.access_account_bank_statement
+DEL ir.model.access: account.access_account_bank_statement_group_invoice
+DEL ir.model.access: account.access_account_bank_statement_group_readonly
+DEL ir.model.access: account.access_account_bank_statement_line
+DEL ir.model.access: account.access_account_bank_statement_line_group_invoice
+DEL ir.model.access: account.access_account_bank_statement_line_group_readonly
+DEL ir.model.access: account.access_account_cash_rounding_readonly
+DEL ir.model.access: account.access_account_cash_rounding_uinvoice
+DEL ir.model.access: account.access_account_code_mapping
+DEL ir.model.access: account.access_account_code_mapping_manager
+DEL ir.model.access: account.access_account_financial_year_op
+DEL ir.model.access: account.access_account_fiscal_position
+DEL ir.model.access: account.access_account_fiscal_position_account
+DEL ir.model.access: account.access_account_fiscal_position_account_product_manager
+DEL ir.model.access: account.access_account_fiscal_position_product_manager
+DEL ir.model.access: account.access_account_full_reconcile
+DEL ir.model.access: account.access_account_full_reconcile_group_invoice
+DEL ir.model.access: account.access_account_full_reconcile_group_readonly
+DEL ir.model.access: account.access_account_group
+DEL ir.model.access: account.access_account_group_basic
+DEL ir.model.access: account.access_account_group_manager
+DEL ir.model.access: account.access_account_incoterms_all
+DEL ir.model.access: account.access_account_incoterms_manager
+DEL ir.model.access: account.access_account_invoice_line_portal
+DEL ir.model.access: account.access_account_invoice_portal
+DEL ir.model.access: account.access_account_invoice_report
+DEL ir.model.access: account.access_account_invoice_report_billing
+DEL ir.model.access: account.access_account_invoice_report_readonly
+DEL ir.model.access: account.access_account_journal_group_invoice
+DEL ir.model.access: account.access_account_journal_group_manager
+DEL ir.model.access: account.access_account_journal_group_readonly
+DEL ir.model.access: account.access_account_journal_invoice
+DEL ir.model.access: account.access_account_journal_manager
+DEL ir.model.access: account.access_account_journal_readonly
+DEL ir.model.access: account.access_account_lock_exception
+DEL ir.model.access: account.access_account_lock_exception_manager
+DEL ir.model.access: account.access_account_merge_wizard_line_manager
+DEL ir.model.access: account.access_account_merge_wizard_manager
+DEL ir.model.access: account.access_account_move_line_manager
+DEL ir.model.access: account.access_account_move_line_readonly
+DEL ir.model.access: account.access_account_move_line_uinvoice
+DEL ir.model.access: account.access_account_move_manager
+DEL ir.model.access: account.access_account_move_readonly
+DEL ir.model.access: account.access_account_move_reversal
+DEL ir.model.access: account.access_account_move_send_batch_wizard
+DEL ir.model.access: account.access_account_move_send_wizard
+DEL ir.model.access: account.access_account_move_uinvoice
+DEL ir.model.access: account.access_account_partial_reconcile
+DEL ir.model.access: account.access_account_partial_reconcile_group_invoice
+DEL ir.model.access: account.access_account_partial_reconcile_readonly
+DEL ir.model.access: account.access_account_payment
+DEL ir.model.access: account.access_account_payment_method
+DEL ir.model.access: account.access_account_payment_method_line
+DEL ir.model.access: account.access_account_payment_method_line_readonly
+DEL ir.model.access: account.access_account_payment_method_readonly
+DEL ir.model.access: account.access_account_payment_readonly
+DEL ir.model.access: account.access_account_payment_register
+DEL ir.model.access: account.access_account_payment_term_line_manager
+DEL ir.model.access: account.access_account_payment_term_line_partner_manager
+DEL ir.model.access: account.access_account_payment_term_manager
+DEL ir.model.access: account.access_account_payment_term_partner_manager
+DEL ir.model.access: account.access_account_payment_term_portal
+DEL ir.model.access: account.access_account_reconcile_model
+DEL ir.model.access: account.access_account_reconcile_model_billing
+DEL ir.model.access: account.access_account_reconcile_model_line
+DEL ir.model.access: account.access_account_reconcile_model_line_billing
+DEL ir.model.access: account.access_account_reconcile_model_line_readonly
+DEL ir.model.access: account.access_account_reconcile_model_readonly
+DEL ir.model.access: account.access_account_report_ac_user
+DEL ir.model.access: account.access_account_report_basic
+DEL ir.model.access: account.access_account_report_column_ac_user
+DEL ir.model.access: account.access_account_report_column_basic
+DEL ir.model.access: account.access_account_report_column_readonly
+DEL ir.model.access: account.access_account_report_expression_ac_user
+DEL ir.model.access: account.access_account_report_expression_basic
+DEL ir.model.access: account.access_account_report_expression_readonly
+DEL ir.model.access: account.access_account_report_external_value_ac_user
+DEL ir.model.access: account.access_account_report_external_value_readonly
+DEL ir.model.access: account.access_account_report_line_ac_user
+DEL ir.model.access: account.access_account_report_line_basic
+DEL ir.model.access: account.access_account_report_line_readonly
+DEL ir.model.access: account.access_account_report_readonly
+DEL ir.model.access: account.access_account_resequence
+DEL ir.model.access: account.access_account_root
+DEL ir.model.access: account.access_account_root_manager
+DEL ir.model.access: account.access_account_secure_entries_wizard
+DEL ir.model.access: account.access_account_setup_bank_manual_config
+DEL ir.model.access: account.access_account_tag_internal_user
+DEL ir.model.access: account.access_account_tax_group
+DEL ir.model.access: account.access_account_tax_group_internal_user
+DEL ir.model.access: account.access_account_tax_group_manager
+DEL ir.model.access: account.access_account_tax_group_readonly
+DEL ir.model.access: account.access_account_tax_internal_user
+DEL ir.model.access: account.access_account_tax_invoice
+DEL ir.model.access: account.access_account_tax_manager
+DEL ir.model.access: account.access_account_tax_readonly
+DEL ir.model.access: account.access_account_tax_repartition_line_invoice
+DEL ir.model.access: account.access_account_tax_repartition_line_manager
+DEL ir.model.access: account.access_account_tax_repartition_line_readonly
+DEL ir.model.access: account.access_account_tax_repartition_line_user
+DEL ir.model.access: account.access_product_product_account_user
+DEL ir.model.access: account.access_res_currency_account_manager
+DEL ir.model.access: account.access_res_currency_rate_account_manager
+DEL ir.model.access: account.access_res_partner_group_account_manager
+DEL ir.model.access: account.access_validate_account_move
+# NOTHING TO DO here: ir.model.access + ir.rule -> ir.access handled by base
+# (XML-IDs released in pre, deactivations restored in end-migration)
+NEW ir.model.constraint: account.constraint_account_move_account_move_sanitize_payment_ref_idx
+NEW ir.model.constraint: account.constraint_account_move_check_document_tax_mode_set
+NEW ir.model.constraint: account.constraint_account_move_journal_id_date_idx
+NEW ir.model.constraint: account.constraint_account_report_column_expression_label_uniq
+# NOTHING TO DO: new records (noupdate ones are created as they do not exist)
+DEL ir.model.constraint: account.constraint_account_group_check_length_prefix
+# NOTHING TO DO: removed by the update (not noupdate)
+DEL ir.rule: account.account_analytic_line_rule_billing_user (noupdate)
+DEL ir.rule: account.account_analytic_line_rule_readonly_user (noupdate)
+DEL ir.rule: account.account_bank_statement_comp_rule (noupdate)
+DEL ir.rule: account.account_bank_statement_line_comp_rule (noupdate)
+DEL ir.rule: account.account_comp_rule (noupdate)
+DEL ir.rule: account.account_fiscal_position_comp_rule (noupdate)
+DEL ir.rule: account.account_group_comp_rule (noupdate)
+DEL ir.rule: account.account_invoice_line_rule_portal (noupdate)
+DEL ir.rule: account.account_invoice_rule_portal (noupdate)
+DEL ir.rule: account.account_move_comp_rule (noupdate)
+DEL ir.rule: account.account_move_line_comp_rule (noupdate)
+DEL ir.rule: account.account_move_line_rule_group_invoice (noupdate)
+DEL ir.rule: account.account_move_line_rule_group_readonly (noupdate)
+DEL ir.rule: account.account_move_line_see_all (noupdate)
+DEL ir.rule: account.account_move_rule_group_invoice (noupdate)
+DEL ir.rule: account.account_move_rule_group_readonly (noupdate)
+DEL ir.rule: account.account_move_see_all (noupdate)
+DEL ir.rule: account.account_move_send_batch_rule_group_invoice (noupdate)
+DEL ir.rule: account.account_move_send_single_rule_group_invoice (noupdate)
+DEL ir.rule: account.account_payment_comp_rule (noupdate)
+DEL ir.rule: account.account_payment_term_comp_rule (noupdate)
+DEL ir.rule: account.account_reconcile_model_line_template_comp_rule (noupdate)
+DEL ir.rule: account.account_reconcile_model_template_comp_rule (noupdate)
+DEL ir.rule: account.invoice_analysis_comp_rule (noupdate)
+DEL ir.rule: account.ir_rule_res_partner_bank_billing_officers (noupdate)
+DEL ir.rule: account.journal_comp_rule (noupdate)
+DEL ir.rule: account.journal_group_comp_rule (noupdate)
+DEL ir.rule: account.report_external_value_comp_rule (noupdate)
+DEL ir.rule: account.tax_comp_rule (noupdate)
+DEL ir.rule: account.tax_group_comp_rule (noupdate)
+DEL ir.rule: account.tax_rep_comp_rule (noupdate)
+# NOTHING TO DO here: ir.model.access + ir.rule -> ir.access handled by base
+# (XML-IDs released in pre, deactivations restored in end-migration)
+NEW ir.ui.menu: account.menu_action_account_cashflow_analysis
+# NOTHING TO DO: new records (noupdate ones are created as they do not exist)
+DEL ir.ui.menu: account.account_logs_menu
+DEL ir.ui.menu: account.root_payment_menu
+# NOTHING TO DO: removed by the update (not noupdate)
+NEW ir.ui.view: account.account_bank_statement_line_view_graph_cashflow
+NEW ir.ui.view: account.account_bank_statement_line_view_pivot_cashflow
+NEW ir.ui.view: account.account_bank_statement_line_view_search_cashflow
+NEW ir.ui.view: account.address_form_additional_identifiers
+NEW ir.ui.view: account.tax_repartition_line_form
+NEW ir.ui.view: account.tax_repartition_line_kanban
+NEW ir.ui.view: account.uom_uom_view_form
+NEW ir.ui.view: account.view_account_list_from_entry
+NEW ir.ui.view: account.view_account_move_graph_invoice
+NEW ir.ui.view: account.view_account_move_pivot_invoice
+NEW ir.ui.view: account.view_bank_statement_kanban
+NEW ir.ui.view: account.view_move_line_tree_open_on
+NEW ir.ui.view: account.view_partner_bank_kanban_account
+# NOTHING TO DO: new records (noupdate ones are created as they do not exist)
+DEL ir.ui.view: account.portal_my_home_invoice
+DEL ir.ui.view: account.product_uom_form_view_inherit
+DEL ir.ui.view: account.product_view_search_catalog
+DEL ir.ui.view: account.view_account_group_form
+DEL ir.ui.view: account.view_account_group_search
+DEL ir.ui.view: account.view_account_group_tree
+DEL ir.ui.view: account_add_gln.view_partner_form_inherit
+# NOTHING TO DO: removed by the update (not noupdate)
+NEW onboarding.onboarding: account.onboarding_onboarding_account_return_dashboard (noupdate)
+NEW portal.entry: account.portal_invoice_client (noupdate)
+NEW portal.entry: account.portal_invoice_vendor (noupdate)
+# NOTHING TO DO: new records (noupdate ones are created as they do not exist)
+# Changes of noupdate data (no noupdate_changes.xml generated by the analysis, files
+# compared with the v19 sources):
+# DONE: post-migration loads noupdate_changes.xml: action_open_settings context
+# (bin_size removed), base.mc linked to europe_vat, email_layout_xmlid of the
+# invoice / credit note / payment receipt templates. Bodies and subjects of the mail
+# templates are not reloaded (translated, v19 texts work in v20), only the renamed
+# res.partner.bank fields are replaced in them.
+# NOTHING TO DO: onboarding step and image type changes (cosmetic)
+# Indexes (not in the analysis): Odoo keeps an existing index without comment whatever
+# its definition. DONE: pre-migration drops account_move_checked_idx (v20: on
+# review_state) and account_move_duplicate_bills_idx (v20: + in_receipt), and the stale
+# definitions of older versions still in production: account_move_made_gaps (other
+# columns) and account_move_line_journal_id_neg_amnt_residual_idx (extra parent_state
+# condition); all recreated by v20. Equivalent definitions (unreconciled_idx,
+# unmatched_idx, lock exception) are kept; account_journal_group_uniq_name is a
+# Constraint, re-created by Odoo itself (now UNIQUE(name))

@@ -1,0 +1,16 @@
+---Models in module 'pos_hr'---
+---Fields in module 'pos_hr'---
+pos_hr       / pos.config               / advanced_employee_ids (many2many): DEL relation: hr.employee
+pos_hr       / pos.config               / basic_employee_ids (many2many): DEL relation: hr.employee
+pos_hr       / pos.config               / cashier_employee_ids (many2many): NEW relation: hr.employee
+pos_hr       / pos.config               / manager_employee_ids (many2many): NEW relation: hr.employee
+pos_hr       / pos.config               / minimal_employee_ids (many2many): DEL relation: hr.employee
+pos_hr       / pos.config               / restrictive_employee_ids (many2many): NEW relation: hr.employee
+pos_hr       / pos.config               / supervised_employee_ids (many2many): NEW relation: hr.employee
+# DONE: post-migration _pos_config_employee_roles: advanced -> manager_employee_ids (4 rows), minimal -> restrictive, basic -> cashier (roles are exclusive in v20; an employee listed in several v19 levels keeps the role v19 resolved: advanced, then minimal, then basic); supervised is a new level. _pos_config_all_employees_cashiers: v19 let every employee log in when no basic employee was listed, v20 only the listed ones: for configs with employee login (module_pos_hr) the other active employees of the company become cashiers (no such config in production)
+pos_hr       / pos.session              / logged_employee_ids (many2many): NEW relation: hr.employee, isfunction: function, stored
+# NOTHING TO DO: stored compute on a new relation table, the ORM computes it for the existing sessions (from employee_id)
+---XML records in module 'pos_hr'---
+NEW ir.ui.view: pos_hr.view_pos_config_kanban_inherit_pos_hr
+NEW ir.ui.view: pos_hr.view_pos_session_form_inherit_pos_hr
+# NOTHING TO DO: handled by the module update

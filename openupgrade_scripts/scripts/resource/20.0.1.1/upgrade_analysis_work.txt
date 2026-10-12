@@ -1,0 +1,166 @@
+---Models in module 'resource'---
+---Fields in module 'resource'---
+resource     / hr.employee              / resource_calendar_id (many2one): now required
+resource     / hr.employee              / tz (selection)                : now required
+
+# DONE: hr pre-migration (fields of hr.version)
+
+resource     / res.company              / tz (selection)                : NEW selection_keys: function, isfunction: function, stored
+
+# DONE: pre-migration: column added and filled with the timezone of the default working schedule of the company (resource.calendar.tz, removed), then of the company partner; post-migration computes the remaining ones (production: Europe/Prague)
+
+resource     / resource.calendar        / calendar_type (selection)     : NEW required, selection_keys: ['fixed', 'undefined', 'variable'], hasdefault: default
+
+# DONE: pre-migration: calendar_type = 'undefined' for schedule_type 'flexible' / flexible_hours, 'variable' for two weeks calendars, else 'fixed' (production: 2 x fully_fixed -> fixed). NOT NULL of schedule_type dropped. post-migration: lines of two weeks calendars become dated lines recurring every 2 weeks (week parity of 19.0 get_week_type kept)
+
+resource     / resource.calendar        / days_per_week (float)         : NEW isfunction: function, stored
+
+# DONE: computed by the ORM for fixed calendars; post-migration: hours_per_week / hours_per_day for the other ones
+
+resource     / resource.calendar        / duration_based (boolean)      : DEL
+
+# DONE: pre-migration: lines of duration based calendars lose their hours (duration kept), so 20.0 computes them as duration based
+
+resource     / resource.calendar        / flexible_hours (boolean)      : DEL
+
+# DONE: pre-migration: calendar_type = 'undefined' for schedule_type 'flexible' / flexible_hours, 'variable' for two weeks calendars, else 'fixed' (production: 2 x fully_fixed -> fixed). NOT NULL of schedule_type dropped. post-migration: lines of two weeks calendars become dated lines recurring every 2 weeks (week parity of 19.0 get_week_type kept)
+
+resource     / resource.calendar        / reference_calendar_id (many2one): NEW relation: resource.calendar, hasdefault: default
+
+# DONE: pre-migration: column created empty, existing calendars keep their 19.0 full_time_required_hours (the default would make the company calendar reference itself)
+
+resource     / resource.calendar        / schedule_type (selection)     : DEL required, selection_keys: ['flexible', 'fully_fixed']
+resource     / resource.calendar        / two_weeks_calendar (boolean)  : DEL
+
+# DONE: pre-migration: calendar_type = 'undefined' for schedule_type 'flexible' / flexible_hours, 'variable' for two weeks calendars, else 'fixed' (production: 2 x fully_fixed -> fixed). NOT NULL of schedule_type dropped. post-migration: lines of two weeks calendars become dated lines recurring every 2 weeks (week parity of 19.0 get_week_type kept)
+
+resource     / resource.calendar        / tz (selection)                : DEL required, selection_keys: function
+
+# DONE: pre-migration: moved to res.company.tz and hr.version.tz (hr), NOT NULL dropped; the column is kept (production: 2 x Europe/Prague)
+
+resource     / resource.calendar        / work_time_rate (float)        : is now stored
+
+# NOTHING TO DO: now stored, computed by the ORM at column creation
+
+resource     / resource.calendar.attendance / date (date)                   : NEW
+
+# DONE: new; set for the lines of two weeks calendars in post-migration, defaults by the ORM for the others
+
+resource     / resource.calendar.attendance / day_period (selection)        : now a function
+resource     / resource.calendar.attendance / day_period (selection)        : selection_keys removed: [lunch]
+
+# DONE: pre-migration: 'lunch' lines deleted (19.0 excluded them from the working time, in 20.0 the break is the gap between lines and 12-13 would be worked; production: 5 lines of the Standard 40 hours/week calendar). post-migration: day_period recomputed (now a stored compute, e.g. the 3-4 h lines of 'Otevírací doba obchůdek' become full_day)
+
+resource     / resource.calendar.attendance / dayofweek (selection)         : now a function
+
+# NOTHING TO DO: computed by the ORM (duration_based new column = no hours); existing dayofweek / hours are kept
+
+resource     / resource.calendar.attendance / display_type (selection)      : DEL selection_keys: ['line_section']
+
+# DONE: pre-migration: section lines deleted (0 in production)
+
+resource     / resource.calendar.attendance / duration_based (boolean)      : is now stored
+resource     / resource.calendar.attendance / duration_based (boolean)      : not related anymore
+resource     / resource.calendar.attendance / duration_based (boolean)      : now a function
+
+# NOTHING TO DO: computed by the ORM (duration_based new column = no hours); existing dayofweek / hours are kept
+
+resource     / resource.calendar.attendance / duration_days (float)         : DEL
+
+# NOTHING TO DO: 20.0 works with duration_hours and day_period only, the values (0.5 / 1) are kept in the column (22 rows in production, 5 deleted lunch lines)
+
+resource     / resource.calendar.attendance / hour_from (float)             : now a function
+resource     / resource.calendar.attendance / hour_to (float)               : now a function
+
+# NOTHING TO DO: computed by the ORM (duration_based new column = no hours); existing dayofweek / hours are kept
+
+resource     / resource.calendar.attendance / name (char)                   : DEL required
+
+# NOTHING TO DO: labels only, no field in 20.0; NOT NULL dropped in pre-migration, the column is kept (22 rows in production)
+
+resource     / resource.calendar.attendance / recurrency (boolean)          : NEW
+resource     / resource.calendar.attendance / recurrency_count (integer)    : NEW hasdefault: default
+resource     / resource.calendar.attendance / recurrency_end_type (selection): NEW selection_keys: ['date', 'forever', 'times'], hasdefault: default
+resource     / resource.calendar.attendance / recurrency_excluded_occurences (json): NEW
+resource     / resource.calendar.attendance / recurrency_interval (integer) : NEW hasdefault: default
+resource     / resource.calendar.attendance / recurrency_type (selection)   : NEW selection_keys: ['days', 'weeks'], hasdefault: default
+resource     / resource.calendar.attendance / recurrency_until (date)       : NEW isfunction: function, stored
+
+# DONE: new; set for the lines of two weeks calendars in post-migration, defaults by the ORM for the others
+
+resource     / resource.calendar.attendance / week_type (selection)         : DEL selection_keys: ['0', '1']
+
+# DONE: post-migration: converted to date + 2 weeks recurrency (0 in production)
+
+resource     / resource.calendar.leaves / count_as (selection)          : NEW selection_keys: ['absence', 'working_time'], hasdefault: default
+resource     / resource.calendar.leaves / time_type (selection)         : DEL selection_keys: ['leave', 'other']
+
+# DONE: pre-migration: count_as = 'working_time' for time_type 'other', else 'absence' (0 rows)
+
+resource     / resource.resource        / calendar_id (many2one)        : now required
+
+# DONE: pre-migration: empty -> 'Fully Flexible' (undefined, no hours target) calendar of the company, as such resources were fully flexible in 19.0 (0 in production)
+
+resource     / resource.resource        / color (integer)               : previously in module resource_mail
+
+# NOTHING TO DO: same column, the XML-ID of the field moves with the field
+
+resource     / resource.resource        / tz (selection)                : now a function
+
+# NOTHING TO DO: same stored field, default only
+
+---XML records in module 'resource'---
+NEW ir.access: resource.access_resource_calendar_attendance_system
+NEW ir.access: resource.access_resource_calendar_attendance_user
+NEW ir.access: resource.access_resource_calendar_system
+NEW ir.access: resource.access_resource_calendar_user
+NEW ir.access: resource.access_resource_resource_all
+NEW ir.access: resource.resource_calendar_leaves_rule_group_admin_modify
+NEW ir.access: resource.resource_calendar_leaves_rule_group_user_create
+NEW ir.access: resource.resource_calendar_leaves_rule_group_user_modify
+NEW ir.access: resource.resource_calendar_leaves_rule_multi_company
+NEW ir.access: resource.resource_resource_multi_company
+
+# NOTHING TO DO: ir.model.access / ir.rule are replaced by ir.access in 20.0, handled by base (XML-IDs of the removed models deleted in base pre-migration, deactivations carried over in base end-migration)
+
+NEW ir.actions.act_window: resource.action_resource_material_from_calendar
+
+# NOTHING TO DO: loaded / removed by the ORM
+
+NEW ir.actions.server: resource.ir_cron_calendar_clean_up_ir_actions_server
+NEW ir.cron: resource.ir_cron_calendar_clean_up
+
+# NOTHING TO DO: new cron; it deletes dated lines of fixed calendars, converted two weeks calendars are variable
+
+DEL ir.model.access: resource.access_resource_calendar_attendance_system
+DEL ir.model.access: resource.access_resource_calendar_attendance_user
+DEL ir.model.access: resource.access_resource_calendar_leaves
+DEL ir.model.access: resource.access_resource_calendar_leaves_user
+DEL ir.model.access: resource.access_resource_calendar_system
+DEL ir.model.access: resource.access_resource_calendar_user
+DEL ir.model.access: resource.access_resource_resource
+DEL ir.model.access: resource.access_resource_resource_all
+
+# NOTHING TO DO: ir.model.access / ir.rule are replaced by ir.access in 20.0, handled by base (XML-IDs of the removed models deleted in base pre-migration, deactivations carried over in base end-migration)
+
+NEW ir.model.constraint: resource.constraint_resource_calendar_attendance_check_count
+NEW ir.model.constraint: resource.constraint_resource_calendar_attendance_check_duration_hours
+NEW ir.model.constraint: resource.constraint_resource_calendar_attendance_check_interval
+NEW ir.model.constraint: resource.constraint_resource_calendar_attendance_check_recurrency_until
+
+# NOTHING TO DO: loaded / removed by the ORM
+
+DEL ir.rule: resource.resource_calendar_leaves_rule_group_admin_modify (noupdate)
+DEL ir.rule: resource.resource_calendar_leaves_rule_group_user_create (noupdate)
+DEL ir.rule: resource.resource_calendar_leaves_rule_group_user_modify (noupdate)
+DEL ir.rule: resource.resource_calendar_leaves_rule_multi_company (noupdate)
+DEL ir.rule: resource.resource_resource_multi_company (noupdate)
+
+# NOTHING TO DO: ir.model.access / ir.rule are replaced by ir.access in 20.0, handled by base (XML-IDs of the removed models deleted in base pre-migration, deactivations carried over in base end-migration)
+
+NEW ir.ui.view: resource.view_resource_calendar_attendance_calendar
+NEW ir.ui.view: resource.view_resource_calendar_multi_create_form
+
+# NOTHING TO DO: loaded / removed by the ORM
+
+# DONE: post-migration: noupdate change without analysis line, resource.resource_calendar_std name 'Standard 40 hours/week' -> '40 hours/week' when unchanged since 19.0 (production calendar 1)

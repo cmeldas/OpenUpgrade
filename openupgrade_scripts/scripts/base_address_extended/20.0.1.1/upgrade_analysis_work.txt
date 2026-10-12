@@ -1,0 +1,27 @@
+---Models in module 'base_address_extended'---
+new model res.city
+# NOTHING TO DO: base_address_extended was not installed in 19.0 (state uninstalled, no res_city table nor leftover columns in production); it gets installed during the migration as a new dependency of contacts and portal (l10n_cz 20 uses its fields enforce_cities and street_name/street_number/street_number2 without depending on it, so it must be installed before l10n_cz is updated, which the dependency of portal guarantees). Odoo 20 ships no res.city records for CZ
+---Fields in module 'base_address_extended'---
+base_address_extended / res.city                 / country_id (many2one)         : NEW relation: res.country, required
+base_address_extended / res.city                 / name (char)                   : NEW required, translate
+base_address_extended / res.city                 / state_id (many2one)           : NEW relation: res.country.state
+base_address_extended / res.city                 / zipcode (char)                : NEW
+# NOTHING TO DO: new model
+base_address_extended / res.country              / enforce_cities (boolean)      : NEW
+# NOTHING TO DO: new column. l10n_cz 20 (data/res_country_data.xml, updatable) sets it on base.cz together with address_view_id = l10n_cz.cz_partner_address_form, which replaces the address block of the partner form (plain city char, street edited as street_name/street_number/street_number2). The website checkout only enforces a city choice for BR/CL/PE/CO/TW
+base_address_extended / res.partner              / city_id (many2one)            : NEW relation: res.city
+# NOTHING TO DO: new column, empty
+base_address_extended / res.partner              / street_name (char)            : NEW isfunction: function, stored
+base_address_extended / res.partner              / street_number (char)          : NEW isfunction: function, stored
+base_address_extended / res.partner              / street_number2 (char)         : NEW isfunction: function, stored
+# NOTHING TO DO: computed at install from street with odoo.tools.business_data.street_split (30 partners, archived ones included). The compute only fills the three new columns, street itself is never rewritten (the inverse _inverse_street_data runs only when a user edits the split fields, e.g. in the CZ address form l10n_cz.cz_partner_address_form). Checked with the v20 street_split on the 10 production streets: split followed by the inverse gives back the same street for all of them, so a later edit of the split fields keeps the address format
+---XML records in module 'base_address_extended'---
+NEW ir.access: base_address_extended.access_res_city_group_all
+NEW ir.access: base_address_extended.access_res_city_group_user
+NEW ir.actions.act_window: base_address_extended.action_res_city_tree
+NEW ir.ui.view: base_address_extended.address_street_extended_city_form
+NEW ir.ui.view: base_address_extended.res_city_view_form
+NEW ir.ui.view: base_address_extended.view_city_filter
+NEW ir.ui.view: base_address_extended.view_city_tree
+NEW ir.ui.view: base_address_extended.view_res_country_city_extended_form
+# NOTHING TO DO: new module data

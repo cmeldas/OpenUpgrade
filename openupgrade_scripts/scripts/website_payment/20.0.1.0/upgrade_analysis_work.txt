@@ -1,0 +1,27 @@
+---Models in module 'website_payment'---
+---Fields in module 'website_payment'---
+website_payment / payment.transaction      / is_donation (boolean)         : DEL
+
+# NOTHING TO DO: 0 donation transactions in production; the donation snippet moved to website_sale
+
+---XML records in module 'website_payment'---
+DEL ir.asset: website_payment.s_donation_000_scss [renamed to website_sale module]
+
+# DONE in website_sale pre-migration: XML-ID renamed to website_sale.s_donation_000_scss
+
+DEL ir.ui.view: website_payment.donation_information
+DEL ir.ui.view: website_payment.donation_input
+
+# NOTHING TO DO: removed by Odoo at the end of the update
+
+DEL ir.ui.view: website_payment.donation_mail_body (noupdate)
+
+# NOTHING TO DO: noupdate mail body of donations, unused (no donation); left in place
+
+DEL ir.ui.view: website_payment.donation_pay
+DEL ir.ui.view: website_payment.payment_form
+DEL ir.ui.view: website_payment.remove_external_snippets
+DEL ir.ui.view: website_payment.s_donation
+DEL ir.ui.view: website_payment.s_donation_button
+
+# NOTHING TO DO: removed by Odoo at the end of the update

@@ -1,0 +1,101 @@
+---Models in module 'maintenance'---
+---Fields in module 'maintenance'---
+maintenance  / maintenance.equipment    / equipment_assign_to (selection): previously in module hr_maintenance
+
+# NOTHING TO DO: field moved from hr_maintenance, which still adds the 'employee'/'department' values (hr_maintenance installed)
+
+maintenance  / maintenance.equipment    / equipment_req_properties_definition (properties_definition): NEW
+
+# NOTHING TO DO: new properties fields
+
+maintenance  / maintenance.request      / archive (boolean)             : DEL
+
+# DONE: pre-migration, new required state pre-created and filled: archive -> 'cancelled', stage done -> 'done', kanban_state blocked -> 'changes_requested', done -> 'approved', else 'normal' (production: 8 done, 1 normal). Moving a request to a 'done' stage no longer finishes it in v20
+
+maintenance  / maintenance.request      / equipment_req_properties (properties): NEW isfunction: function, stored
+
+# NOTHING TO DO: new properties fields
+
+maintenance  / maintenance.request      / instruction_google_slide (char): DEL
+maintenance  / maintenance.request      / instruction_pdf (binary)      : DEL attachment: True
+maintenance  / maintenance.request      / instruction_type (selection)  : DEL selection_keys: ['google_slide', 'pdf', 'text']
+
+# DONE: pre-migration, Google Slide URL appended as a link to instruction_text, PDF attachment kept as a regular attachment (res_field cleared); production: 9 x 'text', nothing to convert
+
+maintenance  / maintenance.request      / kanban_state (selection)      : DEL required, selection_keys: ['blocked', 'done', 'normal']
+
+# DONE: pre-migration, new required state pre-created and filled: archive -> 'cancelled', stage done -> 'done', kanban_state blocked -> 'changes_requested', done -> 'approved', else 'normal' (production: 8 done, 1 normal). Moving a request to a 'done' stage no longer finishes it in v20
+
+maintenance  / maintenance.request      / request_date (date)           : DEL
+
+# DONE: pre-migration, schedule_date/schedule_end filled from request_date for done requests without a schedule (v20 uses schedule_date or create_date instead, e.g. for the MTBF); open requests stay unscheduled; the orphan column keeps the value (all 9 requests already had a schedule)
+
+maintenance  / maintenance.request      / stage_id (many2one)           : now a function
+
+# NOTHING TO DO: stored compute, existing values kept (column exists)
+
+maintenance  / maintenance.request      / state (selection)             : NEW required, selection_keys: ['approved', 'cancelled', 'changes_requested', 'done', 'normal'], hasdefault: default
+
+# DONE: pre-migration, new required state pre-created and filled: archive -> 'cancelled', stage done -> 'done', kanban_state blocked -> 'changes_requested', done -> 'approved', else 'normal' (production: 8 done, 1 normal). Moving a request to a 'done' stage no longer finishes it in v20
+
+maintenance  / maintenance.request      / user_id (many2one)            : DEL relation: res.users
+maintenance  / maintenance.request      / user_ids (many2many)          : NEW relation: res.users, isfunction: function, stored
+
+# DONE: post-migration, maintenance_request_res_users_rel set to the v19 user_id (replaces the ORM computation from the equipment technician), 9 requests
+
+maintenance  / maintenance.stage        / done (boolean)                : DEL
+
+# DONE: pre-migration, new required state pre-created and filled: archive -> 'cancelled', stage done -> 'done', kanban_state blocked -> 'changes_requested', done -> 'approved', else 'normal' (production: 8 done, 1 normal). Moving a request to a 'done' stage no longer finishes it in v20
+
+maintenance  / maintenance.stage        / maintenance_team_ids (many2many): NEW relation: maintenance.team
+
+# NOTHING TO DO: new field, empty = stage of all teams
+
+---XML records in module 'maintenance'---
+NEW ir.access: maintenance.access_equipment_category_admin_user
+NEW ir.access: maintenance.access_equipment_category_user
+NEW ir.access: maintenance.access_mail_activity_type_equipment_manager
+NEW ir.access: maintenance.access_maintenance_stage_admin_user
+NEW ir.access: maintenance.access_maintenance_stage_user
+NEW ir.access: maintenance.access_maintenance_team_admin_user
+NEW ir.access: maintenance.access_maintenance_team_user
+NEW ir.access: maintenance.equipment_request_rule_admin_user
+NEW ir.access: maintenance.equipment_request_rule_user
+NEW ir.access: maintenance.equipment_rule_admin_user
+NEW ir.access: maintenance.equipment_rule_user
+NEW ir.access: maintenance.maintenance_equipment_category_comp_rule
+NEW ir.access: maintenance.maintenance_equipment_comp_rule
+NEW ir.access: maintenance.maintenance_request_comp_rule
+NEW ir.access: maintenance.maintenance_team_comp_rule
+DEL ir.model.access: maintenance.access_equipment_admin_user
+DEL ir.model.access: maintenance.access_equipment_category_admin_user
+DEL ir.model.access: maintenance.access_equipment_category_user
+DEL ir.model.access: maintenance.access_equipment_user
+DEL ir.model.access: maintenance.access_mail_activity_type_equipment_manager
+DEL ir.model.access: maintenance.access_maintenance_stage_admin_user
+DEL ir.model.access: maintenance.access_maintenance_stage_user
+DEL ir.model.access: maintenance.access_maintenance_system_user
+DEL ir.model.access: maintenance.access_maintenance_team_admin_user
+DEL ir.model.access: maintenance.access_maintenance_team_user
+DEL ir.rule: maintenance.equipment_request_rule_admin_user (noupdate)
+DEL ir.rule: maintenance.equipment_request_rule_user (noupdate)
+DEL ir.rule: maintenance.equipment_rule_admin_user (noupdate)
+DEL ir.rule: maintenance.equipment_rule_user (noupdate)
+DEL ir.rule: maintenance.maintenance_equipment_category_comp_rule (noupdate)
+DEL ir.rule: maintenance.maintenance_equipment_comp_rule (noupdate)
+DEL ir.rule: maintenance.maintenance_request_comp_rule (noupdate)
+DEL ir.rule: maintenance.maintenance_team_comp_rule (noupdate)
+
+# NOTHING TO DO: ir.model.access/ir.rule -> ir.access, done by the framework/base (XML-IDs of the removed models dropped in base pre-migration, records recreated from the v20 data, deactivations transferred in base end-migration)
+
+DEL ir.ui.menu: maintenance.menu_m_request_calendar
+NEW ir.ui.view: maintenance.hr_equipment_request_view_card
+NEW ir.ui.view: maintenance.hr_equipment_stage_view_form
+
+# NOTHING TO DO: handled by ORM (views, actions, menus, reports)
+
+# DONE: post-migration, noupdate_changes.xml (activity type icon)
+
+# DONE (line of the mail analysis): maintenance.request email_cc (mail.thread.cc removed, 8 rows) -> existing partners with these addresses subscribed as followers in post-migration, legacy column kept
+# DONE (data repair of the v18 -> v19 migration): maintenance.equipment location (char, dropped in v19 without replacement, 1 value left in the orphan column) prepended to the equipment note in post-migration
+

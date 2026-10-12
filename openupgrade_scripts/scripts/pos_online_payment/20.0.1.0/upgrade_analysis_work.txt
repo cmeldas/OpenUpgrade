@@ -1,0 +1,14 @@
+---Models in module 'pos_online_payment'---
+---Fields in module 'pos_online_payment'---
+pos_online_payment / pos.payment.method       / is_online_payment (boolean)   : DEL
+pos_online_payment / pos.payment.method       / type (selection)              : is now stored
+pos_online_payment / pos.payment.method       / type (selection)              : not a function anymore
+pos_online_payment / pos.payment.method       / type (selection)              : now required
+# DONE: point_of_sale pre-migration _pos_payment_method stores type, 'online' where is_online_payment (no online payment method in production)
+---XML records in module 'pos_online_payment'---
+NEW ir.access: pos_online_payment.payment_provider_pos_manager
+DEL ir.model.access: pos_online_payment.payment_provider_pos_manager
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records
+NEW ir.ui.view: pos_online_payment.pos_payment_status
+NEW ir.ui.view: pos_online_payment.pos_state_header
+# NOTHING TO DO: handled by the module update

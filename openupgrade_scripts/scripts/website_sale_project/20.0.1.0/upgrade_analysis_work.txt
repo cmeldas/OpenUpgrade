@@ -1,0 +1,8 @@
+---Models in module 'website_sale_project'---
+---Fields in module 'website_sale_project'---
+website_sale_project / withdrawal.request       / project_id (many2one)         : NEW relation: project.project
+website_sale_project / withdrawal.request       / task_id (many2one)            : NEW relation: project.task
+
+# NOTHING TO DO: new module in v20 (auto_install), nothing to migrate
+
+---XML records in module 'website_sale_project'---

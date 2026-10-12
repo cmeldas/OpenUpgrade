@@ -1,0 +1,7 @@
+---Models in module 'mysubscription'---
+new model mysubscription.mysubscription [abstract]
+# NOTHING TO DO: new auto_install module (depends on base, web), installed by the framework's update_list patch as in a fresh v20 database. It only adds a client action reading ir.config_parameter (enterprise code, expiration date) and the IAP accounts, no stored data
+---Fields in module 'mysubscription'---
+---XML records in module 'mysubscription'---
+NEW ir.actions.client: mysubscription.action_mysubscription_dashboard
+# NOTHING TO DO: new module data

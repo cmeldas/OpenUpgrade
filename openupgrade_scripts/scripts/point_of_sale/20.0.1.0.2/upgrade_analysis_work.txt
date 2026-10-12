@@ -1,0 +1,458 @@
+---Models in module 'point_of_sale'---
+obsolete model pos.close.session.wizard [transient]
+# NOTHING TO DO: transient wizard, removed by the ORM
+model pos.pack.operation.lot (moved to pos_stock)
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+new model pos.order.receipt [abstract]
+# NOTHING TO DO: abstract model (receipt rendering)
+new model pos.prep.line
+new model pos.prep.order
+# NOTHING TO DO: preparation (kitchen) orders of new orders; v19 kept only a JSON snapshot in pos.order.last_order_preparation_change, see below
+new model pos.price.inclusion.wizard [transient]
+# NOTHING TO DO: transient wizard
+new model pos.snooze
+# NOTHING TO DO: new model
+---Fields in module 'point_of_sale'---
+point_of_sale / account.bank.statement   / pos_session_id (one2many)     : NEW relation: pos.session
+# DONE: inverse of pos.session.bank_statement_id, see post-migration _pos_cash_statements
+point_of_sale / account.move             / pos_session_correction_id (many2one): NEW relation: pos.session
+# NOTHING TO DO: v19 closing differences of bank methods (_create_diff_account_move_for_split_payment_method) were not linked to the session; production has none
+point_of_sale / account.move             / pos_session_ids (one2many)    : not stored anymore
+point_of_sale / account.move             / pos_session_ids (one2many)    : now a function
+# DONE: was the inverse of pos.session.move_id, now computed from pos_session_sales_id / _refunds_id / _correction_id: post-migration _link_session_moves
+point_of_sale / account.move             / pos_session_refunds_id (many2one): NEW relation: pos.session
+# NOTHING TO DO: a v19 closing entry holds sales and refunds, it is linked as sales entry (pos_session_sales_id)
+point_of_sale / account.move             / pos_session_sales_id (many2one): NEW relation: pos.session
+# DONE: post-migration _link_session_moves: account.move.pos_session_sales_id = session of the former pos.session.move_id (210 closing entries in production)
+point_of_sale / account.move.line        / pos_order_line_id (many2one)  : NEW relation: pos.order.line
+# NOTHING TO DO: informational link set on new invoice lines
+point_of_sale / account.tax              / pos_order_line_ids (many2many): NEW relation: pos.order.line
+# NOTHING TO DO: inverse of pos.order.line.tax_ids (same relation table account_tax_pos_order_line_rel)
+point_of_sale / pos.bill                 / name (char)                   : now required
+# DONE: pre-migration _pos_bill_name: empty names get the value (none in production)
+point_of_sale / pos.category             / active (boolean)              : NEW hasdefault: default
+point_of_sale / pos.category             / complete_name (char)          : NEW isfunction: function, stored
+# NOTHING TO DO: ORM default True / stored compute filled by the ORM
+point_of_sale / pos.category             / pos_config_ids (many2many)    : NEW relation: pos.config
+# NOTHING TO DO: inverse of pos.config.iface_available_categ_ids (same relation table pos_category_pos_config_rel)
+point_of_sale / pos.config               / auto_validate_electronic_payment (boolean): NEW hasdefault: default
+point_of_sale / pos.config               / auto_validate_terminal_payment (boolean): DEL
+# DONE: pre-migration rename_fields auto_validate_terminal_payment -> auto_validate_electronic_payment (2 rows)
+point_of_sale / pos.config               / closing_journal_id (many2one) : NEW relation: account.journal, required, isfunction: function, stored
+# DONE: pre-migration _pos_config_journals: closing_journal_id = former journal_id (journal of the closing entries), pre-filled so that the compute does not create a new journal 'POSC'; _closing_journals_to_sale switches it from 'general' to 'sale' (v20 posts out_invoice/out_refund there and _ensure_company_account_journal() looks for a 'sale' journal 'POSS') and gives it the default income account of the invoice journal (required for sale journals in the journal form, set by _fill_missing_values for new ones)
+point_of_sale / pos.config               / custom_email (char)           : NEW
+point_of_sale / pos.config               / custom_logo (binary)          : NEW attachment: True
+point_of_sale / pos.config               / custom_logo_name (char)       : NEW
+point_of_sale / pos.config               / custom_phone (char)           : NEW
+point_of_sale / pos.config               / custom_receipt_address (char) : NEW
+point_of_sale / pos.config               / custom_website (char)         : NEW
+# NOTHING TO DO: new receipt info fields, used only with use_custom_receipt_info (False)
+point_of_sale / pos.config               / default_partner_id (many2one) : NEW relation: res.partner, required, hasdefault: default
+# DONE: post-migration _pos_config_default_partner: configs point to point_of_sale.default_session_closing_partner (the column default created a duplicate before the data was loaded; duplicate deleted)
+point_of_sale / pos.config               / email (char)                  : NEW isfunction: function, stored
+# NOTHING TO DO: stored compute from the company, filled by the ORM
+point_of_sale / pos.config               / epson_printer_ip (char)       : DEL
+# DONE: post-migration _pos_config_receipt_printers: a receipt pos.printer (use_type 'receipt') per config with an ePoS printer IP (none in production)
+point_of_sale / pos.config               / iface_cashdrawer (boolean)    : DEL
+# DONE: post-migration _pos_config_receipt_printers: use_cashdrawer of the receipt printer created from epson_printer_ip. Production (1 row) used an IoT box, which v20 Community does not support: warning logged, configure by hand
+point_of_sale / pos.config               / iface_electronic_scale (boolean): DEL
+# NOTHING TO DO: IoT box scale, False in production
+point_of_sale / pos.config               / iface_print_skip_screen (boolean): DEL
+# NOTHING TO DO: no equivalent in v20 (2 rows); in v19 it only acted together with iface_print_auto (False in production), v20 shows a feedback screen after payment. Not the same as iface_printbill (bill before payment)
+point_of_sale / pos.config               / iface_print_via_proxy (boolean): DEL
+# NOTHING TO DO: printing through an IoT box, no v20 Community equivalent; post-migration logs the configs (1 row). The custom pos_customer_display_remote dropped the IoT option in its v20 port
+point_of_sale / pos.config               / iface_printbill (boolean)     : NEW
+# NOTHING TO DO: new option (moved from pos_restaurant, not installed)
+point_of_sale / pos.config               / iface_scan_via_proxy (boolean): DEL
+# NOTHING TO DO: False everywhere
+point_of_sale / pos.config               / invoice_journal_id (many2one) : DEL relation: account.journal
+# DONE: pre-migration _pos_config_journals: journal_id (v20: journal of the invoices) = former invoice_journal_id (2 rows, journal FA); column kept as openupgrade_legacy_20_0_invoice_journal_id, former journal_id copied to openupgrade_legacy_20_0_journal_id
+# NOTE: pos.order.sale_journal (stored related to session_id.config_id.journal_id) is intentionally not recomputed: past orders keep the journal their accounting was posted in (12933 orders, journal POSS); new orders get the invoice journal. The switched closing journal keeps refund_sequence False (stored compute not triggered by the SQL type change), so its closing receipts and credit notes continue the existing POSS sequence
+point_of_sale / pos.config               / is_closing_entry_by_product (boolean): DEL
+# DONE: pre-migration rename_fields -> use_closing_entry_by_product
+point_of_sale / pos.config               / is_header_or_footer (boolean) : DEL
+# DONE: pre-migration rename_fields -> use_header_or_footer (2 rows)
+point_of_sale / pos.config               / is_order_printer (boolean)    : DEL
+# DONE: pre-migration rename_fields -> use_order_printer, and preparation_devices set from it
+point_of_sale / pos.config               / is_posbox (boolean)           : DEL
+# NOTHING TO DO: IoT box (1 row), not supported by v20 Community; logged by post-migration _pos_config_receipt_printers
+point_of_sale / pos.config               / logo (binary)                 : NEW attachment: True, isfunction: function, stored
+# NOTHING TO DO: stored compute from the company, filled by the ORM
+point_of_sale / pos.config               / name (char)                   : translate is now 'True' ('False')
+# NOTHING TO DO: the ORM converts the column to jsonb ({'en_US': value}), other languages fall back to it
+point_of_sale / pos.config               / order_edit_tracking (boolean) : DEL
+# NOTHING TO DO: False everywhere; v20 always flags edited orders (is_edited)
+point_of_sale / pos.config               / phone (char)                  : NEW isfunction: function, stored
+# NOTHING TO DO: stored compute from the company, filled by the ORM
+point_of_sale / pos.config               / picking_policy (selection)    : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.config               / picking_type_id (many2one)    : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.config               / pos_snooze_ids (one2many)     : NEW relation: pos.snooze
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.config               / preparation_devices (boolean) : NEW
+# DONE: pre-migration _pos_config_new_fields: True where use_order_printer (former is_order_printer)
+point_of_sale / pos.config               / preparation_printer_ids (many2many): NEW relation: pos.printer
+point_of_sale / pos.config               / printer_ids (many2many)       : DEL relation: pos.printer
+# DONE: pre-migration rename_fields printer_ids -> preparation_printer_ids (same relation table pos_config_printer_rel; no printers in production)
+point_of_sale / pos.config               / proxy_ip (char)               : DEL
+# NOTHING TO DO: IoT box (1 row), not supported by v20 Community; logged by post-migration _pos_config_receipt_printers
+point_of_sale / pos.config               / receipt_address (char)        : NEW isfunction: function, stored
+# NOTHING TO DO: stored compute from the company, filled by the ORM
+point_of_sale / pos.config               / receipt_printer_ids (many2many): NEW relation: pos.printer
+# DONE: post-migration _pos_config_receipt_printers (from epson_printer_ip)
+point_of_sale / pos.config               / route_id (many2one)           : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.config               / session_closing_daily_hour (float): NEW hasdefault: default
+# NOTHING TO DO: ORM default 4.0, only used with session_closing_mode 'daily'
+point_of_sale / pos.config               / session_closing_mode (selection): NEW selection_keys: ['closing', 'daily'], hasdefault: default
+# DONE: pre-migration _pos_config_new_fields: 'closing' for existing configs (v19 behaviour: accounting at session closing) instead of the default 'daily' (nightly cron posting partial receipts of open sessions)
+point_of_sale / pos.config               / set_tip_after_payment (boolean): NEW
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.config               / ship_later (boolean)          : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.config               / tip_percentage_1 (integer)    : NEW hasdefault: default
+point_of_sale / pos.config               / tip_percentage_2 (integer)    : NEW hasdefault: default
+point_of_sale / pos.config               / tip_percentage_3 (integer)    : NEW hasdefault: default
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.config               / use_closing_entry_by_product (boolean): NEW
+# DONE: pre-migration rename_fields from is_closing_entry_by_product
+point_of_sale / pos.config               / use_custom_receipt_info (boolean): NEW hasdefault: default
+# NOTHING TO DO: default False, receipt_header / receipt_footer unchanged
+point_of_sale / pos.config               / use_download_invoice (boolean): NEW
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.config               / use_header_or_footer (boolean): NEW
+# DONE: pre-migration rename_fields from is_header_or_footer
+point_of_sale / pos.config               / use_order_printer (boolean)   : NEW
+# DONE: pre-migration rename_fields from is_order_printer
+point_of_sale / pos.config               / warehouse_id (many2one)       : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.config               / website (char)                : NEW isfunction: function, stored
+# NOTHING TO DO: stored compute from the company, filled by the ORM
+point_of_sale / pos.order                / defer_invoice_pdf (boolean)   : NEW
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.order                / failed_pickings (boolean)     : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.order                / last_order_preparation_change (char): DEL
+# NOTHING TO DO: JSON snapshot of the last kitchen printing ({"lines": {}, ...}; 12933 rows, 6 with lines, all orders done or paid). v20 keeps the preparation state in pos.prep.order/line, needed only for orders still in preparation; no draft orders and no preparation printers in production. Column kept by the framework
+point_of_sale / pos.order                / picking_count (integer)       : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.order                / picking_ids (one2many)        : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.order                / picking_type_id (many2one)    : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.order                / prep_order_ids (one2many)     : NEW relation: pos.prep.order
+point_of_sale / pos.order                / print_history (json)          : NEW
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.order                / shipping_date (date)          : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.order                / stock_reference_ids (many2many): module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.order.line           / pack_lot_ids (one2many)       : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.order.line           / prep_line_ids (one2many)      : NEW relation: pos.prep.line
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.pack.operation.lot   / display_name (char)           : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.pack.operation.lot   / lot_name (char)               : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.pack.operation.lot   / order_id (many2one)           : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.pack.operation.lot   / pos_order_line_id (many2one)  : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.pack.operation.lot   / product_id (many2one)         : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.payment              / amount_currency (float)       : NEW
+# NOTHING TO DO: only for payments in a foreign currency (v20 feature)
+point_of_sale / pos.payment              / currency_rate (float)         : is now stored
+point_of_sale / pos.payment              / currency_rate (float)         : not related anymore
+# DONE: pre-migration _pos_payment_currency_rate: was related to pos_order_id.currency_rate, copied from the order (12911 payments)
+point_of_sale / pos.payment              / foreign_currency_id (many2one): NEW relation: res.currency
+# NOTHING TO DO: only for payments in a foreign currency (v20 feature)
+point_of_sale / pos.payment              / qr_code (char)                : NEW
+# NOTHING TO DO: the column exists already with the QR images (data URI PNG, 2036 rows) of the custom module cmeldas_cz_qr_code_pos_receipt, whose v20 port reuses this core field (same type, same use as img src); its XML-ID of the field is dropped at the end, the field record stays owned by point_of_sale
+point_of_sale / pos.payment.method       / account_bank_statement_id (many2one): NEW relation: account.bank.statement
+# NOTHING TO DO: not written by the v20 code
+point_of_sale / pos.payment.method       / company_id (many2one)         : now required
+# DONE: pre-migration _pos_payment_method: empty company from the journal (none in production)
+point_of_sale / pos.payment.method       / currency_ids (many2many)      : NEW relation: res.currency
+# NOTHING TO DO: extra (foreign) currencies, empty = config currency only
+point_of_sale / pos.payment.method       / custom_image (binary)         : NEW attachment: True
+point_of_sale / pos.payment.method       / image (binary)                : not stored anymore
+point_of_sale / pos.payment.method       / image (binary)                : now a function
+# DONE: pre-migration _pos_payment_method: attachments of the v19 stored image moved to custom_image (3 rows); image is computed from it
+point_of_sale / pos.payment.method       / is_cash_count (boolean)       : DEL
+# DONE: pre-migration _pos_payment_method: equivalent to type 'cash', which is filled from the journal type
+point_of_sale / pos.payment.method       / payment_provider (selection)  : NEW selection_keys: function
+# DONE: pre-migration _pos_payment_method: payment_provider = use_payment_terminal (no terminal in production); payment_method_type 'qr_code' -> 'bank_qr_code' (selection function, 1 row)
+point_of_sale / pos.payment.method       / split_transactions (boolean)  : DEL
+# NOTHING TO DO: v20 closes a session into one receipt to the default partner and invoices pay-later orders to the customer, which is what 'Identify Customer' did (2 rows: Karta, Zákaznický účet)
+point_of_sale / pos.payment.method       / type (selection)              : is now stored
+point_of_sale / pos.payment.method       / type (selection)              : not a function anymore
+point_of_sale / pos.payment.method       / type (selection)              : now required
+# DONE: pre-migration _pos_payment_method: stored and required now, filled like the v19 compute (online / journal type cash or bank / pay_later); 5 methods
+point_of_sale / pos.payment.method       / use_payment_terminal (selection): DEL selection_keys: function
+# DONE: pre-migration _pos_payment_method: payment_provider = use_payment_terminal (no terminal in production); payment_method_type 'qr_code' -> 'bank_qr_code' (selection function, 1 row)
+point_of_sale / pos.prep.line            / attribute_value_ids (many2many): NEW relation: product.template.attribute.value
+point_of_sale / pos.prep.line            / cancelled (float)             : NEW hasdefault: default
+point_of_sale / pos.prep.line            / combo_line_ids (one2many)     : NEW relation: pos.prep.line
+point_of_sale / pos.prep.line            / combo_parent_id (many2one)    : NEW relation: pos.prep.line, isfunction: function, stored
+point_of_sale / pos.prep.line            / pos_order_line_id (many2one)  : NEW relation: pos.order.line
+point_of_sale / pos.prep.line            / prep_order_id (many2one)      : NEW relation: pos.prep.order
+point_of_sale / pos.prep.line            / product_id (many2one)         : NEW relation: product.product
+point_of_sale / pos.prep.line            / quantity (float)              : NEW required
+point_of_sale / pos.prep.line            / uuid (char)                   : NEW hasdefault: default
+point_of_sale / pos.prep.order           / pos_order_id (many2one)       : NEW relation: pos.order
+point_of_sale / pos.prep.order           / prep_line_ids (one2many)      : NEW relation: pos.prep.line
+point_of_sale / pos.prep.order           / uuid (char)                   : NEW hasdefault: default
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / pos.preset               / service_fee (boolean)         : NEW hasdefault: default
+point_of_sale / pos.preset               / service_fee_amount (float)    : NEW hasdefault: default
+point_of_sale / pos.preset               / service_fee_based_on (selection): NEW selection_keys: ['post_discount', 'pre_discount'], hasdefault: default
+point_of_sale / pos.preset               / service_fee_product_id (many2one): NEW relation: product.product, hasdefault: default
+point_of_sale / pos.preset               / service_fee_type (selection)  : NEW selection_keys: ['fixed', 'percent'], hasdefault: default
+# NOTHING TO DO: new options, ORM defaults (no presets in production)
+point_of_sale / pos.printer              / company_id (many2one)         : DEL relation: res.company, required
+# NOTHING TO DO: dropped (IoT / company), no printers in production
+point_of_sale / pos.printer              / epson_printer_ip (char)       : DEL
+# DONE: pre-migration rename_fields epson_printer_ip -> printer_ip (no printers in production)
+point_of_sale / pos.printer              / is_split_per_product (boolean): NEW
+point_of_sale / pos.printer              / paper_size (selection)        : NEW required, selection_keys: ['58', '80', 'label', 'tm_l100_40', 'tm_p60_60', 'tm_u22_58', 'tm_u22_70', 'tm_u22_76', 'tm_u33_70', 'tm_u33_76'], hasdefault: default
+# NOTHING TO DO: ORM defaults (use_type 'preparation' matches the v19 kitchen printers)
+point_of_sale / pos.printer              / pos_config_ids (many2many)    : table is now 'pos_config_receipt_printer_rel' ('pos_config_printer_rel')
+# NOTHING TO DO: v19 printers were preparation (kitchen) printers and stay linked through pos_config_printer_rel = pos.config.preparation_printer_ids; use_type defaults to 'preparation'
+point_of_sale / pos.printer              / printer_ip (char)             : NEW
+# DONE: pre-migration rename_fields epson_printer_ip -> printer_ip (no printers in production)
+point_of_sale / pos.printer              / printer_type (selection)      : selection_keys removed: [iot]
+# NOTHING TO DO: IoT printers have no v20 Community equivalent; no printers in production
+point_of_sale / pos.printer              / proxy_ip (char)               : DEL
+# NOTHING TO DO: dropped (IoT / company), no printers in production
+point_of_sale / pos.printer              / timeout (integer)             : NEW hasdefault: default
+point_of_sale / pos.printer              / use_cashdrawer (boolean)      : NEW
+point_of_sale / pos.printer              / use_lna (boolean)             : NEW
+point_of_sale / pos.printer              / use_type (selection)          : NEW selection_keys: ['preparation', 'receipt'], hasdefault: default
+# NOTHING TO DO: ORM defaults (use_type 'preparation' matches the v19 kitchen printers)
+point_of_sale / pos.session              / bank_payment_ids (one2many)   : DEL relation: account.payment
+# NOTHING TO DO: one2many, the inverse fields account.payment.pos_session_id / account.bank.statement.line.pos_session_id are kept
+point_of_sale / pos.session              / bank_statement_id (many2one)  : NEW relation: account.bank.statement
+# DONE: post-migration _pos_cash_statements: statement of the open session (opening balance and its cash lines)
+point_of_sale / pos.session              / cash_journal_id (many2one)    : DEL relation: account.journal
+point_of_sale / pos.session              / cash_real_transaction (float) : DEL
+point_of_sale / pos.session              / cash_register_balance_end_real (float): DEL
+point_of_sale / pos.session              / cash_register_balance_start (float): DEL
+# DONE: columns kept as openupgrade_legacy_20_0_* (pre rename_columns); post-migration _pos_cash_statements creates per POS cash journal a statement anchoring the running balance at the amount expected in the drawer (v20 reads the opening balance from journal.current_statement_balance) and the statement of the open session; balances of closed sessions stay in the legacy columns
+point_of_sale / pos.session              / correction_move_ids (one2many): NEW relation: account.move
+# NOTHING TO DO: see account.move.pos_session_correction_id / _refunds_id
+point_of_sale / pos.session              / failed_pickings (boolean)     : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.session              / move_id (many2one)            : DEL relation: account.move
+# DONE: kept as openupgrade_legacy_20_0_move_id, post-migration _link_session_moves links the entries through sale_move_ids (210 sessions; the 33 other closed sessions had no closing entry). The v19 entry (type 'entry', payment_term lines per payment method) is what _create_partial_reversal_move_from_session_closing reverses when an order of a closed session is invoiced. It is not linked as refund entry too: invoicing a refund of a pre-migration session then creates no invoice (v20 returns early), instead of reversing lines of a mixed entry
+point_of_sale / pos.session              / picking_count (integer)       : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / pos.session              / picking_ids (one2many)        : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.session              / refund_move_ids (one2many)    : NEW relation: account.move
+# NOTHING TO DO: see account.move.pos_session_correction_id / _refunds_id
+point_of_sale / pos.session              / rescue (boolean)              : DEL
+# NOTHING TO DO: flag of v19 rescue sessions (2), no meaning in v20; kept as openupgrade_legacy_20_0_rescue
+point_of_sale / pos.session              / sale_move_ids (one2many)      : NEW relation: account.move
+# DONE: post-migration _link_session_moves
+point_of_sale / pos.session              / statement_line_ids (one2many) : DEL relation: account.bank.statement.line
+# NOTHING TO DO: one2many, the inverse fields account.payment.pos_session_id / account.bank.statement.line.pos_session_id are kept
+point_of_sale / pos.session              / update_stock_at_closing (boolean): module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+point_of_sale / pos.snooze               / end_time (datetime)           : NEW
+point_of_sale / pos.snooze               / pos_config_id (many2one)      : NEW relation: pos.config, required
+point_of_sale / pos.snooze               / product_template_id (many2one): NEW relation: product.template
+point_of_sale / pos.snooze               / start_time (datetime)         : NEW required
+point_of_sale / pos.snooze               / type (selection)              : NEW required, selection_keys: ['product'], hasdefault: default
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+point_of_sale / product.attribute.custom.value / uuid (char)                   : NEW hasdefault: default
+# DONE: pre-migration _fill_new_uuid: one uuid per row (the lambda default would give all rows the same value); 0 rows in production
+point_of_sale / product.combo            / is_upsell (boolean)           : NEW hasdefault: default
+# NOTHING TO DO: default False (no combos in production)
+point_of_sale / res.company              / point_of_sale_update_stock_quantities (selection): module is now 'pos_stock' ('point_of_sale')
+point_of_sale / stock.picking            / pos_order_id (many2one)       : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / stock.picking            / pos_session_id (many2one)     : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / stock.picking.type       / has_stock_reports_to_print (boolean): module is now 'pos_stock' ('point_of_sale')
+point_of_sale / stock.reference          / pos_order_ids (many2many)     : module is now 'pos_stock' ('point_of_sale')
+point_of_sale / stock.warehouse          / pos_type_id (many2one)        : module is now 'pos_stock' ('point_of_sale')
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+---XML records in module 'point_of_sale'---
+NEW ir.access: point_of_sale.access_account_bank_statement
+NEW ir.access: point_of_sale.access_account_bank_statement_manager
+NEW ir.access: point_of_sale.access_account_cash_rounding_pos_user
+NEW ir.access: point_of_sale.access_account_journal_pos_user
+NEW ir.access: point_of_sale.access_account_payment_method_line_pos_user
+NEW ir.access: point_of_sale.access_account_payment_method_pos_user
+NEW ir.access: point_of_sale.access_barcode_nomenclature_pos_manager
+NEW ir.access: point_of_sale.access_barcode_nomenclature_pos_user
+NEW ir.access: point_of_sale.access_barcode_rule_pos_manager
+NEW ir.access: point_of_sale.access_barcode_rule_pos_user
+NEW ir.access: point_of_sale.access_decimal_precision_user
+NEW ir.access: point_of_sale.access_pos_bill
+NEW ir.access: point_of_sale.access_pos_config_manager
+NEW ir.access: point_of_sale.access_pos_config_system_user
+NEW ir.access: point_of_sale.access_pos_config_user
+NEW ir.access: point_of_sale.access_pos_confirmation_wizard
+NEW ir.access: point_of_sale.access_pos_daily_sales_reports_wizard
+NEW ir.access: point_of_sale.access_pos_details_wizard
+NEW ir.access: point_of_sale.access_pos_make_invoice
+NEW ir.access: point_of_sale.access_pos_make_invoice_manager
+NEW ir.access: point_of_sale.access_pos_make_payment
+NEW ir.access: point_of_sale.access_pos_note
+NEW ir.access: point_of_sale.access_pos_note_manager
+NEW ir.access: point_of_sale.access_pos_order
+NEW ir.access: point_of_sale.access_pos_order_line
+NEW ir.access: point_of_sale.access_pos_payment_method_manager
+NEW ir.access: point_of_sale.access_pos_payment_method_user
+NEW ir.access: point_of_sale.access_pos_payment_user
+NEW ir.access: point_of_sale.access_pos_preset
+NEW ir.access: point_of_sale.access_pos_preset_manager
+NEW ir.access: point_of_sale.access_pos_price_inclusion_wizard
+NEW ir.access: point_of_sale.access_pos_printer
+NEW ir.access: point_of_sale.access_pos_printer_manager
+NEW ir.access: point_of_sale.access_pos_session_user
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records
+NEW ir.access: point_of_sale.access_pos_snooze
+# NOTHING TO DO: new field/model without data to convert (ORM default or compute, or filled by the new code)
+NEW ir.access: point_of_sale.access_preparation_line
+NEW ir.access: point_of_sale.access_preparation_order
+NEW ir.access: point_of_sale.access_product_category_pos_manager
+NEW ir.access: point_of_sale.access_product_category_pos_user
+NEW ir.access: point_of_sale.access_product_combo_item_pos_user
+NEW ir.access: point_of_sale.access_product_combo_pos_user
+NEW ir.access: point_of_sale.access_product_pricelist_manager
+NEW ir.access: point_of_sale.access_product_pricelist_user
+NEW ir.access: point_of_sale.access_product_product
+NEW ir.access: point_of_sale.access_product_product_supplierinfo_user
+NEW ir.access: point_of_sale.access_product_template_pos_user
+NEW ir.access: point_of_sale.access_report_pos_order
+NEW ir.access: point_of_sale.access_res_partner_pos_manager
+NEW ir.access: point_of_sale.base_user_account_move_line_rule
+NEW ir.access: point_of_sale.res_partner_rule_user
+NEW ir.access: point_of_sale.res_partner_rule_write_self
+NEW ir.access: point_of_sale.rule_invoice_pos_user
+NEW ir.access: point_of_sale.rule_pos_bank_statement_line_account_user
+NEW ir.access: point_of_sale.rule_pos_bank_statement_line_account_user_1
+NEW ir.access: point_of_sale.rule_pos_bank_statement_line_user
+NEW ir.access: point_of_sale.rule_pos_bank_statement_line_user_1
+NEW ir.access: point_of_sale.rule_pos_config_multi_company
+NEW ir.access: point_of_sale.rule_pos_multi_company
+NEW ir.access: point_of_sale.rule_pos_order_line_multi_company
+NEW ir.access: point_of_sale.rule_pos_order_report_multi_company
+NEW ir.access: point_of_sale.rule_pos_payment_method_multi_company
+NEW ir.access: point_of_sale.rule_pos_payment_multi_company
+NEW ir.access: point_of_sale.rule_pos_session_multi_company
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records
+NEW ir.actions.act_window: point_of_sale.pos_product_attribute_action
+NEW ir.actions.act_window: point_of_sale.pos_product_combo_choice_action
+NEW ir.actions.act_window: point_of_sale.pos_product_pricelist_action
+DEL ir.actions.act_window: point_of_sale.product_product_action
+DEL ir.actions.act_window: point_of_sale.res_partner_action_edit_pos
+# NOTHING TO DO: handled by the module update
+NEW ir.actions.server: point_of_sale.ir_cron_pos_auto_order_invoicing_ir_actions_server (noupdate)
+NEW ir.actions.server: point_of_sale.ir_cron_process_pos_orders_ir_actions_server (noupdate)
+NEW ir.actions.server: point_of_sale.ir_cron_snooze_cleanup_ir_actions_server (noupdate)
+NEW ir.cron: point_of_sale.ir_cron_pos_auto_order_invoicing (noupdate)
+NEW ir.cron: point_of_sale.ir_cron_process_pos_orders (noupdate)
+NEW ir.cron: point_of_sale.ir_cron_snooze_cleanup (noupdate)
+# NOTHING TO DO: created by the module data (noupdate); ir_cron_pos_auto_order_invoicing is a no-op with session_closing_mode 'closing'
+DEL ir.model.access: point_of_sale.access_account_bank_statement_line
+DEL ir.model.access: point_of_sale.access_account_bank_statement_line_manager
+DEL ir.model.access: point_of_sale.access_account_cash_rounding_pos_user
+DEL ir.model.access: point_of_sale.access_account_journal_entry
+DEL ir.model.access: point_of_sale.access_account_journal_item
+DEL ir.model.access: point_of_sale.access_account_journal_pos_user
+DEL ir.model.access: point_of_sale.access_account_payment_method_line_pos_user
+DEL ir.model.access: point_of_sale.access_account_payment_method_pos_user
+DEL ir.model.access: point_of_sale.access_barcode_nomenclature_pos_manager
+DEL ir.model.access: point_of_sale.access_barcode_nomenclature_pos_user
+DEL ir.model.access: point_of_sale.access_barcode_rule_pos_manager
+DEL ir.model.access: point_of_sale.access_barcode_rule_pos_user
+DEL ir.model.access: point_of_sale.access_decimal_precision_user
+DEL ir.model.access: point_of_sale.access_pos_bill
+DEL ir.model.access: point_of_sale.access_pos_close_session_wizard
+DEL ir.model.access: point_of_sale.access_pos_config_manager
+DEL ir.model.access: point_of_sale.access_pos_config_system_user
+DEL ir.model.access: point_of_sale.access_pos_config_user
+DEL ir.model.access: point_of_sale.access_pos_confirmation_wizard
+DEL ir.model.access: point_of_sale.access_pos_confirmation_wizard_manager
+DEL ir.model.access: point_of_sale.access_pos_daily_sales_reports_wizard
+DEL ir.model.access: point_of_sale.access_pos_details_wizard
+DEL ir.model.access: point_of_sale.access_pos_make_invoice
+DEL ir.model.access: point_of_sale.access_pos_make_invoice_manager
+DEL ir.model.access: point_of_sale.access_pos_make_payment
+DEL ir.model.access: point_of_sale.access_pos_note
+DEL ir.model.access: point_of_sale.access_pos_note_manager
+DEL ir.model.access: point_of_sale.access_pos_order
+DEL ir.model.access: point_of_sale.access_pos_order_line
+DEL ir.model.access: point_of_sale.access_pos_order_stock_worker
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records
+DEL ir.model.access: point_of_sale.access_pos_pack_operation_lot
+# DONE: pre-migration: moved to the new module pos_stock (update_module_moved_models / update_module_moved_fields, selection XML-IDs, relation stock_reference_pos_order_rel); data untouched
+DEL ir.model.access: point_of_sale.access_pos_payment_method_manager
+DEL ir.model.access: point_of_sale.access_pos_payment_method_user
+DEL ir.model.access: point_of_sale.access_pos_payment_user
+DEL ir.model.access: point_of_sale.access_pos_preset
+DEL ir.model.access: point_of_sale.access_pos_preset_manager
+DEL ir.model.access: point_of_sale.access_pos_printer
+DEL ir.model.access: point_of_sale.access_pos_printer_manager
+DEL ir.model.access: point_of_sale.access_pos_session_user
+DEL ir.model.access: point_of_sale.access_product_category_pos_manager
+DEL ir.model.access: point_of_sale.access_product_category_pos_user
+DEL ir.model.access: point_of_sale.access_product_combo_item_pos_user
+DEL ir.model.access: point_of_sale.access_product_combo_pos_user
+DEL ir.model.access: point_of_sale.access_product_pricelist_manager
+DEL ir.model.access: point_of_sale.access_product_pricelist_user
+DEL ir.model.access: point_of_sale.access_product_product
+DEL ir.model.access: point_of_sale.access_product_product_supplierinfo_user
+DEL ir.model.access: point_of_sale.access_product_template_pos_user
+DEL ir.model.access: point_of_sale.access_report_pos_order
+DEL ir.model.access: point_of_sale.access_stock_location_manager
+DEL ir.model.access: point_of_sale.access_stock_move_pos_user
+DEL ir.model.access: point_of_sale.access_stock_picking_pos_user
+DEL ir.model.access: point_of_sale.access_stock_warehouse_manager
+DEL ir.model.access: point_of_sale.access_stock_warehouse_pos_user
+DEL ir.rule: point_of_sale.rule_invoice_line_pos_user (noupdate)
+DEL ir.rule: point_of_sale.rule_invoice_pos_user (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_bank_statement_account_user (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_bank_statement_line_account_user (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_bank_statement_line_user (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_config_multi_company (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_multi_company (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_order_line_multi_company (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_order_report_multi_company (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_payment_method_multi_company (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_payment_multi_company (noupdate)
+DEL ir.rule: point_of_sale.rule_pos_session_multi_company (noupdate)
+# NOTHING TO DO: base pre-migration deletes the XML-IDs of ir.model.access / ir.rule (model replaced by ir.access), the module data creates the ir.access records
+NEW ir.ui.menu: point_of_sale.menu_pos_printers
+DEL ir.ui.menu: point_of_sale.menu_point_of_sale_list
+DEL ir.ui.menu: point_of_sale.menu_pos_preparation_printer
+DEL ir.ui.menu: point_of_sale.pos_config_menu_action_product_product
+# NOTHING TO DO: handled by the module update
+NEW ir.ui.view: point_of_sale.company_info_receipt
+NEW ir.ui.view: point_of_sale.pos_cash_move_receipt
+NEW ir.ui.view: point_of_sale.pos_order_change_receipt
+NEW ir.ui.view: point_of_sale.pos_order_change_receipt_line
+NEW ir.ui.view: point_of_sale.pos_order_change_receipt_zpl
+NEW ir.ui.view: point_of_sale.pos_order_receipt
+NEW ir.ui.view: point_of_sale.pos_order_receipt_footer
+NEW ir.ui.view: point_of_sale.pos_order_receipt_header
+NEW ir.ui.view: point_of_sale.pos_order_receipt_style
+NEW ir.ui.view: point_of_sale.pos_orderline_receipt
+NEW ir.ui.view: point_of_sale.pos_orderline_receipt_information
+NEW ir.ui.view: point_of_sale.pos_sale_details_receipt
+NEW ir.ui.view: point_of_sale.pos_sale_details_receipt_product_line
+NEW ir.ui.view: point_of_sale.pos_tip_receipt
+NEW ir.ui.view: point_of_sale.product_pricelist_view_kanban_pos
+NEW ir.ui.view: point_of_sale.uom_uom_view_form
+NEW ir.ui.view: point_of_sale.view_partner_form_pos_ui
+NEW ir.ui.view: point_of_sale.view_pos_category_search
+NEW ir.ui.view: point_of_sale.view_pos_payment_method_kanban
+NEW ir.ui.view: point_of_sale.view_pos_price_inclusion_wizard_form
+NEW ir.ui.view: point_of_sale.view_pos_printer_kanban
+DEL ir.ui.view: point_of_sale.product_product_tree_view
+DEL ir.ui.view: point_of_sale.product_template_tree_view
+DEL ir.ui.view: point_of_sale.product_uom_form_view_inherit
+DEL ir.ui.view: point_of_sale.stock_reference_pos_view_form
+DEL ir.ui.view: point_of_sale.view_form_pos_close_session_wizard
+# NOTHING TO DO: handled by the module update, no website copies of these views
+NEW product.product: point_of_sale.product_product_service_fee (noupdate)
+NEW product.template: point_of_sale.product_product_service_fee_product_template (noupdate)
+# NOTHING TO DO: created by the module data
+NEW res.partner: point_of_sale.default_session_closing_partner (noupdate)
+# DONE: created by the module data; post-migration _pos_config_default_partner points the existing configs to it
+# noupdate_changes.xml (not generated by the analysis tool, taken from the reference analysis):
+# DONE: post-migration load_data: point_of_sale.product_product_tip weight 0.01 -> 0.0

@@ -1,0 +1,59 @@
+---Models in module 'web'---
+---Fields in module 'web'---
+---XML records in module 'web'---
+NEW ir.access: web.access_base_document_layout
+NEW ir.access: web.res_users_settings_embedded_action_rule_admin
+NEW ir.access: web.res_users_settings_embedded_action_rule_user
+DEL ir.model.access: web.access_base_document_layout
+DEL ir.model.access: web.access_res_users_settings_embedded_action_user
+DEL ir.rule: web.res_users_settings_embedded_action_rule_admin (noupdate)
+DEL ir.rule: web.res_users_settings_embedded_action_rule_user (noupdate)
+
+# NOTHING TO DO: ir.model.access/ir.rule are replaced by ir.access, handled in base
+
+NEW ir.ui.view: web.check_identity
+NEW ir.ui.view: web.company_address_list
+NEW ir.ui.view: web.external_layout_body
+NEW ir.ui.view: web.external_layout_center
+NEW ir.ui.view: web.external_layout_compact
+NEW ir.ui.view: web.external_layout_dual
+NEW ir.ui.view: web.external_layout_footer_content
+NEW ir.ui.view: web.external_layout_lines
+
+# NOTHING TO DO: new records
+
+DEL ir.ui.view: web.external_layout_bold
+DEL ir.ui.view: web.external_layout_boxed
+DEL ir.ui.view: web.external_layout_striped
+
+# DONE: post-migration switches companies using the removed bold/boxed/striped layouts to web.external_layout_standard (production uses wave, unchanged)
+
+DEL ir.ui.view: web.qunit_suite
+DEL ir.ui.view: web.test_helpers
+
+# NOTHING TO DO: removed by Odoo
+
+NEW report.layout: web.report_layout_center
+NEW report.layout: web.report_layout_compact
+NEW report.layout: web.report_layout_dual
+NEW report.layout: web.report_layout_lines
+
+# NOTHING TO DO: new records
+
+DEL report.layout: web.report_layout_bold
+DEL report.layout: web.report_layout_boxed
+DEL report.layout: web.report_layout_striped
+
+# DONE: post-migration switches companies using the removed bold/boxed/striped layouts to web.external_layout_standard (production uses wave, unchanged)
+
+# Not in the analysis (QWeb engine changes):
+# DONE: end-migration renames t-esc (and t-raw in QWeb views) to t-out in the views kept from 19.0
+#   (website-specific copies, views without updatable XML-ID, noupdate views), all languages of arch_db,
+#   including @t-esc in xpath expressions and <attribute name="t-esc"> of inheritance specs. 20.0 removed
+#   both directives (ir.qweb logs "Unknown directives" and renders nothing; Owl 3 too); in 19.0 they were
+#   aliases of t-out. Production: 6 website COW copies and 7 noupdate mail/notification layouts
+#   (account.email_template_mail_gateway_failed, digest.digest_mail_main, digest.digest_tool_kpi,
+#   portal.portal_share_template, project.project_message_user_assigned,
+#   purchase.track_po_line_template, purchase.track_po_line_qty_received_template)
+# DONE: end-migration drops the unused active="..." attribute that 19.0 left on the root of some QWeb
+#   archs (production: COW copy of website_sale.extra_info), logged as unknown directive by 20.0

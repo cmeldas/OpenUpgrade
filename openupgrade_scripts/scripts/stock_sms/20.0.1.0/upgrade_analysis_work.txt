@@ -1,0 +1,15 @@
+---Models in module 'stock_sms'---
+---Fields in module 'stock_sms'---
+---XML records in module 'stock_sms'---
+NEW ir.access: stock_sms.access_confirm_stock_sms
+NEW ir.access: stock_sms.access_sms_template_stock_manager
+NEW ir.access: stock_sms.ir_rule_sms_template_stock_manager
+DEL ir.model.access: stock_sms.access_confirm_stock_sms
+DEL ir.model.access: stock_sms.access_sms_template_stock_manager
+DEL ir.rule: stock_sms.ir_rule_sms_template_stock_manager (noupdate)
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+---noupdate and other changes not listed above---
+
+# DONE: post-migration loads noupdate_changes.xml (new body of stock_sms.sms_template_data_stock_delivery, translations kept: body is translate=True, the cs_CZ value stays the 19.0 Czech text, the 20.0 cs.po has an empty msgstr for the new text)

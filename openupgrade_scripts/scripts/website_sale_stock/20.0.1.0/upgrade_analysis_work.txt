@@ -1,0 +1,40 @@
+---Models in module 'website_sale_stock'---
+---Fields in module 'website_sale_stock'---
+website_sale_stock / product.product          / stock_notification_partner_ids (many2many): DEL relation: res.partner
+
+# DONE: post-migration copies stock_notification_product_partner_rel into product.stock.notification (table product_stock_notification_rel, required website: partner website, else first website of the partner company / first website); 0 subscriptions in production
+
+website_sale_stock / product.template         / allow_out_of_stock_order (boolean): module is now 'website_sale' ('website_sale_stock')
+website_sale_stock / product.template         / available_threshold (float)   : module is now 'website_sale' ('website_sale_stock')
+website_sale_stock / product.template         / out_of_stock_message (html)   : module is now 'website_sale' ('website_sale_stock')
+website_sale_stock / product.template         / show_availability (boolean)   : module is now 'website_sale' ('website_sale_stock')
+
+# NOTHING TO DO: moved to website_sale, same columns
+
+website_sale_stock / res.partner              / pickup_delivery_method_id (many2one): NEW relation: delivery.carrier
+
+# NOTHING TO DO: new field
+
+---XML records in module 'website_sale_stock'---
+DEL ir.actions.server: website_sale_stock.ir_cron_send_availability_email_ir_actions_server
+DEL ir.cron: website_sale_stock.ir_cron_send_availability_email
+
+# DONE: website_sale pre-migration renames them to website_sale.ir_cron_send_availability_email(_ir_actions_server), the 20.0 back in stock cron (noupdate file), so the cron and its active state are kept
+
+NEW ir.ui.view: website_sale_stock.choose_delivery_carrier_view_form_inherit_website_sale
+NEW ir.ui.view: website_sale_stock.pickup_address_on_checkout
+NEW ir.ui.view: website_sale_stock.pickup_delivery_method
+NEW ir.ui.view: website_sale_stock.sale_order_list_view_ecommerce
+NEW ir.ui.view: website_sale_stock.sale_order_view_form
+NEW ir.ui.view: website_sale_stock.view_picking_form_inherit_website_sale
+
+# NOTHING TO DO: new records
+
+DEL ir.ui.view: website_sale_stock.availability_email_body
+DEL ir.ui.view: website_sale_stock.product_pages_tree_view
+DEL ir.ui.view: website_sale_stock.product_template_form_view_inherit_website_sale_stock
+DEL ir.ui.view: website_sale_stock.view_picking_form_inherit_website_sale_stock
+DEL ir.ui.view: website_sale_stock.website_sale_stock_cart_lines
+DEL ir.ui.view: website_sale_stock.website_sale_stock_product
+
+# NOTHING TO DO: removed by Odoo at the end of the update

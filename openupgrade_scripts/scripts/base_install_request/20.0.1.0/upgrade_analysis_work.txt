@@ -1,0 +1,20 @@
+---Models in module 'base_install_request'---
+---Fields in module 'base_install_request'---
+---XML records in module 'base_install_request'---
+NEW ir.access: base_install_request.access_base_module_install_request
+NEW ir.access: base_install_request.access_base_module_install_review
+NEW ir.access: base_install_request.access_ir_module_category_group_user
+NEW ir.access: base_install_request.access_ir_module_module_dependency_group_user
+NEW ir.access: base_install_request.access_ir_module_module_exclusion_group_user
+NEW ir.access: base_install_request.access_ir_module_module_group_user
+DEL ir.model.access: base_install_request.access_base_module_install_request
+DEL ir.model.access: base_install_request.access_base_module_install_review
+DEL ir.model.access: base_install_request.access_ir_module_category_group_user
+DEL ir.model.access: base_install_request.access_ir_module_module_dependency_group_user
+DEL ir.model.access: base_install_request.access_ir_module_module_exclusion_group_user
+DEL ir.model.access: base_install_request.access_ir_module_module_group_user
+# NOTHING TO DO: ir.model.access is replaced by ir.access; the old XML-IDs are saved and released in base pre-migration. The ACLs are active and unmodified in production
+NEW ir.ui.view: base_install_request.mail_installation_request_template
+# NOTHING TO DO: new QWeb template, used through the new field qweb_template_xmlid of the transient wizard
+DEL mail.template: base_install_request.mail_template_base_install_request (noupdate)
+# DONE: post-migration: deleted with delete_records_safely_by_xml_id (noupdate, so the end-of-update cleanup would keep it; its cs_CZ body was already lost by the 19.0 migration)

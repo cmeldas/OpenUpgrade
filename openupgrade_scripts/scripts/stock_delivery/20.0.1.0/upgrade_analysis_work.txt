@@ -1,0 +1,88 @@
+---Models in module 'stock_delivery'---
+new model pay.on.delivery [transient]
+
+# NOTHING TO DO: no data (transient/abstract model)
+
+---Fields in module 'stock_delivery'---
+stock_delivery / product.product          / country_of_origin (many2one)  : is now stored
+stock_delivery / product.product          / country_of_origin (many2one)  : not related anymore
+stock_delivery / product.product          / country_of_origin (many2one)  : previously in module product
+stock_delivery / product.product          / hs_code (char)                : is now stored
+stock_delivery / product.product          / hs_code (char)                : not related anymore
+stock_delivery / product.product          / hs_code (char)                : previously in module product
+
+# DONE: post-migration copies the template values to all variants (country_of_origin: template 13 -> 6 variants)
+
+stock_delivery / product.template         / country_of_origin (many2one)  : not stored anymore
+stock_delivery / product.template         / country_of_origin (many2one)  : now a function
+stock_delivery / product.template         / hs_code (char)                : not stored anymore
+stock_delivery / product.template         / hs_code (char)                : now a function
+
+# DONE: computed from the variant now, see above; the template columns are kept
+
+stock_delivery / res.partner              / pickup_location_data (json)   : NEW
+
+# NOTHING TO DO: new field; the pickup point of draft carts (sale.order.pickup_location_data, 25 rows) is not converted, see delivery
+
+stock_delivery / stock.picking.type       / auto_print_carrier_labels (boolean): NEW
+stock_delivery / stock.picking.type       / auto_print_export_documents (boolean): NEW
+stock_delivery / stock.picking.type       / batch_group_by_carrier (boolean): NEW
+stock_delivery / stock.picking.type       / batch_max_weight (integer)    : NEW
+
+# NOTHING TO DO: new options, empty
+
+---XML records in module 'stock_delivery'---
+NEW ir.access: stock_delivery.access_choose_delivery_carrier_stock_user
+NEW ir.access: stock_delivery.access_delivery_carrier_stock_manager
+NEW ir.access: stock_delivery.access_delivery_carrier_stock_user
+NEW ir.access: stock_delivery.access_delivery_price_rule_stock_manager
+NEW ir.access: stock_delivery.access_delivery_price_rule_stock_user
+NEW ir.access: stock_delivery.access_delivery_zip_prefix_stock_manager
+NEW ir.access: stock_delivery.access_delivery_zip_prefix_stock_user
+NEW ir.access: stock_delivery.access_pay_on_delivery_sale_user
+NEW ir.access: stock_delivery.access_pay_on_delivery_stock_user
+NEW ir.access: stock_delivery.access_printer_stock_manager
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.actions.act_window: stock_delivery.open_export_docs_report
+NEW ir.actions.act_window: stock_delivery.open_shipping_labels_report
+NEW ir.actions.report: stock_delivery.action_report_shipping_docs
+NEW ir.actions.report: stock_delivery.action_report_shipping_labels
+
+# NOTHING TO DO: new actions
+
+DEL ir.model.access: stock_delivery.access_choose_delivery_carrier_stock_user
+DEL ir.model.access: stock_delivery.access_delivery_carrier_stock_manager
+DEL ir.model.access: stock_delivery.access_delivery_carrier_stock_user
+DEL ir.model.access: stock_delivery.access_delivery_price_rule_stock_manager
+DEL ir.model.access: stock_delivery.access_delivery_price_rule_stock_user
+DEL ir.model.access: stock_delivery.access_delivery_zip_prefix_stock_manager
+DEL ir.model.access: stock_delivery.access_delivery_zip_prefix_stock_user
+
+# NOTHING TO DO: ir.model.access and ir.rule are replaced by ir.access in 20.0; base pre-migration drops the XML-IDs of the removed models and the module data creates the ir.access records
+
+NEW ir.ui.menu: stock_delivery.cached_printers_action
+NEW ir.ui.menu: stock_delivery.cached_printers_section
+NEW ir.ui.menu: stock_delivery.manage_printers_action
+
+# NOTHING TO DO: new menus
+
+NEW ir.ui.view: stock_delivery.barcode_alternative_label
+NEW ir.ui.view: stock_delivery.barcode_normal_label
+NEW ir.ui.view: stock_delivery.package_pdf_label_delivery
+NEW ir.ui.view: stock_delivery.package_zpl_label_delivery
+NEW ir.ui.view: stock_delivery.pay_on_delivery_form
+NEW ir.ui.view: stock_delivery.product_product_hs_code
+NEW ir.ui.view: stock_delivery.product_product_hs_code_list
+NEW ir.ui.view: stock_delivery.report_shipping_docs
+NEW ir.ui.view: stock_delivery.report_shipping_labels
+
+# NOTHING TO DO: new views
+
+DEL ir.ui.view: stock_delivery.alternative_zpl_label
+DEL ir.ui.view: stock_delivery.label_package_template_view_delivery
+DEL ir.ui.view: stock_delivery.normal_zpl_label
+DEL ir.ui.view: stock_delivery.report_package_barcode_small_delivery
+
+# NOTHING TO DO: obsolete views are removed by the ORM

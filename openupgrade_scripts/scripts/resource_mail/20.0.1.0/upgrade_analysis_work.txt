@@ -1,0 +1,7 @@
+---Models in module 'resource_mail'---
+---Fields in module 'resource_mail'---
+resource_mail / resource.resource        / color (integer)               : module is now 'resource' ('resource_mail')
+
+# NOTHING TO DO: field moved to resource, same column, the ORM moves the XML-ID of the field
+
+---XML records in module 'resource_mail'---
