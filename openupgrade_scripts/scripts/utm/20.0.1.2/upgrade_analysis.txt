@@ -1,0 +1,43 @@
+---Models in module 'utm'---
+obsolete model utm.source.mixin [abstract]
+---Fields in module 'utm'---
+utm          / account.move             / utm_reference (reference)     : NEW
+utm          / link.tracker             / utm_reference (reference)     : NEW
+utm          / mailing.mailing          / source_id (many2one)          : module is now 'mass_mailing' ('utm')
+utm          / mailing.mailing          / source_id (many2one)          : now a function
+utm          / sale.order               / utm_reference (reference)     : NEW
+---XML records in module 'utm'---
+NEW ir.access: utm.access_utm_campaign_system
+NEW ir.access: utm.access_utm_campaign_user
+NEW ir.access: utm.access_utm_medium_system
+NEW ir.access: utm.access_utm_medium_user
+NEW ir.access: utm.access_utm_source_system
+NEW ir.access: utm.access_utm_source_user
+NEW ir.access: utm.access_utm_stage_system
+NEW ir.access: utm.access_utm_stage_user
+NEW ir.access: utm.access_utm_tag_system
+NEW ir.access: utm.access_utm_tag_user
+DEL ir.model.access: utm.access_utm_campaign_system
+DEL ir.model.access: utm.access_utm_campaign_user
+DEL ir.model.access: utm.access_utm_medium_system
+DEL ir.model.access: utm.access_utm_medium_user
+DEL ir.model.access: utm.access_utm_source_system
+DEL ir.model.access: utm.access_utm_source_user
+DEL ir.model.access: utm.access_utm_stage_system
+DEL ir.model.access: utm.access_utm_stage_user
+DEL ir.model.access: utm.access_utm_tag_system
+DEL ir.model.access: utm.access_utm_tag_user
+NEW utm.medium: utm.utm_medium_messaging (noupdate)
+NEW utm.medium: utm.utm_medium_social_media (noupdate)
+DEL utm.medium: utm.utm_medium_banner (noupdate)
+DEL utm.medium: utm.utm_medium_facebook (noupdate)
+DEL utm.medium: utm.utm_medium_google_adwords (noupdate)
+DEL utm.medium: utm.utm_medium_linkedin (noupdate)
+DEL utm.medium: utm.utm_medium_television (noupdate)
+DEL utm.medium: utm.utm_medium_twitter (noupdate)
+NEW utm.source: utm.utm_source_google (noupdate)
+NEW utm.source: utm.utm_source_instagram (noupdate)
+NEW utm.source: utm.utm_source_livechat (noupdate)
+NEW utm.source: utm.utm_source_survey (noupdate)
+NEW utm.source: utm.utm_source_youtube (noupdate)
+DEL utm.source: utm.utm_source_search_engine (noupdate)

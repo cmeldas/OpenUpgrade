@@ -1,0 +1,33 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (27 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'base'---
+obsolete model ir.model.access  => 1307 rows in table ir_model_access; own addons: auto_database_backup/__manifest__.py:44, cmeldas_cz_qr_code_pos_receipt/__manifest__.py:15 (+6)
+obsolete model ir.rule  => 343 rows in table ir_rule
+obsolete model res.bank  => 56 rows in table res_bank; own addons: cz_qr_payment/hooks.py:17, cz_qr_payment/hooks.py:65
+---Fields in module 'base'---
+base         / ir.actions.client        / params_store (binary)         : type is now 'text' ('binary')  => 5 rows with a value
+base         / ir.actions.report        / report_file (char)            : DEL  => 61 rows with a value
+base         / ir.mail_server           / max_email_size (float)        : DEL  => 1 rows with a value
+base         / ir.model.fields          / index (boolean)               : type is now 'selection' ('boolean')  => 735 rows with a value
+base         / res.company              / layout_background (selection) : DEL required, selection_keys: ['Blank', 'Custom', 'Demo logo']  => 1 rows with a value
+base         / res.company              / logo_web (binary)             : attachment is now 'True' ('False')  => 1 rows with a value
+base         / res.country              / zip_required (boolean)        : DEL  => 242 rows with a value
+base         / res.device.log           / browser (char)                : DEL  => 182 rows with a value
+base         / res.device.log           / device_type (selection)       : DEL selection_keys: ['computer', 'mobile']  => 182 rows with a value
+base         / res.device.log           / platform (char)               : DEL  => 182 rows with a value
+base         / res.device.log           / user_agent (char)             : NEW required  => 182 existing rows without value (required, no default)
+base         / res.device.log           / user_id (many2one)            : now required  => 3 rows are NULL (no default)
+base         / res.device.log           / user_id (many2one)            : type is now 'integer' ('many2one')  => 179 rows with a value
+base         / res.groups               / rule_groups (many2many)       : DEL relation: ir.rule  => 246 rows in relation table
+base         / res.groups.privilege     / description (text)            : translate is now 'True' ('False')  => 1 rows with a value
+base         / res.groups.privilege     / placeholder (char)            : translate is now 'True' ('False')  => 21 rows with a value
+base         / res.partner              / company_registry (char)       : DEL  => 7 rows with a value
+base         / res.partner.bank         / acc_holder_name (char)        : DEL  => 2 rows with a value; rename candidate: holder_name
+base         / res.partner.bank         / acc_number (char)             : DEL required  => 2 rows with a value; rename candidate: account_number; own addons: cz_qr_payment/hooks.py:48, cz_qr_payment/hooks.py:55 (+13)
+base         / res.partner.bank         / account_number (char)         : NEW required  => 2 existing rows without value (required, no default)
+base         / res.partner.bank         / bank_id (many2one)            : DEL relation: res.bank  => 2 rows with a value; own addons: cz_qr_payment/hooks.py:29, cz_qr_payment/hooks.py:78 (+2)
+base         / res.partner.bank         / currency_id (many2one)        : DEL relation: res.currency  => 2 rows with a value; own addons: fio_qr_payment_validation/models/fio_bank_transaction.py:35, fio_qr_payment_validation/models/fio_bank_transaction.py:36 (+19)
+base         / res.partner.bank         / sanitized_acc_number (char)   : DEL  => 2 rows with a value; rename candidate: sanitized_account_number; own addons: cz_qr_payment/models/res_partner_bank.py:92, cz_qr_payment/models/res_partner_bank.py:134 (+1)
+---XML records in module 'base'---
+DEL ir.module.category: base.module_category_manufacturing_manufacturing (noupdate)  => referenced by res_groups.category_id 2

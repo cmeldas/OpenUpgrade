@@ -1,0 +1,6 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (0 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'partner_autocomplete'---
+---Fields in module 'partner_autocomplete'---
+---XML records in module 'partner_autocomplete'---

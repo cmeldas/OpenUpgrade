@@ -1,0 +1,16 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (10 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'stock'---
+obsolete model stock.scrap  => 293 rows in table stock_scrap; own addons: mrp_barcode_scrap/models/scrap_dashboard.py:142, mrp_barcode_scrap/static/src/js/scrap_dashboard.js:551
+---Fields in module 'stock'---
+stock        / product.template         / sale_delay (integer)          : now company_dependent  => 77 rows with a value
+stock        / product.template         / tracking (selection)          : selection_keys removed: [none]  => rows with removed keys: none: 77; own addons: mrp_barcode_scrap/models/product.py:91, mrp_barcode_scrap/tests/test_quick_inventory.py:85
+stock        / res.company              / horizon_days (float)          : type is now 'integer' ('float')  => 1 rows with a value
+stock        / stock.move               / location_final_id (many2one)  : DEL relation: stock.location  => 949 rows with a value
+stock        / stock.move               / product_uom (many2one)        : DEL relation: uom.uom, required  => 30357 rows with a value
+stock        / stock.move               / scrap_id (many2one)           : DEL relation: stock.scrap  => 293 rows with a value
+stock        / stock.move.line          / product_uom_id (many2one)     : DEL relation: uom.uom, required  => 30905 rows with a value; rename candidate: uom_id
+stock        / stock.picking.type       / sequence_code (char)          : not stored anymore  => 12 rows with a value
+stock        / stock.scrap.reason.tag   / color (char)                  : type is now 'integer' ('char')  => 5 rows with a value
+---XML records in module 'stock'---

@@ -1,0 +1,28 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (22 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'website'---
+---Fields in module 'website'---
+website      / website                  / social_facebook (char)        : DEL  => 1 rows with a value
+website      / website                  / social_instagram (char)       : DEL  => 1 rows with a value
+website      / website                  / social_youtube (char)         : DEL  => 1 rows with a value
+website      / website.menu             / url (char)                    : not stored anymore  => 15 rows with a value
+website      / website.page             / url (char)                    : translate is now 'True' ('False')  => 18 rows with a value
+---XML records in module 'website'---
+DEL ir.ui.view: website.new_page_template_about_full_1_s_text_block_h1  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_about_full_1_s_text_block_h2  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_about_full_s_numbers  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_about_map_s_text_block_h1  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_about_mini_s_cover (noupdate)  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_about_personal_s_numbers  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_about_personal_s_text_block_h2  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_landing_0_s_cover  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_landing_2_s_three_columns  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_landing_3_s_text_block_h2  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_landing_4_s_cover  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_pricing_5_s_text_block_h1  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_pricing_s_showcase (noupdate)  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_pricing_s_text_block_h1  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_team_0_s_text_block_h1 (noupdate)  => referenced by 1 child views without XML ID
+DEL ir.ui.view: website.new_page_template_team_1_s_text_block_h1 (noupdate)  => referenced by 1 child views without XML ID
+DEL website: website.default_website [renamed to base module] (noupdate)  => referenced by delivery_carrier.website_id 1, product_pricelist.website_id 1, res_company.website_id 1, sale_order.website_id 362, website_checkout_step.website_id 4, website_menu.website_id 15, website_page.website_id 14, website_visitor.website_id 39379

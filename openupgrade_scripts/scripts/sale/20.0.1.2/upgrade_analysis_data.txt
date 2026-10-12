@@ -1,0 +1,9 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (3 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'sale'---
+---Fields in module 'sale'---
+sale         / product.template         / expense_policy (selection)    : DEL selection_keys: ['cost', 'no', 'sales_price']  => 77 rows with a value; rename candidate: reinvoice_policy
+sale         / product.template         / sale_delay (integer)          : now company_dependent  => 77 rows with a value
+sale         / sale.order.line          / customer_lead (float)         : type is now 'integer' ('float')  => 355 rows with a value
+---XML records in module 'sale'---

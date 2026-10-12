@@ -1,0 +1,21 @@
+---Models in module 'base_address_extended'---
+new model res.city
+---Fields in module 'base_address_extended'---
+base_address_extended / res.city                 / country_id (many2one)         : NEW relation: res.country, required
+base_address_extended / res.city                 / name (char)                   : NEW required, translate
+base_address_extended / res.city                 / state_id (many2one)           : NEW relation: res.country.state
+base_address_extended / res.city                 / zipcode (char)                : NEW
+base_address_extended / res.country              / enforce_cities (boolean)      : NEW
+base_address_extended / res.partner              / city_id (many2one)            : NEW relation: res.city
+base_address_extended / res.partner              / street_name (char)            : NEW isfunction: function, stored
+base_address_extended / res.partner              / street_number (char)          : NEW isfunction: function, stored
+base_address_extended / res.partner              / street_number2 (char)         : NEW isfunction: function, stored
+---XML records in module 'base_address_extended'---
+NEW ir.access: base_address_extended.access_res_city_group_all
+NEW ir.access: base_address_extended.access_res_city_group_user
+NEW ir.actions.act_window: base_address_extended.action_res_city_tree
+NEW ir.ui.view: base_address_extended.address_street_extended_city_form
+NEW ir.ui.view: base_address_extended.res_city_view_form
+NEW ir.ui.view: base_address_extended.view_city_filter
+NEW ir.ui.view: base_address_extended.view_city_tree
+NEW ir.ui.view: base_address_extended.view_res_country_city_extended_form

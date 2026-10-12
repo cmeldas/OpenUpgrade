@@ -1,0 +1,7 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (1 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'survey'---
+---Fields in module 'survey'---
+survey       / survey.survey            / certification_report_layout (selection): selection_keys added: [classic-1_black, classic-1_company, classic-2_black, classic-2_company, minimal_black, minimal_company, modern_black, modern_company], removed: [classic_blue, classic_gold, classic_purple, modern_blue, modern_gold, modern_purple]  => rows with removed keys: modern_purple: 2
+---XML records in module 'survey'---

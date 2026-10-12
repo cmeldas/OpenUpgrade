@@ -1,0 +1,7 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (1 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'pos_hr'---
+---Fields in module 'pos_hr'---
+pos_hr       / pos.config               / advanced_employee_ids (many2many): DEL relation: hr.employee  => 4 rows in relation table; rename candidate: manager_employee_ids
+---XML records in module 'pos_hr'---

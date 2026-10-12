@@ -1,0 +1,150 @@
+---Models in module 'general'---
+obsolete model account.group [module account]
+obsolete model barcodes.barcode_events_mixin [abstract] [module barcodes]
+obsolete model hr.attendance.overtime.line [module hr_attendance]
+obsolete model hr.attendance.overtime.rule [module hr_attendance]
+obsolete model hr.attendance.overtime.ruleset [module hr_attendance]
+obsolete model hr.contract.type [module hr]
+obsolete model hr.departure.wizard [transient] [module hr]
+obsolete model hr.employee.certification.report [abstract] [module hr_skills]
+obsolete model hr.version.wizard [transient] [module hr]
+obsolete model ir.model.access [module base]
+obsolete model ir.rule [module base]
+obsolete model mail.thread.cc [abstract] [module mail]
+model mail.tracking.value (moved to mail_tracking, not installed in 20.0 analysis) [module mail]
+obsolete model mailing.list.merge [transient] [module mass_mailing]
+obsolete model pos.close.session.wizard [transient] [module point_of_sale]
+model pos.pack.operation.lot (moved to pos_stock) [module point_of_sale]
+obsolete model product.template.attribute.exclusion [module product]
+obsolete model report.product.report_producttemplatelabel2x7 [abstract] [module product]
+obsolete model report.product.report_producttemplatelabel4x12 [abstract] [module product]
+obsolete model report.product.report_producttemplatelabel4x12noprice [abstract] [module product]
+obsolete model report.product.report_producttemplatelabel4x7 [abstract] [module product]
+obsolete model report.product.report_producttemplatelabel_dymo [abstract] [module product]
+obsolete model report.stock.label_lot_template_view [abstract] [module stock]
+obsolete model report.stock.label_product_product_view [abstract] [module stock]
+obsolete model report.stock.report_reception [abstract] [module stock]
+obsolete model res.bank [module base]
+obsolete model stock.quantity.history [transient] [module stock]
+obsolete model stock.return.picking [transient] [module stock]
+obsolete model stock.return.picking.line [transient] [module stock]
+obsolete model stock.scrap [module stock]
+obsolete model stock_account.stock.valuation.report [abstract] [module stock_account]
+obsolete model utm.source.mixin [abstract] [module utm]
+model website (moved to base) [module website]
+obsolete model website.base.unit [module website_sale]
+new model account.edi.cii [abstract] [module account_edi_ubl_cii]
+new model account.stock.valuation.report [abstract] [module account]
+new model bus.sync.mixin [abstract] [module mail]
+new model clearing.label [module base]
+new model customer.product.reference [module sale_edi_ubl]
+new model delivery.note.wizard [transient] [module delivery]
+new model delivery.note.wizard.line [transient] [module delivery]
+new model digest.test [transient] [module digest]
+new model discuss.category [module mail]
+new model discuss.channel.last.interest.update [module mail]
+new model hr.employee.create.version.wizard [transient] [module hr]
+new model hr.employee.departure [module hr]
+new model hr.employee.type [module hr]
+new model hr.export.work.entries [transient] [module hr_work_entry]
+new model hr.export.work.entries.employee [transient] [module hr_work_entry]
+new model hr.time.rule [module hr_work_entry]
+new model hr.time.rule.source.mixin [abstract] [module hr_work_entry]
+new model hr.user.work.entry.employee [module hr_work_entry]
+new model hr.work.entry.type [module hr_work_entry]
+new model iap.service.pack [module iap]
+new model ir.access [module base]
+new model ir.profile.query [module base]
+new model mail.call.artifact [module mail]
+new model mail.poll [module mail]
+new model mail.poll.option [module mail]
+new model mail.poll.vote [module mail]
+new model mail.thread.subject.suggested [abstract] [module mail]
+new model mail.track.mixin [abstract] [module mail]
+new model mrp.finished.product.label.layout [transient] [module mrp]
+new model mysubscription.mysubscription [abstract] [module mysubscription]
+new model pay.on.delivery [transient] [module stock_delivery]
+new model payment.data [module payment]
+new model portal.entry [module portal]
+new model pos.order.receipt [abstract] [module point_of_sale]
+model pos.pack.operation.lot (moved from point_of_sale) [module pos_stock]
+new model pos.prep.line [module point_of_sale]
+new model pos.prep.order [module point_of_sale]
+new model pos.price.inclusion.wizard [transient] [module point_of_sale]
+new model pos.snooze [module point_of_sale]
+new model printer.printer [module printer]
+new model product.base.unit [module product]
+new model product.catalog.line.mixin [abstract] [module product]
+new model product.stock.notification [module website_sale]
+new model project.task.stage.report [sql_view] [module project]
+new model report.product.label.base [abstract] [module product]
+new model report.product.report_product_label_dymo [abstract] [module product]
+new model report.product.report_product_label_pdf [abstract] [module product]
+new model report.product.report_product_label_zpl [abstract] [module product]
+new model res.city [module base_address_extended]
+new model res.currency.rate.consolidation.mixin [abstract] [module account]
+new model res.session [sql_view] [module base]
+new model return.reason [module sale_stock]
+new model select.printers.wizard [transient] [module printer]
+new model spreadsheet.dashboard.favorite.filters [module spreadsheet_dashboard]
+new model stock.add.to.wave [transient] [module stock]
+new model stock.allocation.report [abstract] [module stock]
+new model stock.location.label.layout [transient] [module stock]
+new model stock.orderpoint.suggest [transient] [module stock]
+new model stock.package.label.layout [transient] [module stock]
+new model stock.picking.batch [module stock]
+new model stock.picking.to.batch [transient] [module stock]
+new model stock.picking.type.label.layout [transient] [module stock]
+new model stock.zero.demand.confirmation [transient] [module stock]
+model website (moved from website) [module base]
+new model website.checkout.alert.mixin [abstract] [module website_sale]
+new model website.llms [transient] [module website]
+new model website.located.mixin [abstract] [module website]
+new model website.structured_data.mixin [abstract] [module website]
+new model website.trackable.mixin [abstract] [module website]
+new model withdrawal.request [module website_sale]
+---Fields in module 'general'---
+# 4891 fields matched,
+# In obsolete models: 112
+# Not matched: 290
+# New columns: 754
+---XML records in module 'general'---
+---Merged modules (removed in 20.0, lines attributed to the successor)---
+account_add_gln -> account   XML IDs in dbprod1006: 6   votes: account 7, account_edi_ubl_cii 3, auth_signup 3, base 3
+base_iban -> base   XML IDs in dbprod1006: 5   votes: account 3, account_qr_code_sepa 3, base 3, hr 3
+base_vat -> base   XML IDs in dbprod1006: 27   votes: base 21, l10n_eu_account_vies 18, account 14, mail 14
+hr_homeworking -> hr   XML IDs in dbprod1006: 67   votes: hr 100, hr_attendance 9, hr_gamification 9, auth_signup 7
+hr_hourly_cost -> hr   XML IDs in dbprod1006: 5   votes: hr 6, hr_attendance 3, hr_gamification 3, hr_maintenance 3
+hr_org_chart -> hr   XML IDs in dbprod1006: 29   votes: hr 35, hr_attendance 6, hr_gamification 6, hr_maintenance 6
+iot_base -> (none)   XML IDs in dbprod1006: 0   votes: 
+theme_common -> (none)   XML IDs in dbprod1006: 3   votes: theme_anelusia 3, website 3, website_sale 3
+website_sale_autocomplete -> website_address_autocomplete   XML IDs in dbprod1006: 10   votes: website_address_autocomplete 11, base 6, website 6, website_sale 6
+website_sale_collect_wishlist -> website_sale_collect   XML IDs in dbprod1006: 1   votes: website_sale_collect 1
+website_sale_comparison -> website_sale   XML IDs in dbprod1006: 35   votes: website_sale 40, product 10, point_of_sale 9, account 3
+website_sale_comparison_wishlist -> website_sale   XML IDs in dbprod1006: 1   votes: website_sale 1
+website_sale_stock_wishlist -> website_sale   XML IDs in dbprod1006: 8   votes: website_sale 7, account 3, loyalty 3, mrp 3
+website_sale_wishlist -> website_sale   XML IDs in dbprod1006: 61   votes: website_sale 74, website 21, point_of_sale 12, stock 12
+---Modules installed in 20.0 analysis but not in production 19 (all NEW)---
+account_payment_custom (new in 20.0, auto_install)
+base_address_extended (existed in 19.0, dependency of contacts)
+base_report_wkhtmltox (new in 20.0, auto_install)
+hr_work_entry (existed in 19.0, dependency of hr_attendance)
+iot_webserial (new in 20.0, dependency of point_of_sale)
+l10n_eu_account_vies (new in 20.0, not auto-installed, install explicitly)
+mail_plugin (existed in 19.0, auto_install)
+mrp_delivery (new in 20.0, auto_install)
+mysubscription (new in 20.0, auto_install)
+portal_discuss (new in 20.0, auto_install)
+pos_partner_autocomplete (new in 20.0, auto_install)
+pos_sale_delivery (new in 20.0, auto_install)
+pos_sale_margin (existed in 19.0, auto_install)
+pos_sale_stock (new in 20.0, auto_install)
+pos_stock (new in 20.0, auto_install)
+printer (new in 20.0, dependency of stock_delivery)
+project_mail_plugin (existed in 19.0, auto_install)
+sale_margin (existed in 19.0, auto_install)
+sale_project_margin (new in 20.0, auto_install)
+sale_stock_margin (existed in 19.0, auto_install)
+sale_timesheet_margin (existed in 19.0, auto_install)
+website_address_autocomplete (new in 20.0, auto_install)
+website_sale_project (new in 20.0, auto_install)

@@ -1,0 +1,7 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (1 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'website_blog'---
+---Fields in module 'website_blog'---
+website_blog / blog.post                / post_date (datetime)          : DEL  => 24 rows with a value
+---XML records in module 'website_blog'---

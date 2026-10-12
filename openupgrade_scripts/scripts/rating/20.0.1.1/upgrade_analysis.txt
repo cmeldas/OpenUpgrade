@@ -1,0 +1,18 @@
+---Models in module 'rating'---
+---Fields in module 'rating'---
+rating       / hr.work.entry.type       / rating_ids (one2many)         : NEW relation: rating.rating
+rating       / ir.access                / rating_ids (one2many)         : NEW relation: rating.rating
+rating       / mrp.workorder            / rating_ids (one2many)         : NEW relation: rating.rating
+rating       / rating.rating            / parent_res_id (integer)       : type is now 'many2one_reference' ('integer')
+rating       / res.users                / rating_ids (one2many)         : is now stored
+rating       / res.users                / rating_ids (one2many)         : not related anymore
+rating       / res.users                / rating_ids (one2many)         : previously in module base
+rating       / stock.picking.batch      / rating_ids (one2many)         : NEW relation: rating.rating
+rating       / stock.scrap              / rating_ids (one2many)         : DEL relation: rating.rating
+---XML records in module 'rating'---
+NEW ir.access: rating.access_rating_user
+NEW ir.access: rating.rating_rating_access_system
+DEL ir.model.access: rating.access_rating_portal
+DEL ir.model.access: rating.access_rating_public
+DEL ir.model.access: rating.access_rating_user
+DEL ir.model.access: rating.rating_rating_access_system

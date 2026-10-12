@@ -1,0 +1,8 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (2 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'iap'---
+---Fields in module 'iap'---
+iap          / iap.account              / balance (char)                : not stored anymore  => 2 rows with a value
+iap          / iap.service              / name (char)                   : translate is now 'True' ('False')  => 4 rows with a value
+---XML records in module 'iap'---

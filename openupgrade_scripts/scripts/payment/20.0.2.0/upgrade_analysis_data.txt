@@ -1,0 +1,17 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (11 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'payment'---
+---Fields in module 'payment'---
+payment      / payment.method           / provider_id (many2one)        : NEW relation: payment.provider, required  => 232 existing rows without value (required, no default)
+payment      / payment.method           / provider_ids (many2many)      : DEL relation: payment.provider  => 297 rows in relation table
+payment      / payment.provider         / color (integer)               : DEL  => 26 rows with a value
+payment      / payment.provider         / state (selection)             : DEL required, selection_keys: ['disabled', 'enabled', 'test']  => 26 rows with a value
+---XML records in module 'payment'---
+DEL payment.method: payment.payment_method_astropay (noupdate)  => referenced by payment_method.primary_payment_method_id 3
+DEL payment.method: payment.payment_method_bank_reference (noupdate)  => referenced by payment_method.primary_payment_method_id 3
+DEL payment.method: payment.payment_method_card (noupdate)  => referenced by payment_method.primary_payment_method_id 37
+DEL payment.method: payment.payment_method_cvs (noupdate)  => referenced by payment_method.primary_payment_method_id 3
+DEL payment.method: payment.payment_method_ideal (noupdate)  => referenced by payment_method.primary_payment_method_id 2
+DEL payment.method: payment.payment_method_mobile_wallet (noupdate)  => referenced by payment_method.primary_payment_method_id 1
+DEL payment.method: payment.payment_method_nuvei_local (noupdate)  => referenced by payment_method.primary_payment_method_id 2

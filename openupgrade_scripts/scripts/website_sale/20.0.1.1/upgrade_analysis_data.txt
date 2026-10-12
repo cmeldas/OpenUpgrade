@@ -1,0 +1,15 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (9 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'website_sale'---
+obsolete model website.base.unit  => 1 rows in table website_base_unit
+---Fields in module 'website_sale'---
+website_sale / product.product          / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')  => 8 rows with a value
+website_sale / product.public.category  / show_category_description (boolean): DEL  => 4 rows with a value
+website_sale / product.template         / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')  => 3 rows with a value
+website_sale / website                  / add_to_cart_action (selection): DEL selection_keys: ['go_to_cart', 'stay']  => 1 rows with a value
+website_sale / website                  / contact_us_button_url (char)  : DEL  => 1 rows with a value; rename candidate: contact_us_link_url
+website_sale / website                  / prevent_zero_price_sale (boolean): DEL  => 1 rows with a value; rename candidate: prevent_sale; own addons: website_sale_showcase_only/views/website_sale_templates.xml:7
+---XML records in module 'website_sale'---
+DEL ir.filters: website_sale.dynamic_snippet_newest_products_filter  => referenced by website_snippet_filter.filter_id 1
+DEL res.groups: website_sale.group_show_uom_price [renamed to product module] (noupdate)  => record in DB, moved to product

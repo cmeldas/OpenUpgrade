@@ -1,0 +1,4 @@
+---Models in module 'base_report_wkhtmltox'---
+---Fields in module 'base_report_wkhtmltox'---
+base_report_wkhtmltox / ir.actions.report        / report_type (selection)       : selection_keys added: [qweb-pdf-wkhtmltopdf] (most likely nothing to do)
+---XML records in module 'base_report_wkhtmltox'---

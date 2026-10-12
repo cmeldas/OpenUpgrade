@@ -1,0 +1,300 @@
+---Models in module 'payment'---
+new model payment.data
+---Fields in module 'payment'---
+payment      / payment.data             / error_traceback (text)        : NEW
+payment      / payment.data             / errored (boolean)             : NEW
+payment      / payment.data             / payload (json)                : NEW required
+payment      / payment.data             / transaction_id (many2one)     : NEW relation: payment.transaction, required
+payment      / payment.method           / allow_amount_selection (boolean): NEW
+payment      / payment.method           / provider_id (many2one)        : NEW relation: payment.provider, required
+payment      / payment.method           / provider_ids (many2many)      : DEL relation: payment.provider
+payment      / payment.provider         / active (boolean)              : NEW hasdefault: default
+payment      / payment.provider         / color (integer)               : DEL
+payment      / payment.provider         / is_live (boolean)             : NEW
+payment      / payment.provider         / minimum_amount (float)        : NEW
+payment      / payment.provider         / payment_method_ids (many2many): table is now 'False' ('payment_method_payment_provider_rel')
+payment      / payment.provider         / payment_method_ids (many2many): type is now 'one2many' ('many2many')
+payment      / payment.provider         / payment_token_ids (one2many)  : NEW relation: payment.token
+payment      / payment.provider         / payment_transaction_ids (one2many): NEW relation: payment.transaction
+payment      / payment.provider         / state (selection)             : DEL required, selection_keys: ['disabled', 'enabled', 'test']
+payment      / payment.transaction      / payment_data_ids (one2many)   : NEW relation: payment.data
+payment      / res.company              / pay_later_label (char)        : NEW hasdefault: default, translate
+payment      / res.company              / pay_now_label (char)          : NEW hasdefault: default, translate
+---XML records in module 'payment'---
+NEW ir.access: payment.payment_capture_wizard_rule
+NEW ir.access: payment.payment_capture_wizard_user
+NEW ir.access: payment.payment_data_system
+NEW ir.access: payment.payment_method_rule
+NEW ir.access: payment.payment_method_system
+NEW ir.access: payment.payment_provider_company_rule
+NEW ir.access: payment.payment_provider_system
+NEW ir.access: payment.payment_token_admin_rule
+NEW ir.access: payment.payment_token_company_rule
+NEW ir.access: payment.payment_token_public_rule
+NEW ir.access: payment.payment_transaction_system
+NEW ir.access: payment.transaction_company_rule
+NEW ir.actions.server: payment.action_add_payment_method
+NEW ir.actions.server: payment.action_confirm_payment_transaction
+NEW ir.actions.server: payment.post_processing_cron_ir_actions_server
+NEW ir.actions.server: payment.processing_cron_ir_actions_server
+DEL ir.actions.server: payment.cron_post_process_payment_tx_ir_actions_server
+NEW ir.cron: payment.post_processing_cron
+NEW ir.cron: payment.processing_cron
+DEL ir.cron: payment.cron_post_process_payment_tx
+DEL ir.model.access: payment.access_payment_link_wizard
+DEL ir.model.access: payment.payment_capture_wizard_user
+DEL ir.model.access: payment.payment_method_employee
+DEL ir.model.access: payment.payment_method_portal
+DEL ir.model.access: payment.payment_method_public
+DEL ir.model.access: payment.payment_method_system
+DEL ir.model.access: payment.payment_provider_system
+DEL ir.model.access: payment.payment_token_employee
+DEL ir.model.access: payment.payment_token_portal
+DEL ir.model.access: payment.payment_token_public
+DEL ir.model.access: payment.payment_token_system
+DEL ir.model.access: payment.payment_transaction_system
+NEW ir.model.constraint: payment.constraint_payment_method_provider_id_code_uniq
+DEL ir.rule: payment.payment_capture_wizard_rule (noupdate)
+DEL ir.rule: payment.payment_provider_company_rule (noupdate)
+DEL ir.rule: payment.payment_token_company_rule (noupdate)
+DEL ir.rule: payment.payment_token_user_rule (noupdate)
+DEL ir.rule: payment.transaction_company_rule (noupdate)
+NEW ir.ui.view: payment.amount_input
+NEW ir.ui.view: payment.generic_redirect_form
+NEW ir.ui.view: payment.payment_data_form
+NEW ir.ui.view: payment.payment_data_list
+DEL ir.ui.view: payment.payment_transaction_graph
+DEL ir.ui.view: payment.payment_transaction_kanban
+DEL ir.ui.view: payment.payment_transaction_pivot
+DEL ir.ui.view: payment.portal_my_home_payment
+DEL payment.method: payment.payment_method_7eleven (noupdate)
+DEL payment.method: payment.payment_method_abitab (noupdate)
+DEL payment.method: payment.payment_method_ach_direct_debit (noupdate)
+DEL payment.method: payment.payment_method_affirm (noupdate)
+DEL payment.method: payment.payment_method_afterpay (noupdate)
+DEL payment.method: payment.payment_method_afterpay_riverty (noupdate)
+DEL payment.method: payment.payment_method_akulaku (noupdate)
+DEL payment.method: payment.payment_method_alipay (noupdate)
+DEL payment.method: payment.payment_method_alipay_hk (noupdate)
+DEL payment.method: payment.payment_method_alipay_plus (noupdate)
+DEL payment.method: payment.payment_method_alma (noupdate)
+DEL payment.method: payment.payment_method_aman (noupdate)
+DEL payment.method: payment.payment_method_amazon_pay (noupdate)
+DEL payment.method: payment.payment_method_amex (noupdate)
+DEL payment.method: payment.payment_method_appota (noupdate)
+DEL payment.method: payment.payment_method_argencard (noupdate)
+DEL payment.method: payment.payment_method_astropay (noupdate)
+DEL payment.method: payment.payment_method_atome (noupdate)
+DEL payment.method: payment.payment_method_bacs_direct_debit (noupdate)
+DEL payment.method: payment.payment_method_bancnet (noupdate)
+DEL payment.method: payment.payment_method_banco_de_bogota (noupdate)
+DEL payment.method: payment.payment_method_banco_guayaquil (noupdate)
+DEL payment.method: payment.payment_method_banco_pichincha (noupdate)
+DEL payment.method: payment.payment_method_bancolombia (noupdate)
+DEL payment.method: payment.payment_method_bancontact (noupdate)
+DEL payment.method: payment.payment_method_bangkok_bank (noupdate)
+DEL payment.method: payment.payment_method_bank_account (noupdate)
+DEL payment.method: payment.payment_method_bank_bca (noupdate)
+DEL payment.method: payment.payment_method_bank_of_ayudhya (noupdate)
+DEL payment.method: payment.payment_method_bank_permata (noupdate)
+DEL payment.method: payment.payment_method_bank_reference (noupdate)
+DEL payment.method: payment.payment_method_bank_transfer (noupdate)
+DEL payment.method: payment.payment_method_becs_direct_debit (noupdate)
+DEL payment.method: payment.payment_method_belfius (noupdate)
+DEL payment.method: payment.payment_method_benefit (noupdate)
+DEL payment.method: payment.payment_method_bharatqr (noupdate)
+DEL payment.method: payment.payment_method_billease (noupdate)
+DEL payment.method: payment.payment_method_billink (noupdate)
+DEL payment.method: payment.payment_method_bizum (noupdate)
+DEL payment.method: payment.payment_method_blik (noupdate)
+DEL payment.method: payment.payment_method_bni (noupdate)
+DEL payment.method: payment.payment_method_boleto (noupdate)
+DEL payment.method: payment.payment_method_boost (noupdate)
+DEL payment.method: payment.payment_method_bri (noupdate)
+DEL payment.method: payment.payment_method_bsi (noupdate)
+DEL payment.method: payment.payment_method_cabal (noupdate)
+DEL payment.method: payment.payment_method_caixa (noupdate)
+DEL payment.method: payment.payment_method_card (noupdate)
+DEL payment.method: payment.payment_method_carnet (noupdate)
+DEL payment.method: payment.payment_method_cartes_bancaires (noupdate)
+DEL payment.method: payment.payment_method_cash_app_pay (noupdate)
+DEL payment.method: payment.payment_method_cashalo (noupdate)
+DEL payment.method: payment.payment_method_cebuana (noupdate)
+DEL payment.method: payment.payment_method_cencosud (noupdate)
+DEL payment.method: payment.payment_method_cimb_niaga (noupdate)
+DEL payment.method: payment.payment_method_cirrus (noupdate)
+DEL payment.method: payment.payment_method_clearpay (noupdate)
+DEL payment.method: payment.payment_method_cmr (noupdate)
+DEL payment.method: payment.payment_method_codensa (noupdate)
+DEL payment.method: payment.payment_method_cofidis (noupdate)
+DEL payment.method: payment.payment_method_contact (noupdate)
+DEL payment.method: payment.payment_method_cordial (noupdate)
+DEL payment.method: payment.payment_method_cordobesa (noupdate)
+DEL payment.method: payment.payment_method_credit (noupdate)
+DEL payment.method: payment.payment_method_cvs (noupdate)
+DEL payment.method: payment.payment_method_dana (noupdate)
+DEL payment.method: payment.payment_method_dankort (noupdate)
+DEL payment.method: payment.payment_method_davivienda (noupdate)
+DEL payment.method: payment.payment_method_diners (noupdate)
+DEL payment.method: payment.payment_method_discover (noupdate)
+DEL payment.method: payment.payment_method_dpo (noupdate)
+DEL payment.method: payment.payment_method_duitnow (noupdate)
+DEL payment.method: payment.payment_method_elo (noupdate)
+DEL payment.method: payment.payment_method_emi_india (noupdate)
+DEL payment.method: payment.payment_method_enets (noupdate)
+DEL payment.method: payment.payment_method_eps (noupdate)
+DEL payment.method: payment.payment_method_facilito (noupdate)
+DEL payment.method: payment.payment_method_family_mart (noupdate)
+DEL payment.method: payment.payment_method_floa_bank (noupdate)
+DEL payment.method: payment.payment_method_forsa (noupdate)
+DEL payment.method: payment.payment_method_fps (noupdate)
+DEL payment.method: payment.payment_method_fpx (noupdate)
+DEL payment.method: payment.payment_method_gcash (noupdate)
+DEL payment.method: payment.payment_method_gopay (noupdate)
+DEL payment.method: payment.payment_method_grabpay (noupdate)
+DEL payment.method: payment.payment_method_halan (noupdate)
+DEL payment.method: payment.payment_method_hd (noupdate)
+DEL payment.method: payment.payment_method_hi_life (noupdate)
+DEL payment.method: payment.payment_method_hipercard (noupdate)
+DEL payment.method: payment.payment_method_hoolah (noupdate)
+DEL payment.method: payment.payment_method_humm (noupdate)
+DEL payment.method: payment.payment_method_ideal (noupdate)
+DEL payment.method: payment.payment_method_ideal_brand (noupdate)
+DEL payment.method: payment.payment_method_in3 (noupdate)
+DEL payment.method: payment.payment_method_installments_eg (noupdate)
+DEL payment.method: payment.payment_method_ipass_money (noupdate)
+DEL payment.method: payment.payment_method_jcb (noupdate)
+DEL payment.method: payment.payment_method_jeniuspay (noupdate)
+DEL payment.method: payment.payment_method_jkopay (noupdate)
+DEL payment.method: payment.payment_method_kakaopay (noupdate)
+DEL payment.method: payment.payment_method_kasikorn_bank (noupdate)
+DEL payment.method: payment.payment_method_kbc_cbc (noupdate)
+DEL payment.method: payment.payment_method_kfh (noupdate)
+DEL payment.method: payment.payment_method_kiosk (noupdate)
+DEL payment.method: payment.payment_method_klarna (noupdate)
+DEL payment.method: payment.payment_method_klarna_pay_over_time (noupdate)
+DEL payment.method: payment.payment_method_klarna_paynow (noupdate)
+DEL payment.method: payment.payment_method_knet (noupdate)
+DEL payment.method: payment.payment_method_kredivo (noupdate)
+DEL payment.method: payment.payment_method_krungthai_bank (noupdate)
+DEL payment.method: payment.payment_method_lider (noupdate)
+DEL payment.method: payment.payment_method_linepay (noupdate)
+DEL payment.method: payment.payment_method_linkaja (noupdate)
+DEL payment.method: payment.payment_method_mada (noupdate)
+DEL payment.method: payment.payment_method_maestro (noupdate)
+DEL payment.method: payment.payment_method_magna (noupdate)
+DEL payment.method: payment.payment_method_mandiri (noupdate)
+DEL payment.method: payment.payment_method_mastercard (noupdate)
+DEL payment.method: payment.payment_method_maya (noupdate)
+DEL payment.method: payment.payment_method_maybank (noupdate)
+DEL payment.method: payment.payment_method_mbway (noupdate)
+DEL payment.method: payment.payment_method_meeza (noupdate)
+DEL payment.method: payment.payment_method_mercado_livre (noupdate)
+DEL payment.method: payment.payment_method_mercado_pago_wallet (noupdate)
+DEL payment.method: payment.payment_method_mobile (noupdate)
+DEL payment.method: payment.payment_method_mobile_money (noupdate)
+DEL payment.method: payment.payment_method_mobile_pay (noupdate)
+DEL payment.method: payment.payment_method_mobile_wallet (noupdate)
+DEL payment.method: payment.payment_method_mobile_wallet_eg (noupdate)
+DEL payment.method: payment.payment_method_momo (noupdate)
+DEL payment.method: payment.payment_method_mpesa (noupdate)
+DEL payment.method: payment.payment_method_multibanco (noupdate)
+DEL payment.method: payment.payment_method_mybank (noupdate)
+DEL payment.method: payment.payment_method_napas_card (noupdate)
+DEL payment.method: payment.payment_method_naps (noupdate)
+DEL payment.method: payment.payment_method_naranja (noupdate)
+DEL payment.method: payment.payment_method_nativa (noupdate)
+DEL payment.method: payment.payment_method_netbanking (noupdate)
+DEL payment.method: payment.payment_method_nuvei_local (noupdate)
+DEL payment.method: payment.payment_method_oca (noupdate)
+DEL payment.method: payment.payment_method_octopus (noupdate)
+DEL payment.method: payment.payment_method_ok_mart (noupdate)
+DEL payment.method: payment.payment_method_omannet (noupdate)
+DEL payment.method: payment.payment_method_online_banking_czech_republic (noupdate)
+DEL payment.method: payment.payment_method_online_banking_india (noupdate)
+DEL payment.method: payment.payment_method_online_banking_slovakia (noupdate)
+DEL payment.method: payment.payment_method_online_banking_thailand (noupdate)
+DEL payment.method: payment.payment_method_open_banking (noupdate)
+DEL payment.method: payment.payment_method_ovo (noupdate)
+DEL payment.method: payment.payment_method_oxxopay (noupdate)
+DEL payment.method: payment.payment_method_p24 (noupdate)
+DEL payment.method: payment.payment_method_pace (noupdate)
+DEL payment.method: payment.payment_method_pay_id (noupdate)
+DEL payment.method: payment.payment_method_paybright (noupdate)
+DEL payment.method: payment.payment_method_paylater_india (noupdate)
+DEL payment.method: payment.payment_method_payme (noupdate)
+DEL payment.method: payment.payment_method_paynow (noupdate)
+DEL payment.method: payment.payment_method_paypal (noupdate)
+DEL payment.method: payment.payment_method_paysafecard (noupdate)
+DEL payment.method: payment.payment_method_paytm (noupdate)
+DEL payment.method: payment.payment_method_paytrail (noupdate)
+DEL payment.method: payment.payment_method_pix (noupdate)
+DEL payment.method: payment.payment_method_poli (noupdate)
+DEL payment.method: payment.payment_method_post_finance (noupdate)
+DEL payment.method: payment.payment_method_poste_pay (noupdate)
+DEL payment.method: payment.payment_method_pps (noupdate)
+DEL payment.method: payment.payment_method_premium_card (noupdate)
+DEL payment.method: payment.payment_method_presto (noupdate)
+DEL payment.method: payment.payment_method_promptpay (noupdate)
+DEL payment.method: payment.payment_method_pse (noupdate)
+DEL payment.method: payment.payment_method_qris (noupdate)
+DEL payment.method: payment.payment_method_rabbit_line_pay (noupdate)
+DEL payment.method: payment.payment_method_ratepay (noupdate)
+DEL payment.method: payment.payment_method_redpagos (noupdate)
+DEL payment.method: payment.payment_method_revolut_pay (noupdate)
+DEL payment.method: payment.payment_method_rupay (noupdate)
+DEL payment.method: payment.payment_method_samsung_pay (noupdate)
+DEL payment.method: payment.payment_method_scb (noupdate)
+DEL payment.method: payment.payment_method_sepa_direct_debit (noupdate)
+DEL payment.method: payment.payment_method_shopback (noupdate)
+DEL payment.method: payment.payment_method_shopeepay (noupdate)
+DEL payment.method: payment.payment_method_shopping (noupdate)
+DEL payment.method: payment.payment_method_sofort (noupdate)
+DEL payment.method: payment.payment_method_souhoola (noupdate)
+DEL payment.method: payment.payment_method_spei (noupdate)
+DEL payment.method: payment.payment_method_stcpay (noupdate)
+DEL payment.method: payment.payment_method_swish (noupdate)
+DEL payment.method: payment.payment_method_sympl (noupdate)
+DEL payment.method: payment.payment_method_tabby (noupdate)
+DEL payment.method: payment.payment_method_tamara (noupdate)
+DEL payment.method: payment.payment_method_tarjeta_mercadopago (noupdate)
+DEL payment.method: payment.payment_method_techcom (noupdate)
+DEL payment.method: payment.payment_method_tendopay (noupdate)
+DEL payment.method: payment.payment_method_tenpay (noupdate)
+DEL payment.method: payment.payment_method_tienphong (noupdate)
+DEL payment.method: payment.payment_method_tinka (noupdate)
+DEL payment.method: payment.payment_method_tmb (noupdate)
+DEL payment.method: payment.payment_method_touch_n_go (noupdate)
+DEL payment.method: payment.payment_method_troy (noupdate)
+DEL payment.method: payment.payment_method_truemoney (noupdate)
+DEL payment.method: payment.payment_method_trustly (noupdate)
+DEL payment.method: payment.payment_method_ttb (noupdate)
+DEL payment.method: payment.payment_method_twint (noupdate)
+DEL payment.method: payment.payment_method_twqr (noupdate)
+DEL payment.method: payment.payment_method_uatp (noupdate)
+DEL payment.method: payment.payment_method_unionpay (noupdate)
+DEL payment.method: payment.payment_method_unknown (noupdate)
+DEL payment.method: payment.payment_method_uob (noupdate)
+DEL payment.method: payment.payment_method_upi (noupdate)
+DEL payment.method: payment.payment_method_ussd (noupdate)
+DEL payment.method: payment.payment_method_valu (noupdate)
+DEL payment.method: payment.payment_method_venmo (noupdate)
+DEL payment.method: payment.payment_method_vietcapital (noupdate)
+DEL payment.method: payment.payment_method_vietcom (noupdate)
+DEL payment.method: payment.payment_method_viettelpay (noupdate)
+DEL payment.method: payment.payment_method_vipps (noupdate)
+DEL payment.method: payment.payment_method_visa (noupdate)
+DEL payment.method: payment.payment_method_vnptwallet (noupdate)
+DEL payment.method: payment.payment_method_vpay (noupdate)
+DEL payment.method: payment.payment_method_vpbank (noupdate)
+DEL payment.method: payment.payment_method_wallets_india (noupdate)
+DEL payment.method: payment.payment_method_walley (noupdate)
+DEL payment.method: payment.payment_method_webpay (noupdate)
+DEL payment.method: payment.payment_method_wechat_pay (noupdate)
+DEL payment.method: payment.payment_method_welend (noupdate)
+DEL payment.method: payment.payment_method_wero (noupdate)
+DEL payment.method: payment.payment_method_woori (noupdate)
+DEL payment.method: payment.payment_method_zalopay (noupdate)
+DEL payment.method: payment.payment_method_zip (noupdate)
+NEW payment.provider: payment.payment_provider_pay_on_invoice (noupdate)
+NEW portal.entry: payment.payment_methods_portal_entry (noupdate)

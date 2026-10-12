@@ -1,0 +1,8 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (2 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'pos_loyalty'---
+---Fields in module 'pos_loyalty'---
+pos_loyalty  / pos.order.line           / coupon_id (many2one)          : DEL relation: loyalty.card  => 42 rows with a value
+pos_loyalty  / pos.order.line           / reward_identifier_code (char) : DEL  => 42 rows with a value
+---XML records in module 'pos_loyalty'---

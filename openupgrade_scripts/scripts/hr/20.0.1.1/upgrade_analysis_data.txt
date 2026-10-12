@@ -1,0 +1,9 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (3 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'hr'---
+obsolete model hr.contract.type  => 12 rows in table hr_contract_type
+---Fields in module 'hr'---
+hr           / hr.version               / employee_type (selection)     : DEL required, selection_keys: ['contractor', 'employee', 'freelance', 'student', 'trainee', 'worker']  => 2 rows with a value
+---XML records in module 'hr'---
+DEL hr.employee: hr.employee_admin (noupdate)  => referenced by account_analytic_line.employee_id 2, hr_version.employee_id 1, maintenance_equipment.employee_id 2, maintenance_request.employee_id 9, pos_hr_advanced_employee_hr_employee.hr_employee_id 2, pos_session.employee_id 1

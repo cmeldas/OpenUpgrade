@@ -1,0 +1,12 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (6 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'stock_account'---
+---Fields in module 'stock_account'---
+stock_account / res.company              / account_stock_journal_id (many2one): not stored anymore  => 1 rows with a value
+stock_account / res.company              / account_stock_valuation_id (many2one): not stored anymore  => 1 rows with a value
+stock_account / res.company              / cost_method (selection)       : not stored anymore  => 1 rows with a value
+stock_account / res.company              / inventory_valuation (selection): not stored anymore  => 1 rows with a value
+---XML records in module 'stock_account'---
+DEL ir.actions.server: stock_account.ir_cron_post_stock_valuation_ir_actions_server [renamed to account module] (noupdate)  => record in DB, moved to account
+DEL ir.cron: stock_account.ir_cron_post_stock_valuation [renamed to account module] (noupdate)  => record in DB, moved to account

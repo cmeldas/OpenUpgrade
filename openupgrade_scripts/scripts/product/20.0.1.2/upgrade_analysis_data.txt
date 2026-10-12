@@ -1,0 +1,14 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (8 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'product'---
+---Fields in module 'product'---
+product      / product.category         / complete_name (char)          : not stored anymore  => 34 rows with a value
+product      / product.category         / name (char)                   : translate is now 'True' ('False')  => 34 rows with a value
+product      / product.pricelist.item   / display_applied_on (selection): DEL required, selection_keys: ['1_product', '2_product_category']  => 1 rows with a value
+product      / product.pricelist.item   / percent_price (float)         : DEL  => 1 rows with a value
+product      / product.pricelist.item   / price_markup (float)          : not stored anymore  => 1 rows with a value
+product      / product.product          / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')  => 8 rows with a value
+product      / product.supplierinfo     / product_uom_id (many2one)     : DEL relation: uom.uom, required  => 17 rows with a value; rename candidate: uom_id
+product      / product.template         / base_unit_id (many2one)       : relation is now 'product.base.unit' ('website.base.unit')  => 3 rows with a value
+---XML records in module 'product'---

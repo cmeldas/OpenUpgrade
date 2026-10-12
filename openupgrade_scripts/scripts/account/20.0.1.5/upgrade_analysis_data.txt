@@ -1,0 +1,28 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (22 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'account'---
+obsolete model account.group  => 313 rows in table account_group
+---Fields in module 'account'---
+account      / account.move             / checked (boolean)             : DEL  => 1278 rows with a value
+account      / account.move.line        / deductible_amount (float)     : DEL  => 3135 rows with a value; rename candidate: deductible_percentage
+account      / account.move.line        / name (char)                   : type is now 'text' ('char')  => 3111 rows with a value
+account      / account.payment          / state (selection)             : selection_keys added: [reconciled], removed: [in_process]  => rows with removed keys: in_process: 190; own addons: fio_qr_payment_validation/models/fio_bank_transaction.py:51, fio_qr_payment_validation/models/fio_bank_transaction.py:196 (+7)
+account      / account.report           / active (boolean)              : not stored anymore  => 4 rows with a value
+account      / account.report           / prefix_groups_threshold (integer): DEL  => 4 rows with a value
+account      / account.report.expression / formula (char)                : type is now 'text' ('char')  => 74 rows with a value
+account      / account.report.expression / subformula (char)             : type is now 'text' ('char')  => 16 rows with a value
+account      / account.tax.group        / tax_payable_account_id (many2one): DEL relation: account.account  => 4 rows with a value
+account      / account.tax.group        / tax_receivable_account_id (many2one): DEL relation: account.account  => 4 rows with a value
+account      / res.company              / account_stock_journal_id (many2one): not stored anymore  => 1 rows with a value
+account      / res.company              / account_stock_valuation_id (many2one): not stored anymore  => 1 rows with a value
+account      / res.company              / cost_method (selection)       : not stored anymore  => 1 rows with a value
+account      / res.company              / expense_account_id (many2one) : not stored anymore  => 1 rows with a value
+account      / res.company              / income_account_id (many2one)  : not stored anymore  => 1 rows with a value
+account      / res.company              / inventory_valuation (selection): not stored anymore  => 1 rows with a value
+account      / res.partner.bank         / acc_holder_name (char)        : DEL mode: modify  => 2 rows with a value; rename candidate: holder_name
+account      / res.partner.bank         / acc_number (char)             : DEL required, mode: modify  => 2 rows with a value; rename candidate: account_number; own addons: cz_qr_payment/hooks.py:48, cz_qr_payment/hooks.py:55 (+13)
+account      / res.partner.bank         / account_number (char)         : NEW required, mode: modify  => 2 existing rows without value (required, no default)
+account      / res.partner.bank         / bank_id (many2one)            : DEL relation: res.bank, mode: modify  => 2 rows with a value; own addons: cz_qr_payment/hooks.py:29, cz_qr_payment/hooks.py:78 (+2)
+account      / res.partner.bank         / currency_id (many2one)        : DEL relation: res.currency, mode: modify  => 2 rows with a value; own addons: fio_qr_payment_validation/models/fio_bank_transaction.py:35, fio_qr_payment_validation/models/fio_bank_transaction.py:36 (+19)
+---XML records in module 'account'---

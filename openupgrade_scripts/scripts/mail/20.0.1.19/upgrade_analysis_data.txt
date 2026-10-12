@@ -1,0 +1,13 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (7 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'mail'---
+model mail.tracking.value (moved to mail_tracking, not installed in 20.0 analysis)  => 22851 rows in table mail_tracking_value
+---Fields in module 'mail'---
+mail         / discuss.channel.member   / fetched_message_id (many2one) : DEL relation: mail.message  => 5 rows with a value
+mail         / mail.activity.type       / chaining_type (selection)     : DEL required, selection_keys: ['suggest', 'trigger']  => 9 rows with a value
+mail         / maintenance.request      / email_cc (char)               : DEL  => 8 rows with a value
+mail         / res.users.settings       / is_discuss_sidebar_category_channel_open (boolean): DEL  => 3 rows with a value
+mail         / res.users.settings       / is_discuss_sidebar_category_chat_open (boolean): DEL  => 3 rows with a value
+mail         / res.users.settings       / voice_active_duration (integer): DEL  => 3 rows with a value
+---XML records in module 'mail'---

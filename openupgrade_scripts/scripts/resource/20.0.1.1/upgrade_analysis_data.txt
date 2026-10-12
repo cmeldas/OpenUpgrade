@@ -1,0 +1,11 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (5 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'resource'---
+---Fields in module 'resource'---
+resource     / resource.calendar        / schedule_type (selection)     : DEL required, selection_keys: ['flexible', 'fully_fixed']  => 2 rows with a value; rename candidate: calendar_type
+resource     / resource.calendar        / tz (selection)                : DEL required, selection_keys: function  => 2 rows with a value
+resource     / resource.calendar.attendance / day_period (selection)        : selection_keys removed: [lunch]  => rows with removed keys: lunch: 5
+resource     / resource.calendar.attendance / duration_days (float)         : DEL  => 22 rows with a value
+resource     / resource.calendar.attendance / name (char)                   : DEL required  => 22 rows with a value
+---XML records in module 'resource'---

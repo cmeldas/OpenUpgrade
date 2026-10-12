@@ -1,0 +1,20 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (14 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'mrp'---
+---Fields in module 'mrp'---
+mrp          / mrp.bom                  / consumption (selection)       : DEL required, selection_keys: ['flexible', 'strict', 'warning']  => 25 rows with a value
+mrp          / mrp.bom                  / product_uom_id (many2one)     : DEL relation: uom.uom, required  => 25 rows with a value; rename candidate: uom_id
+mrp          / mrp.bom.line             / product_uom_id (many2one)     : DEL relation: uom.uom, required  => 32 rows with a value; rename candidate: uom_id
+mrp          / mrp.production           / consumption (selection)       : DEL required, selection_keys: ['flexible', 'strict', 'warning']  => 1648 rows with a value
+mrp          / mrp.production           / location_final_id (many2one)  : DEL relation: stock.location  => 1 rows with a value
+mrp          / mrp.production           / product_uom_id (many2one)     : DEL relation: uom.uom, required  => 1648 rows with a value; rename candidate: uom_id
+mrp          / mrp.unbuild              / product_uom_id (many2one)     : DEL relation: uom.uom, required  => 1 rows with a value; rename candidate: uom_id
+mrp          / product.document         / attached_on_mrp (selection)   : DEL required, selection_keys: ['bom', 'hidden']  => 1 rows with a value
+mrp          / stock.move               / manual_consumption (boolean)  : DEL  => 1 rows with a value
+---XML records in module 'mrp'---
+DEL mail.message.subtype: mrp.mrp_mo_in_cancelled (noupdate)  => referenced by mail_message.subtype_id 42
+DEL mail.message.subtype: mrp.mrp_mo_in_confirmed (noupdate)  => referenced by mail_message.subtype_id 1640
+DEL mail.message.subtype: mrp.mrp_mo_in_done (noupdate)  => referenced by mail_message.subtype_id 1606
+DEL mail.message.subtype: mrp.mrp_mo_in_progress (noupdate)  => referenced by mail_message.subtype_id 64
+DEL mail.message.subtype: mrp.mrp_mo_in_to_close (noupdate)  => referenced by mail_message.subtype_id 214

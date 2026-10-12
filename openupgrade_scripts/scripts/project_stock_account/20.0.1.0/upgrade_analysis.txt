@@ -1,0 +1,4 @@
+---Models in module 'project_stock_account'---
+---Fields in module 'project_stock_account'---
+project_stock_account / stock.picking.type       / analytic_costs (boolean)      : now a function
+---XML records in module 'project_stock_account'---

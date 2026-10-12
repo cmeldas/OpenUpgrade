@@ -1,0 +1,8 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (2 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'sale_stock'---
+---Fields in module 'sale_stock'---
+sale_stock   / res.company              / security_lead (float)         : type is now 'integer' ('float')  => 1 rows with a value
+sale_stock   / sale.order.line          / customer_lead (float)         : type is now 'integer' ('float')  => 355 rows with a value
+---XML records in module 'sale_stock'---

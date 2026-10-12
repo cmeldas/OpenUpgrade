@@ -1,0 +1,13 @@
+# Rows in dbprod1006 (production copy, Odoo 19) behind lines of upgrade_analysis.txt.
+# Only changes that touch existing data are listed (7 lines); see
+# odoo_local/upgrade20/tools/report.py touches_data for the rule.
+---Models in module 'hr_attendance'---
+obsolete model hr.attendance.overtime.rule  => 6 rows in table hr_attendance_overtime_rule
+obsolete model hr.attendance.overtime.ruleset  => 2 rows in table hr_attendance_overtime_ruleset
+---Fields in module 'hr_attendance'---
+hr_attendance / hr.version               / ruleset_id (many2one)         : DEL relation: hr.attendance.overtime.ruleset  => 2 rows with a value
+hr_attendance / res.company              / attendance_overtime_validation (selection): DEL selection_keys: ['by_manager', 'no_validation']  => 1 rows with a value; rename candidate: attendance_validation
+hr_attendance / res.company              / overtime_company_threshold (integer): DEL  => 1 rows with a value
+hr_attendance / res.company              / overtime_employee_threshold (integer): DEL  => 1 rows with a value
+---XML records in module 'hr_attendance'---
+DEL hr.attendance.overtime.ruleset: hr_attendance.hr_attendance_default_ruleset (noupdate)  => referenced by hr_attendance_overtime_rule.ruleset_id 2, hr_version.ruleset_id 2
