@@ -60,12 +60,14 @@ def _raise_view_error(
 
 
 def _check_field_paths(self, node, field_paths, model_name, use):
-    """Ignore UnboundLocalError when we squelched the raise about missing fields"""
+    """Ignore the errors that follow when we squelched the raise about missing
+    fields or models: UnboundLocalError or KeyError for an unknown field or
+    model, AttributeError when walking a path through a non-relational field"""
     try:
         return IrUiView._check_field_paths._original_method(
             self, node, field_paths, model_name, use
         )
-    except UnboundLocalError:  # pylint: disable=except-pass
+    except (UnboundLocalError, AttributeError, KeyError):  # pylint: disable=except-pass
         pass
 
 

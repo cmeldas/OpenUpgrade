@@ -9,7 +9,9 @@ def _get_files(self):
     MigrationManager._get_files._original_method(self)
     to_exclude = [("analytic", "1.2")]
     for addon, version in to_exclude:
-        self.migrations.get(addon, {}).get("module", {}).pop(version, None)
+        # scripts of the addon itself, in its migrations or upgrades folder
+        for key in ("module", "module_upgrades"):
+            self.migrations.get(addon, {}).get(key, {}).pop(version, None)
 
 
 _get_files._original_method = MigrationManager._get_files

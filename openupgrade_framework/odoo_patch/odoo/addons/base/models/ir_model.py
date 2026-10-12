@@ -1,14 +1,19 @@
 # Copyright Odoo Community Association (OCA)
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
+import logging
+
 from openupgradelib import openupgrade
 
-from odoo import models
+from odoo import api, models
 
 from odoo.addons.base.models.ir_model import (
     IrModel,
+    IrModelData,
     IrModelFields,
     IrModelRelation,
 )
+
+_logger = logging.getLogger(__name__)
 
 
 def _drop_table(self):
@@ -56,3 +61,25 @@ def _module_data_uninstall(self):
 
 
 IrModelRelation._module_data_uninstall = _module_data_uninstall
+
+
+@api.model
+def _process_end_unlink_record(self, record):
+    """Don't break the migration on an obsolete record that cannot be deleted.
+
+    The patch of BaseModel.unlink() only protects the base implementation.
+    Overrides of unlink() run partly outside of it, and an exception raised
+    there would abort the whole migration at its very end. Delete the record
+    in a savepoint instead, and keep it (and its xmlid) if that fails.
+    """
+    try:
+        with self.env.cr.savepoint():
+            return _process_end_unlink_record._original_method(self, record)
+    except Exception as e:
+        _logger.warning(
+            "Could not delete obsolete record %s, keeping it", record, exc_info=e
+        )
+
+
+_process_end_unlink_record._original_method = IrModelData._process_end_unlink_record
+IrModelData._process_end_unlink_record = _process_end_unlink_record
