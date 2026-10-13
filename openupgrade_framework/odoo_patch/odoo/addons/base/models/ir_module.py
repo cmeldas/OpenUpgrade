@@ -5,7 +5,7 @@ import logging
 
 from openupgradelib import openupgrade
 
-from odoo import api
+from odoo import api, modules
 
 from odoo.addons.base.models.ir_module import IrModuleModule
 
@@ -40,6 +40,29 @@ def _get_previously_installed_modules(env):
         )
         names.update(name for (name,) in env.cr.fetchall())
     return names
+
+
+def _disable_vanished_modules(env):
+    """Mark the uninstalled modules whose code is gone as uninstallable.
+
+    Odoo's update_list only looks at the manifests found on disk; rows of
+    modules that were removed or merged in the new version stay in the
+    database untouched, including their auto_install flag and dependencies.
+    When the dependencies of such a module get installed later (e.g. when a
+    user enables a feature in the settings), Odoo marks it 'to install', cannot
+    load it ('not installable, skipped') and reloads the registry endlessly.
+    """
+    on_disk = {manifest.name for manifest in modules.Manifest.all_addon_manifests()}
+    vanished = env["ir.module.module"].search(
+        [("state", "in", ("uninstalled", "to install")), ("name", "not in", list(on_disk))]
+    )
+    if vanished:
+        _logger.info(
+            "Marking %s modules without code as uninstallable: %s",
+            len(vanished),
+            ", ".join(sorted(vanished.mapped("name"))),
+        )
+        vanished.write({"state": "uninstallable", "auto_install": False})
 
 
 def _get_split_modules(env, split_modules, previously_installed):
@@ -97,11 +120,15 @@ def update_list(self):
     modules for countries no company is in, and the modules that
     openupgrade_scripts' apriori lists in `no_auto_install_modules`.
 
+    Modules of the previous version that have no code anymore are marked as
+    uninstallable, so that they are never selected for installation.
+
     Also mark as to install the modules that took over models or data from
     installed modules, as listed in `split_modules` of openupgrade_scripts'
     apriori (these new modules are often not auto_install).
     """
     result = IrModuleModule.update_list._original_method(self)
+    _disable_vanished_modules(self.env)
     no_auto_install = set(_get_apriori_attribute("no_auto_install_modules", ()))
     company_countries = self.env["res.company"].search([]).country_id
     new_auto_install_modules = self.browse([])
