@@ -209,6 +209,19 @@ def _res_device_log(env):
         )
 
 
+def _ir_act_server_update_property(env):
+    """ir.actions.server.update_property is a new stored computed field. When
+    the ORM creates its column while loading base, it recomputes every server
+    action, and for "update record" actions on models of modules that are not
+    loaded yet the compute fails (KeyError on the model). The value only
+    matters for paths through properties fields: pre-create it empty.
+    """
+    openupgrade.logged_query(
+        env.cr,
+        "ALTER TABLE ir_act_server ADD COLUMN IF NOT EXISTS update_property varchar",
+    )
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     _snapshot_module_states(env)
@@ -225,5 +238,6 @@ def migrate(env, version):
     _ir_access_xmlids(env)
     _ir_model_fields_index(env)
     _ir_act_client_params_store(env)
+    _ir_act_server_update_property(env)
     openupgrade.rename_fields(env, _renamed_fields)
     _res_device_log(env)

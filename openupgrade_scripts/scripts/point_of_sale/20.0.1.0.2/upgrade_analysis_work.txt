@@ -221,6 +221,7 @@ point_of_sale / pos.printer              / proxy_ip (char)               : DEL
 point_of_sale / pos.printer              / timeout (integer)             : NEW hasdefault: default
 point_of_sale / pos.printer              / use_cashdrawer (boolean)      : NEW
 point_of_sale / pos.printer              / use_lna (boolean)             : NEW
+# DONE: post-migration _pos_printers_use_lna: True for ePoS printers (v19 used the page protocol, v20 forces https without it), unless v19 had point_of_sale.use_lna explicitly off
 point_of_sale / pos.printer              / use_type (selection)          : NEW selection_keys: ['preparation', 'receipt'], hasdefault: default
 # NOTHING TO DO: ORM defaults (use_type 'preparation' matches the v19 kitchen printers)
 point_of_sale / pos.session              / bank_payment_ids (one2many)   : DEL relation: account.payment

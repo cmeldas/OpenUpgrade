@@ -398,7 +398,7 @@ def _recompute_stored_fields(env):
 
 @openupgrade.migrate()
 def migrate(env, version):
-    openupgrade.load_data(env, "account", "20.0.1.5/noupdate_changes.xml")
+    openupgrade.load_data(env, "account", "20.0.1.6/noupdate_changes.xml")
     _convert_account_groups(env)
     # account.group does not exist anymore: Odoo never cleans the XML-IDs of
     # removed models (the template ones, not converted above)

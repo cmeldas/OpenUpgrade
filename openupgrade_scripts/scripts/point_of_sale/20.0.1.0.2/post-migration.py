@@ -79,6 +79,32 @@ def _pos_config_default_partner(env):
             )
 
 
+def _pos_printers_use_lna(env):
+    """v19 chose the protocol of ePoS printers globally: http when the system
+    parameter point_of_sale.use_lna is set, else the protocol of the POS page.
+    v20 stores use_lna per printer and without it always calls https://, so a
+    printer that worked from a POS opened over http (plain ePoS devices and
+    ePoS bridges only listen on http) would stop printing. Use Local Network
+    Access (http with the browser's local network permission) is the v20 way
+    that works from http and https pages alike: enable it on all ePoS printers
+    unless the v19 parameter explicitly said otherwise.
+    """
+    cr = env.cr
+    cr.execute(
+        "SELECT value FROM ir_config_parameter WHERE key = 'point_of_sale.use_lna'"
+    )
+    row = cr.fetchone()
+    use_lna = (row[0] or "").strip().lower() not in ("0", "false", "") if row else True
+    openupgrade.logged_query(
+        cr,
+        """
+        UPDATE pos_printer SET use_lna = %s
+         WHERE printer_type = 'epson_epos' AND use_lna IS NOT TRUE
+        """,
+        (use_lna,),
+    )
+
+
 def _pos_config_receipt_printers(env):
     """v19 printed receipts on an ePoS printer set on the config
     (epson_printer_ip, iface_cashdrawer); v20 uses a pos.printer of type
@@ -298,4 +324,5 @@ def migrate(env, version):
     _link_session_moves(env)
     _pos_config_default_partner(env)
     _pos_config_receipt_printers(env)
+    _pos_printers_use_lna(env)
     _pos_cash_statements(env)
