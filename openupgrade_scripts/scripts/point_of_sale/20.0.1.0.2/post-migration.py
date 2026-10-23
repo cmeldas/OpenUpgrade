@@ -339,6 +339,22 @@ def _pos_order_amount_difference(env):
     )
 
 
+def _pos_refresh_browser_cache(env):
+    """The POS keeps its records in the browser (IndexedDB, same store names in
+    v19 and v20) and load_data only sends a cached record again when its
+    write_date is newer than the cached one (pos.load.mixin
+    _read_pos_data_from_metadata). The SQL updates of this migration keep
+    write_date, so a browser that ran the v19 POS keeps the v19 values: a bank
+    QR method cached with payment_method_type 'qr_code' is a plain bank method
+    for v20 and the POS never asks for the QR code. Bump write_date of the
+    cached models this migration updates so every browser reloads them.
+    """
+    for table in ("pos_payment_method", "pos_printer"):
+        openupgrade.logged_query(
+            env.cr, f"UPDATE {table} SET write_date = now() AT TIME ZONE 'UTC'"
+        )
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.load_data(env, "point_of_sale", "20.0.1.0.2/noupdate_changes.xml")
@@ -348,3 +364,4 @@ def migrate(env, version):
     _pos_printers_use_lna(env)
     _pos_cash_statements(env)
     _pos_order_amount_difference(env)
+    _pos_refresh_browser_cache(env)
