@@ -318,6 +318,27 @@ def _pos_cash_statements(env):
     env["pos.session"].invalidate_model(["bank_statement_id"])
 
 
+def _pos_order_amount_difference(env):
+    """pos.order.amount_difference (paid minus computed total, i.e. the cash
+    rounding of the order) exists in v19 too, but v19 never filled it for
+    orders coming from the POS UI. v20 sets it in _process_saved_order and the
+    session closing relies on it: _get_rounding_method_for_invoice only adds
+    the cash rounding line when an order has a non-zero difference, otherwise
+    closing a session with rounded orders fails with "The entry is not
+    balanced". Fill it for the migrated orders.
+    """
+    openupgrade.logged_query(
+        env.cr,
+        """
+        UPDATE pos_order
+           SET amount_difference = amount_paid - amount_total
+         WHERE COALESCE(amount_difference, 0) = 0
+           AND abs(amount_paid - amount_total) > 0.000001
+           AND state IN ('paid', 'done', 'invoiced')
+        """,
+    )
+
+
 @openupgrade.migrate()
 def migrate(env, version):
     openupgrade.load_data(env, "point_of_sale", "20.0.1.0.2/noupdate_changes.xml")
@@ -326,3 +347,4 @@ def migrate(env, version):
     _pos_config_receipt_printers(env)
     _pos_printers_use_lna(env)
     _pos_cash_statements(env)
+    _pos_order_amount_difference(env)
